@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken', # Para autenticação via Token
     'corsheaders',
     'src.usuarios',
+    'src.riscos',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
