@@ -13,6 +13,9 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/planos" element={<Dashboard />} /> {/* Placeholder */}
+        <Route path="/mapa" element={<Dashboard />} /> {/* Placeholder */}
+        <Route path="/perfil" element={<Dashboard />} /> {/* Placeholder */}
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
