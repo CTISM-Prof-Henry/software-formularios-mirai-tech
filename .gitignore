@@ -138,11 +138,9 @@ $RECYCLE.BIN/
 
 ### Sass ###
 .sass-cache/
-*.css.map
 
 
 ### Less ###
-*.css
 
 
 ### grunt ###
@@ -187,6 +185,15 @@ sftp-config.json
 
 
 # README
-README.md
 HELP.md
 
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.coverage
+.coveragerc
+
+# Zip files
+*.zip
+*.rar
