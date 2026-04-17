@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
 from django.contrib.auth import authenticate
 import random
 from django.utils import timezone
@@ -120,10 +121,34 @@ class RedefinirSenhaView(APIView):
 class SetorViewSet(viewsets.ModelViewSet):
     """
     CRUD completo de Setores da UFSM.
+    Inclui gestão de equipe (membros).
     """
     queryset = Setor.objects.all()
     serializer_class = SetorSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def membros(self, request, pk=None):
+        """Retorna a lista de gestores vinculados a este setor."""
+        setor = self.get_object()
+        usuarios = setor.usuarios.all()
+        serializador = UsuarioSerializer(usuarios, many=True)
+        return Response(serializador.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def remover_membro(self, request, pk=None):
+        """Remove o vínculo de um gestor com este setor."""
+        setor = self.get_object()
+        usuario_id = request.data.get('usuario_id')
+        
+        try:
+            usuario = Usuario.objects.get(id=usuario_id)
+            if setor in usuario.setores.all():
+                usuario.setores.remove(setor)
+                return Response({'mensagem': 'Membro removido da equipe com sucesso.'})
+            return Response({'erro': 'Usuário não pertence a este setor.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Usuario.DoesNotExist:
+            return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class RegistroUsuarioView(generics.CreateAPIView):
