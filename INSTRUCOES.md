@@ -51,3 +51,10 @@ O servidor estará disponível em: **http://localhost:8000/**
 *   **Planos de Risco**: `/api/riscos/planos/`
 *   **Ações de Tratamento**: `/api/riscos/acoes/`
 *   **Monitoramento**: `/api/riscos/monitoramentos/`
+
+### 7. Validação
+Para validar as funcionalidades e verificar a cobertura de código, execute:
+```bash
+python -m pytest
+```
+O comando acima executará todos os testes unitários e de integração, gerando um relatório de cobertura no terminal.
