@@ -13,7 +13,7 @@ source venv/Scripts/activate
 
 # Instalar dependências
 pip install -r requirements.txt
-pip install "psycopg[binary]"  # driver postgres
+pip install "psycopg[binary]"  # Garante o driver moderno do Postgres
 ```
 
 ### 3. Banco de Dados
@@ -39,9 +39,15 @@ python manage.py runserver
 O servidor estará disponível em: **http://localhost:8000/**
 
 ### 6. Endpoints Principais (API)
-* **Login**: `POST /api/usuarios/login/` (Requer `siape` e `senha`)
-* **Registro**: `POST /api/usuarios/registro/` (Requer `siape`, `senha`, `nome`, `email`, `id_setores` [lista])
-* **Setores**: `GET/POST /api/usuarios/setores/`
-* **Dados do Usuário**: `GET /api/usuarios/me/` (Requer Token no Header)
-* **Atualizar Perfil**: `PATCH /api/usuarios/me/` (Permite alterar `senha`, `email` e `id_setores`)
 
+#### Usuários
+*   **Login**: `POST /api/usuarios/login/` (Requer `siape` e `senha`)
+*   **Registro**: `POST /api/usuarios/registro/` (Requer `siape`, `senha`, `nome`, `email`, `id_setores`)
+*   **Setores**: `GET/POST /api/usuarios/setores/`
+*   **Atualizar Perfil**: `PATCH /api/usuarios/me/`
+
+#### Gestão de Riscos
+*   **Desafios/Objetivos/Processos**: `/api/riscos/desafios/`, `/api/riscos/objetivos/`, `/api/riscos/macroprocessos/`
+*   **Planos de Risco**: `/api/riscos/planos/`
+*   **Ações de Tratamento**: `/api/riscos/acoes/`
+*   **Monitoramento**: `/api/riscos/monitoramentos/`
