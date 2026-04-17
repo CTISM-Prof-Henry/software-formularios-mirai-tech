@@ -153,6 +153,35 @@ class TestUsuarioViews:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["erro"] == "As senhas não coincidem."
 
+    def test_listar_membros_setor(self, api_client, usuario, setor):
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor.id}/membros/"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]["siape"] == usuario.siape
+
+    def test_remover_membro_setor_sucesso(self, api_client, usuario, setor):
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor.id}/remover_membro/"
+        payload = {"usuario_id": usuario.id}
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["mensagem"] == "Membro removido da equipe com sucesso."
+        
+        # Valida se o vínculo sumiu
+        assert setor not in usuario.setores.all()
+
+    def test_remover_membro_nao_pertencente(self, api_client, usuario):
+        # Novo setor que o usuário não pertence
+        setor_vazio = Setor.objects.create(nome="Vazio", sigla="VV")
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor_vazio.id}/remover_membro/"
+        payload = {"usuario_id": usuario.id}
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["erro"] == "Usuário não pertence a este setor."
+
     def test_admin_exibir_setores(self, db, usuario, setor):
         from src.usuarios.admin import UsuarioAdmin
         from django.contrib.admin.sites import AdminSite
