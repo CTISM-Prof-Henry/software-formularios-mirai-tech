@@ -32,13 +32,23 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 5. Rodar o Servidor
+### 5. Rodar o Servidor Backend
 ```bash
 python manage.py runserver
 ```
 O servidor estará disponível em: **http://localhost:8000/**
 
-### 6. Endpoints Principais (API)
+### 6. Rodar o Frontend (React)
+Em um novo terminal:
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
+O frontend estará disponível em: **http://localhost:5173/**
+
+### 7. Endpoints Principais (API)
+...
 
 #### Usuários
 *   **Login**: `POST /api/usuarios/login/` (Requer `siape` e `senha`)
