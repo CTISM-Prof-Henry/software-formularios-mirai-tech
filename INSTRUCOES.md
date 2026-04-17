@@ -55,6 +55,7 @@ O frontend estará disponível em: **http://localhost:5173/**
 *   **Registro**: `POST /api/usuarios/registro/` (Requer `siape`, `senha`, `nome`, `email`, `id_setores`)
 *   **Setores**: `GET/POST /api/usuarios/setores/`
 *   **Atualizar Perfil**: `PATCH /api/usuarios/me/`
+*   **Recuperação de Senha**: `POST /api/usuarios/recuperar-senha/enviar/`, `validar/` e `redefinir/`
 
 #### Gestão de Riscos
 *   **Desafios/Objetivos/Processos**: `/api/riscos/desafios/`, `/api/riscos/objetivos/`, `/api/riscos/macroprocessos/`
