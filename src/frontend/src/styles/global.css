@@ -1,0 +1,39 @@
+:root {
+  --font-family-inter: 'Inter', sans-serif;
+  --primary-blue: rgba(0, 52, 112, 1);
+  --dark-blue: rgba(1, 50, 106, 1);
+  --yellow-bg: rgba(255, 222, 132, 1);
+  --text-black: rgba(0, 0, 0, 0.8);
+  --text-grey: rgba(0, 0, 0, 0.55);
+  --text-white: rgba(255, 255, 255, 1);
+  --bg-white: rgba(255, 255, 255, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-inter);
+  background-color: var(--bg-white);
+  color: var(--text-black);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
