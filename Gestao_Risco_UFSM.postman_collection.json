@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"siape\": \"1234567\",\n    \"senha\": \"senha_segura_123\",\n    \"nome\": \"João da Silva\",\n    \"email\": \"joao@ufsm.br\",\n    \"id_setor\": 1\n}",
+							"raw": "{\n    \"siape\": \"1234567\",\n    \"senha\": \"senha_segura_123\",\n    \"nome\": \"João da Silva\",\n    \"email\": \"joao@ufsm.br\",\n    \"id_setores\": [1]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -92,6 +92,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Atualizar Perfil",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"novo_email@ufsm.br\",\n    \"senha\": \"nova_senha_123\",\n    \"id_setores\": [1, 2]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/me/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -146,6 +181,329 @@
 						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "Gestão de Riscos",
+			"item": [
+				{
+					"name": "Infraestrutura PDI",
+					"item": [
+						{
+							"name": "Listar Desafios",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/desafios/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"desafios",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Criar Desafio",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"numero\": 1,\n    \"descricao\": \"Educação Inovadora\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/desafios/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"desafios",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Criar Objetivo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"codigo\": \"OBJ-01\",\n    \"descricao\": \"Implementar metodologias ativas\",\n    \"desafio\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/objetivos/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"objetivos",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Criar Macroprocesso",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nome\": \"Ensino de Graduação\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/macroprocessos/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"macroprocessos",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Planos de Risco",
+					"item": [
+						{
+							"name": "Listar Planos (Todos)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/planos/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"planos",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Criar Novo Plano (Risco)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"setor\": 1,\n    \"objetivo\": 1,\n    \"macroprocesso\": 1,\n    \"categoria\": \"Operacional\",\n    \"evento\": \"Interrupção do sistema acadêmico\",\n    \"causa\": \"Falha de hardware no servidor\",\n    \"consequencia\": \"Atraso no lançamento de notas\",\n    \"controles_atuais\": \"Backup diário\",\n    \"eficacia_controle\": \"Médio\",\n    \"probabilidade\": 3,\n    \"impacto\": 4,\n    \"prob_residual\": 2,\n    \"imp_residual\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/planos/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"planos",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Risco (Somente Setor Responsável)",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"eficacia_controle\": \"Forte\",\n    \"prob_residual\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/planos/1/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"planos",
+										"1",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Tratamento e Ações",
+					"item": [
+						{
+							"name": "Criar Plano de Ação (5W2H)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"risco\": 1,\n    \"tipo_resposta\": \"Mitigar\",\n    \"descricao_acao\": \"Adquirir novo servidor de redundância\",\n    \"responsavel\": \"Coordenador de TI\",\n    \"parceiros\": \"Pró-Reitoria de Administração\",\n    \"data_inicio\": \"2024-06-01\",\n    \"data_fim\": \"2024-12-31\",\n    \"status\": \"Não iniciada\",\n    \"observacoes\": \"Aguardando liberação de verba\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/acoes/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"acoes",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Monitoramento",
+					"item": [
+						{
+							"name": "Registrar Monitoramento",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Token {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"risco\": 1,\n    \"resultados\": \"Os backups estão sendo realizados sem erros.\",\n    \"acoes_futuras\": \"Contratar suporte especializado para o banco de dados.\",\n    \"analise_critica\": \"O tempo de recuperação precisa ser reduzido.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/riscos/monitoramentos/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"riscos",
+										"monitoramentos",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}
