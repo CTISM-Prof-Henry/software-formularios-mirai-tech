@@ -71,7 +71,7 @@ const Login = () => {
 
         <footer className="login-footer">
           <p>Ainda não tem acesso? <Link to="/cadastro" className="register-link">Cadastrar Gestor</Link></p>
-          <Link to="#" className="forgot-password">Esqueceu a senha?</Link>
+          <Link to="/recuperar-senha" className="forgot-password">Esqueceu a senha?</Link>
         </footer>
       </main>
     </div>
