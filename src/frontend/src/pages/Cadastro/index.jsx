@@ -22,9 +22,11 @@ const Cadastro = () => {
     async function loadSetores() {
       try {
         const response = await api.get('/usuarios/setores/');
-        setSetoresDisponiveis(response.data);
+        const setoresData = response.data?.results || response.data;
+        setSetoresDisponiveis(Array.isArray(setoresData) ? setoresData : []);
       } catch (err) {
         console.error('Erro ao carregar setores:', err);
+        setSetoresDisponiveis([]);
       }
     }
     loadSetores();
@@ -46,22 +48,25 @@ const Cadastro = () => {
 
   const toggleSetor = (setorId) => {
     setFormData(prev => {
-      const jaSelecionado = prev.id_setores.includes(setorId);
+      const currentIds = Array.isArray(prev.id_setores) ? prev.id_setores : [];
+      const jaSelecionado = currentIds.includes(setorId);
       if (jaSelecionado) {
-        return { ...prev, id_setores: prev.id_setores.filter(id => id !== setorId) };
+        return { ...prev, id_setores: currentIds.filter(id => id !== setorId) };
       } else {
-        return { ...prev, id_setores: [...prev.id_setores, setorId] };
+        return { ...prev, id_setores: [...currentIds, setorId] };
       }
     });
   };
 
   const getSetoresSelecionadosTexto = () => {
-    if (formData.id_setores.length === 0) return 'Selecione um ou mais setores';
-    if (formData.id_setores.length === 1) {
-      const setor = setoresDisponiveis.find(s => s.id === formData.id_setores[0]);
+    const currentIds = Array.isArray(formData.id_setores) ? formData.id_setores : [];
+    if (currentIds.length === 0) return 'Selecione um ou mais setores';
+    if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando setores...';
+    if (currentIds.length === 1) {
+      const setor = setoresDisponiveis.find(s => s.id === currentIds[0]);
       return setor ? setor.sigla : '1 setor selecionado';
     }
-    return `${formData.id_setores.length} setores selecionados`;
+    return `${currentIds.length} setores selecionados`;
   };
 
   const handleCadastro = async (e) => {
