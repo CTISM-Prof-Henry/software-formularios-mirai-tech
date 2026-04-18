@@ -26,7 +26,7 @@ def infra_risco(db):
     risco = Risco.objects.create(
         setor=s1, objetivo=obj, macroprocesso=macro,
         categoria="Operacional", evento="E", causa="C", consequencia="C", 
-        controles_atuais="C", eficacia_controle="Médio",
+        controles_atuais="C", eficacia_controle="Satisfatório",
         probabilidade=3, impacto=3, prob_residual=1, imp_residual=1
     )
     
@@ -34,6 +34,11 @@ def infra_risco(db):
 
 @pytest.mark.django_db
 class TestRiscoViewsPermissions:
+    def test_calculo_niveis_no_save(self, infra_risco):
+        risco = infra_risco['risco']
+        assert risco.nivel_risco == 9
+        assert risco.nivel_residual == 1
+
     def test_qualquer_gestor_visualiza_riscos(self, api_client, infra_risco):
         # Gestor 2 visualizando risco do Setor 1
         api_client.force_authenticate(user=infra_risco['u2'])
@@ -68,7 +73,7 @@ class TestRiscoViewsPermissions:
             "macroprocesso": infra_risco['risco'].macroprocesso.id,
             "categoria": "Operacional",
             "evento": "E", "causa": "C", "consequencia": "C", "controles_atuais": "C", 
-            "eficacia_controle": "Médio", "probabilidade": 1, "impacto": 1, 
+            "eficacia_controle": "Satisfatório", "probabilidade": 1, "impacto": 1, 
             "prob_residual": 1, "imp_residual": 1
         }
         response = api_client.post(url, payload, format='json')
@@ -86,3 +91,39 @@ class TestRiscoViewsPermissions:
             user = infra_risco['u1']
             
         assert perm.has_object_permission(MockRequest(), None, MockObj()) is False
+
+    def test_paginacao_riscos(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        url = "/api/riscos/planos/"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert "results" in response.data
+        assert "count" in response.data
+        assert len(response.data["results"]) == 1
+
+    def test_filtro_setor(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        url = f"/api/riscos/planos/?setor={infra_risco['s1'].id}"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        
+        # Filtro por setor vazio
+        url = f"/api/riscos/planos/?setor={infra_risco['s2'].id}"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
+    def test_busca_texto_risco(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        # Busca por termo que existe no evento "E"
+        url = "/api/riscos/planos/?search=E"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        
+        # Busca por termo que NÃO existe
+        url = "/api/riscos/planos/?search=Inexistente"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0

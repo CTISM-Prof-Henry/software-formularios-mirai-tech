@@ -5,15 +5,25 @@ import api from '../../services/api';
 import './styles.css';
 
 const Perfil = () => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('@SIGR:user') || '{}'));
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  // Inicialização segura do estado do usuário
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('@SIGR:user');
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: user.email || '',
-    id_setores: user.setores?.map(s => s.id) || [],
+    email: user?.email || '',
+    id_setores: Array.isArray(user?.setores) ? user.setores.map(s => s.id) : [],
     senha_atual: '',
     nova_senha: '',
     confirmacao_senha: ''
@@ -30,13 +40,18 @@ const Perfil = () => {
           api.get('/usuarios/setores/'),
           api.get('/usuarios/me/')
         ]);
-        setSetoresDisponiveis(setoresRes.data);
-        setUser(profileRes.data);
-        localStorage.setItem('@SIGR:user', JSON.stringify(profileRes.data));
+        
+        const userData = profileRes.data;
+        // Ajuste para lidar com paginação do DRF
+        const setoresData = setoresRes.data.results || setoresRes.data;
+        setSetoresDisponiveis(Array.isArray(setoresData) ? setoresData : []);
+        setUser(userData);
+        localStorage.setItem('@SIGR:user', JSON.stringify(userData));
+        
         setFormData(prev => ({
           ...prev,
-          email: profileRes.data.email,
-          id_setores: profileRes.data.setores?.map(s => s.id) || []
+          email: userData.email || '',
+          id_setores: Array.isArray(userData.setores) ? userData.setores.map(s => s.id) : []
         }));
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
@@ -60,21 +75,26 @@ const Perfil = () => {
 
   const toggleSetor = (setorId) => {
     setFormData(prev => {
-      const jaSelecionado = prev.id_setores.includes(setorId);
+      const currentIds = Array.isArray(prev.id_setores) ? prev.id_setores : [];
+      const jaSelecionado = currentIds.includes(setorId);
       if (jaSelecionado) {
-        return { ...prev, id_setores: prev.id_setores.filter(id => id !== setorId) };
+        return { ...prev, id_setores: currentIds.filter(id => id !== setorId) };
       } else {
-        return { ...prev, id_setores: [...prev.id_setores, setorId] };
+        return { ...prev, id_setores: [...currentIds, setorId] };
       }
     });
   };
 
   const getSetoresSelecionadosTexto = () => {
-    if (formData.id_setores.length === 0) return 'Selecione seus setores';
+    const currentIds = Array.isArray(formData.id_setores) ? formData.id_setores : [];
+    if (currentIds.length === 0) return 'Selecione seus setores';
+    if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando setores...';
+
     const selecionados = setoresDisponiveis
-      .filter(s => formData.id_setores.includes(s.id))
+      .filter(s => currentIds.includes(s.id))
       .map(s => s.sigla);
-    return selecionados.join(', ');
+      
+    return selecionados.length > 0 ? selecionados.join(', ') : 'Selecione seus setores';
   };
 
   const handleSalvar = async (e) => {
