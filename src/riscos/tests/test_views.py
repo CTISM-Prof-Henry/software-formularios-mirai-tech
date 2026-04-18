@@ -26,7 +26,7 @@ def infra_risco(db):
     risco = Risco.objects.create(
         setor=s1, objetivo=obj, macroprocesso=macro,
         categoria="Operacional", evento="E", causa="C", consequencia="C", 
-        controles_atuais="C", eficacia_controle="Médio",
+        controles_atuais="C", eficacia_controle="Satisfatório",
         probabilidade=3, impacto=3, prob_residual=1, imp_residual=1
     )
     
@@ -34,6 +34,11 @@ def infra_risco(db):
 
 @pytest.mark.django_db
 class TestRiscoViewsPermissions:
+    def test_calculo_niveis_no_save(self, infra_risco):
+        risco = infra_risco['risco']
+        assert risco.nivel_risco == 9
+        assert risco.nivel_residual == 1
+
     def test_qualquer_gestor_visualiza_riscos(self, api_client, infra_risco):
         # Gestor 2 visualizando risco do Setor 1
         api_client.force_authenticate(user=infra_risco['u2'])
@@ -68,7 +73,7 @@ class TestRiscoViewsPermissions:
             "macroprocesso": infra_risco['risco'].macroprocesso.id,
             "categoria": "Operacional",
             "evento": "E", "causa": "C", "consequencia": "C", "controles_atuais": "C", 
-            "eficacia_controle": "Médio", "probabilidade": 1, "impacto": 1, 
+            "eficacia_controle": "Satisfatório", "probabilidade": 1, "impacto": 1, 
             "prob_residual": 1, "imp_residual": 1
         }
         response = api_client.post(url, payload, format='json')
