@@ -9,6 +9,7 @@ import GestaoEquipe from './pages/GestaoEquipe'
 import PlanosRisco from './pages/PlanosRisco'
 import NovoPlano from './pages/NovoPlano'
 import EditarPlano from './pages/EditarPlano'
+import VisualizarPlano from './pages/VisualizarPlano'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/planos" element={<PlanosRisco />} />
+        <Route path="/planos/:id" element={<VisualizarPlano />} />
         <Route path="/novo-plano" element={<NovoPlano />} />
         <Route path="/editar-plano/:id" element={<EditarPlano />} />
         <Route path="/mapa" element={<Dashboard />} /> {/* Placeholder */}
