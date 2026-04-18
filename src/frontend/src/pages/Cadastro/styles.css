@@ -129,10 +129,31 @@
   border-top: none;
   border-radius: 0 0 8px 8px;
   z-index: 10;
-  max-height: 200px;
-  overflow-y: auto;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   margin-top: -2px;
+}
+
+.custom-select-search {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid #eef2f5;
+}
+
+.custom-select-search input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d7e0e8;
+  font-size: 14px;
+}
+
+.custom-select-search input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+}
+
+.custom-select-list {
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .custom-option {
