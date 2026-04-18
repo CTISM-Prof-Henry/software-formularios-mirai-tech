@@ -10,10 +10,10 @@ Link para o Figma:
 ## Autenticação
 
 ### Tela de Login
-![tela de login do sistema](tela-login.png)
+![tela de login do sistema](Tela-login.png)
 
 ### Tela de Cadastro
-![tela de cadastro do sistema](tela-cadastro.png)
+![tela de cadastro do sistema](Tela-cadastro.png)
 
 ---
 

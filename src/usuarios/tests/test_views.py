@@ -62,8 +62,13 @@ class TestUsuarioViews:
         api_client.force_authenticate(user=usuario)
         url = "/api/usuarios/me/"
         novo_email = "atualizado@ufsm.br"
-        # Testando e-mail (campo genérico no loop) e senha (campo especial)
-        payload = {"email": novo_email, "senha": "nova_senha_456"}
+        # Agora exige senha_atual, nova_senha e confirmacao_senha
+        payload = {
+            "email": novo_email, 
+            "senha_atual": "senha_original",
+            "nova_senha": "nova_senha_456",
+            "confirmacao_senha": "nova_senha_456"
+        }
         response = api_client.patch(url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data["usuario"]["email"] == novo_email
@@ -181,6 +186,35 @@ class TestUsuarioViews:
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["erro"] == "Usuário não pertence a este setor."
+
+    def test_adicionar_membro_setor_sucesso(self, api_client, usuario, setor):
+        # Novo usuário que não pertence ao setor
+        novo_usuario = Usuario.objects.create_user(siape="999", password="p", nome="Novo", email="n@u.com")
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
+        payload = {"siape": "999"}
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["mensagem"] == "Membro adicionado com sucesso!"
+        
+        # Valida se o vínculo foi criado
+        assert setor in novo_usuario.setores.all()
+
+    def test_adicionar_membro_ja_existente(self, api_client, usuario, setor):
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
+        payload = {"siape": usuario.siape}
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["erro"] == "Este usuário já faz parte deste setor."
+
+    def test_adicionar_membro_nao_encontrado(self, api_client, usuario, setor):
+        api_client.force_authenticate(user=usuario)
+        url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
+        payload = {"siape": "000"} # Não existe
+        response = api_client.post(url, payload, format='json')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.data["erro"] == "Usuário com este SIAPE não encontrado."
 
     def test_admin_exibir_setores(self, db, usuario, setor):
         from src.usuarios.admin import UsuarioAdmin

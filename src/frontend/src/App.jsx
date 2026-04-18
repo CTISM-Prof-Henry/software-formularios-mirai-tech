@@ -4,6 +4,8 @@ import Login from './pages/Login'
 import Cadastro from './pages/Cadastro'
 import Dashboard from './pages/Dashboard'
 import RecuperarSenha from './pages/RecuperarSenha'
+import Perfil from './pages/Perfil'
+import GestaoEquipe from './pages/GestaoEquipe'
 
 function App() {
   return (
@@ -15,7 +17,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/planos" element={<Dashboard />} /> {/* Placeholder */}
         <Route path="/mapa" element={<Dashboard />} /> {/* Placeholder */}
-        <Route path="/perfil" element={<Dashboard />} /> {/* Placeholder */}
+        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/equipe" element={<GestaoEquipe />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

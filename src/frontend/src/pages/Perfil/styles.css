@@ -1,0 +1,244 @@
+.perfil-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f7f9;
+}
+
+.perfil-main {
+  flex: 1;
+  margin-left: 260px; /* Largura da sidebar */
+  padding: 32px 48px;
+}
+
+.perfil-header {
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.perfil-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  border-left: 4px solid #003470;
+  padding-left: 16px;
+}
+
+.perfil-header p {
+  color: #666;
+  font-size: 14px;
+  padding-left: 20px;
+}
+
+.perfil-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.perfil-tabs {
+  padding: 0 40px;
+  border-bottom: 1px solid #f0f2f5;
+  display: flex;
+}
+
+.tab-item {
+  padding: 24px 0;
+  font-weight: 700;
+  font-size: 14px;
+  color: #003470;
+  border-bottom: 3px solid #003470;
+  margin-right: 40px;
+  cursor: pointer;
+}
+
+.perfil-content {
+  padding: 40px;
+}
+
+.perfil-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 32px;
+}
+
+.perfil-section-title.mt {
+  margin-top: 48px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px 40px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative; /* Adicionado para conter o dropdown absoluto */
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input, .form-group .custom-select-trigger {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1.5px solid #e1e8ed;
+  font-size: 15px;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.custom-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 46px;
+  cursor: pointer;
+}
+
+.custom-select-trigger.open {
+  border-color: #003470;
+}
+
+.custom-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1.5px solid #003470;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: -2px;
+}
+
+.custom-option {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.custom-option:hover {
+  background-color: #f8f9fa;
+}
+
+.custom-option.selected {
+  background-color: #eef2f7;
+}
+
+.custom-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.custom-option span {
+  font-size: 14px;
+  color: #444;
+}
+
+.form-group input:disabled {
+  background-color: #f1f3f5;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #003470;
+}
+
+.input-caption {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.perfil-actions {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid #f0f2f5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.btn-cancelar {
+  padding: 12px 32px;
+  background: #f8f9fa;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  color: #555;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-salvar {
+  padding: 12px 40px;
+  background: #003470;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0px 4px 12px rgba(0, 52, 112, 0.2);
+}
+
+.btn-salvar:hover {
+  background: #002b5c;
+}
+
+.success-message {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.error-message-perfil {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+}

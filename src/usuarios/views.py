@@ -150,6 +150,28 @@ class SetorViewSet(viewsets.ModelViewSet):
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def adicionar_membro(self, request, pk=None):
+        """Adiciona um usuário (existente pelo SIAPE) a este setor."""
+        setor = self.get_object()
+        siape = request.data.get('siape')
+        
+        if not siape:
+            return Response({'erro': 'O SIAPE é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            usuario = Usuario.objects.get(siape=siape)
+            if setor in usuario.setores.all():
+                return Response({'erro': 'Este usuário já faz parte deste setor.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            usuario.setores.add(setor)
+            return Response({
+                'mensagem': 'Membro adicionado com sucesso!',
+                'usuario': UsuarioSerializer(usuario).data
+            })
+        except Usuario.DoesNotExist:
+            return Response({'erro': 'Usuário com este SIAPE não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class RegistroUsuarioView(generics.CreateAPIView):
     """
