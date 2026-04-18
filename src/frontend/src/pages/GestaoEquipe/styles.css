@@ -1,0 +1,253 @@
+.equipe-content {
+  margin-top: 32px;
+}
+
+.equipe-selector {
+  margin-bottom: 32px;
+}
+
+.equipe-selector label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-grey);
+  margin-bottom: 12px;
+}
+
+.selector-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-grey);
+  font-weight: 500;
+}
+
+.tab-button:hover {
+  border-color: var(--primary-blue);
+  background: #eff6ff;
+}
+
+.tab-button.active {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 52, 112, 0.2);
+}
+
+.equipe-actions {
+  margin-bottom: 48px;
+  max-width: 600px;
+}
+
+.add-membro-form .input-group {
+  display: flex;
+  gap: 12px;
+}
+
+.add-membro-form input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.add-membro-form input:focus {
+  border-color: var(--primary-blue);
+}
+
+.add-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-button:hover {
+  background: #219150;
+  transform: translateY(-1px);
+}
+
+.message {
+  margin-top: 12px;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.message.error {
+  background: #fdf2f2;
+  color: #c81e1e;
+  border: 1px solid #fbd5d5;
+}
+
+.message.success {
+  background: #f3faf7;
+  color: #057a55;
+  border: 1px solid #def7ec;
+}
+
+.membros-list-container h2 {
+  font-size: 18px;
+  color: var(--primary-blue);
+  margin: 0;
+}
+
+.list-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 16px;
+  width: 100%;
+  max-width: 400px;
+  transition: border-color 0.2s;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary-blue);
+}
+
+.search-bar svg {
+  color: var(--text-grey);
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-black);
+}
+
+.search-bar input::placeholder {
+  color: #bbb;
+}
+
+/* Tabela de Membros */
+.membros-list {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.list-header {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 2fr 80px;
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-bottom: 2px solid #eee;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-grey);
+  letter-spacing: 0.05em;
+}
+
+.membro-row {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 2fr 80px;
+  padding: 16px 24px;
+  align-items: center;
+  border-bottom: 1px solid #f1f1f1;
+  transition: background 0.2s;
+}
+
+.membro-row:last-child {
+  border-bottom: none;
+}
+
+.membro-row:hover {
+  background: #fcfdfe;
+}
+
+.membro-avatar {
+  width: 36px;
+  height: 36px;
+  background: #eef2f7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--primary-blue);
+  font-size: 14px;
+}
+
+.membro-nome {
+  font-weight: 600;
+  color: var(--text-black);
+}
+
+.membro-siape, .membro-email {
+  color: var(--text-grey);
+  font-size: 14px;
+}
+
+.membro-acoes-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.remove-membro-button {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-membro-button:hover {
+  background: #fdedec;
+  color: #c0392b;
+}
+
+.current-user-tag {
+  font-size: 12px;
+  background: #e8f0fe;
+  color: var(--primary-blue);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.loading-text, .empty-text {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-grey);
+}
