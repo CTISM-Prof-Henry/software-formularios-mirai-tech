@@ -13,7 +13,8 @@ const Dashboard = () => {
     async function loadDashboardData() {
       try {
         const response = await api.get('/riscos/planos/');
-        setPlanos(response.data);
+        // Agora a resposta é paginada, então os dados estão em .results
+        setPlanos(response.data.results || []);
       } catch (err) {
         console.error('Erro ao carregar dados do dashboard:', err);
       } finally {

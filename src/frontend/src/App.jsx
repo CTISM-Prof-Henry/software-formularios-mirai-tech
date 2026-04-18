@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import RecuperarSenha from './pages/RecuperarSenha'
 import Perfil from './pages/Perfil'
 import GestaoEquipe from './pages/GestaoEquipe'
+import PlanosRisco from './pages/PlanosRisco'
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/planos" element={<Dashboard />} /> {/* Placeholder */}
+        <Route path="/planos" element={<PlanosRisco />} />
         <Route path="/mapa" element={<Dashboard />} /> {/* Placeholder */}
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/equipe" element={<GestaoEquipe />} />

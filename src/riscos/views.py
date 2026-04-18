@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import (
     DesafioPDI, Macroprocesso, ObjetivoPDI, 
@@ -34,6 +35,57 @@ class RiscoViewSet(viewsets.ModelViewSet):
     queryset = Risco.objects.all()
     serializer_class = RiscoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
+
+    def get_queryset(self):
+        queryset = Risco.objects.all()
+        
+        # Filtros básicos
+        setor_id = self.request.query_params.get('setor')
+        categoria = self.request.query_params.get('categoria')
+        search = self.request.query_params.get('search')
+        
+        # Filtros de Data (considerando que planos de ação tem datas, mas o risco em si usaremos ID para ordenação)
+        # Se desejar filtrar pela data de início do primeiro plano de ação vinculado:
+        data_inicio = self.request.query_params.get('data_inicio')
+        data_fim = self.request.query_params.get('data_fim')
+        ordenacao = self.request.query_params.get('ordenacao', 'desc') # padrão: mais recentes primeiro
+
+        if setor_id:
+            queryset = queryset.filter(setor_id=setor_id)
+        if categoria:
+            queryset = queryset.filter(categoria=categoria)
+        if search:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(evento__icontains=search) | 
+                Q(causa__icontains=search) | 
+                Q(consequencia__icontains=search)
+            )
+        
+        # Ordenação
+        if ordenacao == 'asc':
+            queryset = queryset.order_by('id')
+        else:
+            queryset = queryset.order_by('-id')
+        
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def estatisticas(self, request):
+        """Retorna estatísticas globais para os cards do dashboard."""
+        total = Risco.objects.count()
+        riscos_altos = Risco.objects.filter(nivel_residual__gte=15).count()
+        
+        # Estatísticas baseadas nos Planos de Ação
+        concluidos = PlanoAcao.objects.filter(status='Concluída').count()
+        em_revisao = PlanoAcao.objects.filter(status='Em andamento').count()
+        
+        return Response({
+            "total_planos": total,
+            "riscos_altos": riscos_altos,
+            "em_revisao": em_revisao,
+            "concluidos": concluidos
+        })
 
     def create(self, request, *args, **kwargs):
         # Garante que o gestor só crie riscos para os seus próprios setores
