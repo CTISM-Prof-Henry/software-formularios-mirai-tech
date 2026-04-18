@@ -72,6 +72,18 @@ const NovoPlano = () => {
     setPlanoAcaoData(prev => ({ ...prev, [name]: value }));
   };
 
+  const getRiskColorClass = (nivel) => {
+    if (nivel >= 15) return 'risk-alto';
+    if (nivel >= 8) return 'risk-moderado';
+    return 'risk-baixo';
+  };
+
+  const getRiskLabel = (nivel) => {
+    if (nivel >= 15) return 'RISCO ALTO';
+    if (nivel >= 8) return 'RISCO MODERADO';
+    return 'RISCO BAIXO';
+  };
+
   const handleNext = () => {
     if (etapa < 3) setEtapa(etapa + 1);
   };
@@ -213,49 +225,111 @@ const NovoPlano = () => {
 
           {etapa === 2 && (
             <div className="step-content">
-              <h3>Matriz de Risco</h3>
-              <p className="step-desc">Identifique os controles e avalie a probabilidade e o impacto.</p>
-              
-              <div className="form-group">
-                <label>Controles Atuais:</label>
-                <textarea name="controles_atuais" value={riscoData.controles_atuais} onChange={handleRiscoChange}></textarea>
+              <div className="evaluation-header">
+                <div className="step-title-row">
+                  <div className="step-number-small">2</div>
+                  <h3>Avaliação</h3>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label>Eficácia do Controle:</label>
-                <select name="eficacia_controle" value={riscoData.eficacia_controle} onChange={handleRiscoChange}>
-                  <option value="Forte">Forte</option>
-                  <option value="Médio">Médio</option>
-                  <option value="Fraco">Fraco</option>
-                </select>
-              </div>
-
-              <div className="matrix-grid">
-                <div className="matrix-section">
-                  <h4>Risco Inerente</h4>
-                  <div className="input-row">
-                    <div className="form-group">
-                      <label>Probabilidade (1-5):</label>
-                      <input type="number" min="1" max="5" name="probabilidade" value={riscoData.probabilidade} onChange={handleRiscoChange} />
+              <div className="evaluation-grid">
+                <div className="sliders-column">
+                  <div className="form-group">
+                    <div className="label-row">
+                      <label>Probabilidade (1-5)</label>
+                      <span className="value-display">{riscoData.probabilidade}</span>
                     </div>
-                    <div className="form-group">
-                      <label>Impacto (1-5):</label>
-                      <input type="number" min="1" max="5" name="impacto" value={riscoData.impacto} onChange={handleRiscoChange} />
+                    <input 
+                      type="range" min="1" max="5" step="1"
+                      name="probabilidade" 
+                      value={riscoData.probabilidade} 
+                      onChange={handleRiscoChange} 
+                      className="slider-input"
+                    />
+                    <div className="slider-labels">
+                      <span>MUITO BAIXA</span>
+                      <span>MUITO ALTA</span>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <div className="label-row">
+                      <label>Impacto (1-5)</label>
+                      <span className="value-display">{riscoData.impacto}</span>
+                    </div>
+                    <input 
+                      type="range" min="1" max="5" step="1"
+                      name="impacto" 
+                      value={riscoData.impacto} 
+                      onChange={handleRiscoChange} 
+                      className="slider-input"
+                    />
+                    <div className="slider-labels">
+                      <span>MUITO BAIXO</span>
+                      <span>MUITO ALTO</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="matrix-section">
-                  <h4>Risco Residual</h4>
-                  <div className="input-row">
-                    <div className="form-group">
-                      <label>Probabilidade (1-5):</label>
-                      <input type="number" min="1" max="5" name="prob_residual" value={riscoData.prob_residual} onChange={handleRiscoChange} />
-                    </div>
-                    <div className="form-group">
-                      <label>Impacto (1-5):</label>
-                      <input type="number" min="1" max="5" name="imp_residual" value={riscoData.imp_residual} onChange={handleRiscoChange} />
-                    </div>
+                <div className="preview-column">
+                  <div className="risk-preview-card">
+                    <span className="preview-label">NÍVEL DE RISCO INERENTE</span>
+                    <span className="preview-value">{riscoData.probabilidade * riscoData.impacto}</span>
+                    <span className={`risk-badge-large ${getRiskColorClass(riscoData.probabilidade * riscoData.impacto)}`}>
+                      {getRiskLabel(riscoData.probabilidade * riscoData.impacto)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="controls-section">
+                <div className="form-group">
+                  <label>CONTROLES ATUAIS:</label>
+                  <textarea 
+                    name="controles_atuais" 
+                    value={riscoData.controles_atuais} 
+                    onChange={handleRiscoChange}
+                    placeholder="Descreva os controles existentes..."
+                  ></textarea>
+                </div>
+
+                <div className="form-group">
+                  <label>EFICÁCIA DOS CONTROLES INTERNOS <span className="required">*</span></label>
+                  <p className="sub-label">Como os controles atuais mitigam este risco?</p>
+                  <div className="efficacy-buttons">
+                    {['Inexistente', 'Fraco', 'Satisfatório', 'Forte'].map(option => (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`efficacy-btn ${riscoData.eficacia_controle === option ? 'active' : ''}`}
+                        onClick={() => setRiscoData(prev => ({ ...prev, eficacia_controle: option }))}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="residual-section">
+                <div className="residual-info">
+                  <h4>Risco Residual (Após Controles)</h4>
+                  <p>Este é o risco real que precisa ser tratado.</p>
+                </div>
+                <div className="residual-result">
+                  <div className="residual-value-group">
+                    <span className="residual-value">{riscoData.prob_residual * riscoData.imp_residual}</span>
+                    <span className="residual-label">{getRiskLabel(riscoData.prob_residual * riscoData.imp_residual)}</span>
+                  </div>
+                  <div className="residual-sliders">
+                    <input 
+                      type="range" min="1" max="5" name="prob_residual" 
+                      value={riscoData.prob_residual} onChange={handleRiscoChange} 
+                    />
+                    <input 
+                      type="range" min="1" max="5" name="imp_residual" 
+                      value={riscoData.imp_residual} onChange={handleRiscoChange} 
+                    />
                   </div>
                 </div>
               </div>
