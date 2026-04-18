@@ -10,6 +10,7 @@ import PlanosRisco from './pages/PlanosRisco'
 import NovoPlano from './pages/NovoPlano'
 import EditarPlano from './pages/EditarPlano'
 import VisualizarPlano from './pages/VisualizarPlano'
+import MapaRisco from './pages/MapaRisco'
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
         <Route path="/planos/:id" element={<VisualizarPlano />} />
         <Route path="/novo-plano" element={<NovoPlano />} />
         <Route path="/editar-plano/:id" element={<EditarPlano />} />
-        <Route path="/mapa" element={<Dashboard />} /> {/* Placeholder */}
+        <Route path="/mapa" element={<MapaRisco />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/equipe" element={<GestaoEquipe />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
