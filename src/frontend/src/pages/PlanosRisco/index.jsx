@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
@@ -9,6 +9,9 @@ const PlanosRisco = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const dropdownRef = useRef(null);
+  
   const [stats, setStats] = useState({
     total_planos: 0,
     riscos_altos: 0,
@@ -37,6 +40,16 @@ const PlanosRisco = () => {
     carregarPlanos();
     carregarEstatisticas();
   }, [currentPage, filterSetor, filterCategoria, filterDataInicio, filterDataFim, ordenacao]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   async function carregarEstatisticas() {
     try {
@@ -81,9 +94,17 @@ const PlanosRisco = () => {
   };
 
   const getRiskColorClass = (nivel) => {
-    if (nivel >= 15) return 'risk-alto';
-    if (nivel >= 8) return 'risk-moderado';
+    if (nivel >= 20) return 'risk-extremo';
+    if (nivel >= 12) return 'risk-alto';
+    if (nivel >= 4) return 'risk-moderado';
     return 'risk-baixo';
+  };
+
+  const getRiskLabel = (nivel) => {
+    if (nivel >= 20) return 'RISCO EXTREMO';
+    if (nivel >= 12) return 'RISCO ALTO';
+    if (nivel >= 4) return 'RISCO MODERADO';
+    return 'RISCO BAIXO';
   };
 
   return (
@@ -277,7 +298,7 @@ const PlanosRisco = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {planos.map(plano => (
+                  {planos.map((plano, index) => (
                     <tr key={plano.id}>
                       <td>#{plano.id}</td>
                       <td className="col-evento" title={plano.evento}>{plano.evento}</td>
@@ -296,12 +317,24 @@ const PlanosRisco = () => {
                           </svg>
                         </button>
                         {canEdit(plano) && (
-                          <button className="btn-action edit" title="Editar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                          </button>
+                          <div className="edit-dropdown-container" ref={openDropdownId === plano.id ? dropdownRef : null}>
+                            <button 
+                              className={`btn-action edit ${openDropdownId === plano.id ? 'active' : ''}`} 
+                              title="Editar"
+                              onClick={() => setOpenDropdownId(openDropdownId === plano.id ? null : plano.id)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                            </button>
+                            <div className={`edit-dropdown-content ${openDropdownId === plano.id ? 'show' : ''} ${index >= planos.length - 2 ? 'up' : ''}`}>
+                              <div className="dropdown-title">Editar Seção:</div>
+                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=1`)}>1. Identificação</button>
+                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=2`)}>2. Avaliação</button>
+                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=3`)}>3. Tratamento</button>
+                            </div>
+                          </div>
                         )}
                       </td>
                     </tr>
