@@ -126,6 +126,7 @@ class SetorViewSet(viewsets.ModelViewSet):
     queryset = Setor.objects.all()
     serializer_class = SetorSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
+    pagination_class = None
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def membros(self, request, pk=None):

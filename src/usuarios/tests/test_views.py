@@ -24,6 +24,13 @@ def usuario(db, setor):
 
 @pytest.mark.django_db
 class TestUsuarioViews:
+    def test_listar_setores_publico(self, api_client, setor):
+        url = "/api/usuarios/setores/"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        assert len(response.data) >= 1
+
     def test_registro_usuario(self, api_client, setor):
         url = "/api/usuarios/registro/"
         payload = {

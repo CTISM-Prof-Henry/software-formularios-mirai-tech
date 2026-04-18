@@ -14,7 +14,9 @@ const Cadastro = () => {
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingSetores, setLoadingSetores] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [buscaSetor, setBuscaSetor] = useState('');
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -22,17 +24,20 @@ const Cadastro = () => {
     async function loadSetores() {
       try {
         const response = await api.get('/usuarios/setores/');
-        setSetoresDisponiveis(response.data);
+        setSetoresDisponiveis(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error('Erro ao carregar setores:', err);
+        setSetoresDisponiveis([]);
+      } finally {
+        setLoadingSetores(false);
       }
     }
     loadSetores();
 
-    // Fecha o dropdown ao clicar fora
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+        setBuscaSetor('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -41,33 +46,54 @@ const Cadastro = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const toggleSetor = (setorId) => {
-    setFormData(prev => {
-      const jaSelecionado = prev.id_setores.includes(setorId);
+    setFormData((prev) => {
+      const currentIds = Array.isArray(prev.id_setores) ? prev.id_setores : [];
+      const jaSelecionado = currentIds.includes(setorId);
       if (jaSelecionado) {
-        return { ...prev, id_setores: prev.id_setores.filter(id => id !== setorId) };
-      } else {
-        return { ...prev, id_setores: [...prev.id_setores, setorId] };
+        return { ...prev, id_setores: currentIds.filter((id) => id !== setorId) };
       }
+      return { ...prev, id_setores: [...currentIds, setorId] };
     });
   };
 
   const getSetoresSelecionadosTexto = () => {
-    if (formData.id_setores.length === 0) return 'Selecione um ou mais setores';
-    if (formData.id_setores.length === 1) {
-      const setor = setoresDisponiveis.find(s => s.id === formData.id_setores[0]);
+    const currentIds = Array.isArray(formData.id_setores) ? formData.id_setores : [];
+    if (currentIds.length === 0) return 'Selecione um ou mais setores';
+    if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando setores...';
+    if (currentIds.length === 1) {
+      const setor = setoresDisponiveis.find((item) => item.id === currentIds[0]);
       return setor ? setor.sigla : '1 setor selecionado';
     }
-    return `${formData.id_setores.length} setores selecionados`;
+    return `${currentIds.length} setores selecionados`;
+  };
+
+  const setoresFiltrados = setoresDisponiveis.filter((setor) => {
+    const termo = buscaSetor.trim().toLowerCase();
+    if (!termo) return true;
+    return (
+      setor.sigla.toLowerCase().includes(termo) ||
+      setor.nome.toLowerCase().includes(termo)
+    );
+  });
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => {
+      const nextValue = !prev;
+      if (!nextValue) {
+        setBuscaSetor('');
+      }
+      return nextValue;
+    });
   };
 
   const handleCadastro = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (formData.id_setores.length === 0) {
       setError('Selecione pelo menos um setor.');
       return;
@@ -78,7 +104,7 @@ const Cadastro = () => {
     try {
       await api.post('/usuarios/registro/', formData);
       alert('Cadastro realizado com sucesso! Faça login para continuar.');
-      navigate('/login'); 
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.erro || 'Erro ao realizar cadastro. Tente novamente.');
     } finally {
@@ -95,7 +121,6 @@ const Cadastro = () => {
         </header>
 
         <form onSubmit={handleCadastro}>
-          {/* 1. Nome Completo */}
           <div className="input-group">
             <label htmlFor="nome">Nome Completo</label>
             <input
@@ -108,7 +133,6 @@ const Cadastro = () => {
             />
           </div>
 
-          {/* 2. Email */}
           <div className="input-group">
             <label htmlFor="email">Email Institucional</label>
             <input
@@ -121,7 +145,6 @@ const Cadastro = () => {
             />
           </div>
 
-          {/* 3. SIAPE e Senha */}
           <div className="input-row">
             <div className="input-group">
               <label htmlFor="siape">SIAPE</label>
@@ -147,36 +170,54 @@ const Cadastro = () => {
             </div>
           </div>
 
-          {/* 4. Setores (Dropdown Customizado) */}
           <div className="input-group" ref={dropdownRef}>
             <label>Setores Vinculados</label>
-            <div 
+            <div
               className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              onClick={toggleDropdown}
             >
               <span>{getSetoresSelecionadosTexto()}</span>
               <i className="arrow-icon"></i>
             </div>
-            
+
             {isDropdownOpen && (
               <div className="custom-select-options">
-                {setoresDisponiveis.map(setor => (
-                  <div 
-                    key={setor.id} 
-                    className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
-                    onClick={() => toggleSetor(setor.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.id_setores.includes(setor.id)}
-                      readOnly
-                    />
-                    <span>{setor.sigla} - {setor.nome}</span>
-                  </div>
-                ))}
-                {setoresDisponiveis.length === 0 && (
-                  <div className="custom-option-loading">Carregando setores...</div>
-                )}
+                <div className="custom-select-search">
+                  <input
+                    type="text"
+                    value={buscaSetor}
+                    onChange={(e) => setBuscaSetor(e.target.value)}
+                    placeholder="Buscar setor por sigla ou nome"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+
+                <div className="custom-select-list">
+                  {setoresFiltrados.map((setor) => (
+                    <div
+                      key={setor.id}
+                      className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
+                      onClick={() => toggleSetor(setor.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.id_setores.includes(setor.id)}
+                        readOnly
+                      />
+                      <span>{setor.sigla} - {setor.nome}</span>
+                    </div>
+                  ))}
+
+                  {loadingSetores && (
+                    <div className="custom-option-loading">Carregando setores...</div>
+                  )}
+                  {!loadingSetores && setoresDisponiveis.length === 0 && (
+                    <div className="custom-option-loading">Nenhum setor cadastrado.</div>
+                  )}
+                  {!loadingSetores && setoresDisponiveis.length > 0 && setoresFiltrados.length === 0 && (
+                    <div className="custom-option-loading">Nenhum setor encontrado.</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
