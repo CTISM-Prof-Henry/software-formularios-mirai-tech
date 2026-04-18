@@ -86,3 +86,39 @@ class TestRiscoViewsPermissions:
             user = infra_risco['u1']
             
         assert perm.has_object_permission(MockRequest(), None, MockObj()) is False
+
+    def test_paginacao_riscos(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        url = "/api/riscos/planos/"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert "results" in response.data
+        assert "count" in response.data
+        assert len(response.data["results"]) == 1
+
+    def test_filtro_setor(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        url = f"/api/riscos/planos/?setor={infra_risco['s1'].id}"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        
+        # Filtro por setor vazio
+        url = f"/api/riscos/planos/?setor={infra_risco['s2'].id}"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
+    def test_busca_texto_risco(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco['u1'])
+        # Busca por termo que existe no evento "E"
+        url = "/api/riscos/planos/?search=E"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        
+        # Busca por termo que NÃO existe
+        url = "/api/riscos/planos/?search=Inexistente"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
