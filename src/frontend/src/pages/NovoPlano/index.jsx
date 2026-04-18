@@ -395,6 +395,11 @@ const NovoPlano = () => {
                   <input type="text" name="parceiros" value={planoAcaoData.parceiros} onChange={handlePlanoAcaoChange} />
                 </div>
 
+                <div className="form-group">
+                  <label>Observações:</label>
+                  <textarea name="observacoes" value={planoAcaoData.observacoes} onChange={handlePlanoAcaoChange} placeholder="Alguma observação relevante?"></textarea>
+                </div>
+
                 <div className="input-row">
                   <div className="form-group">
                     <label>Data Início:</label>

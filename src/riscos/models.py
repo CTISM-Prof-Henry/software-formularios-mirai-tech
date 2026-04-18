@@ -109,11 +109,11 @@ class PlanoAcao(models.Model):
     tipo_resposta = models.CharField(max_length=50, choices=RESPOSTA_CHOICES, db_column="tipo_resposta")
     descricao_acao = models.TextField(db_column="descricao_acao")
     responsavel = models.CharField(max_length=255, db_column="responsavel")
-    parceiros = models.TextField(db_column="parceiros")
+    parceiros = models.TextField(db_column="parceiros", null=True, blank=True)
     data_inicio = models.DateField(db_column="data_inicio")
     data_fim = models.DateField(db_column="data_fim")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, db_column="status")
-    observacoes = models.TextField(db_column="observacoes")
+    observacoes = models.TextField(db_column="observacoes", null=True, blank=True)
 
     class Meta:
         db_table = "planos_acao"
