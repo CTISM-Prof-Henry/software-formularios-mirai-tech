@@ -25,11 +25,11 @@ const NovoPlano = () => {
     causa: '',
     consequencia: '',
     controles_atuais: '',
-    eficacia_controle: 'Médio',
+    eficacia_controle: 'Inexistente',
     probabilidade: 3,
     impacto: 3,
-    prob_residual: 1,
-    imp_residual: 1
+    prob_residual: 3,
+    imp_residual: 3
   });
 
   // Step 3: Plano de Ação
@@ -73,16 +73,46 @@ const NovoPlano = () => {
   };
 
   const getRiskColorClass = (nivel) => {
-    if (nivel >= 15) return 'risk-alto';
-    if (nivel >= 8) return 'risk-moderado';
+    if (nivel >= 20) return 'risk-extremo';
+    if (nivel >= 12) return 'risk-alto';
+    if (nivel >= 4) return 'risk-moderado';
     return 'risk-baixo';
   };
 
   const getRiskLabel = (nivel) => {
-    if (nivel >= 15) return 'RISCO ALTO';
-    if (nivel >= 8) return 'RISCO MODERADO';
+    if (nivel >= 20) return 'RISCO EXTREMO';
+    if (nivel >= 12) return 'RISCO ALTO';
+    if (nivel >= 4) return 'RISCO MODERADO';
     return 'RISCO BAIXO';
   };
+
+  // Cálculo automático do Risco Residual
+  useEffect(() => {
+    let prob_res = parseInt(riscoData.probabilidade);
+    let imp_res = parseInt(riscoData.impacto);
+
+    switch (riscoData.eficacia_controle) {
+      case 'Forte':
+        prob_res = Math.max(1, prob_res - 3);
+        imp_res = Math.max(1, imp_res - 2);
+        break;
+      case 'Satisfatório':
+        prob_res = Math.max(1, prob_res - 2);
+        imp_res = Math.max(1, imp_res - 1);
+        break;
+      case 'Fraco':
+        prob_res = Math.max(1, prob_res - 1);
+        break;
+      default: // Inexistente
+        break;
+    }
+
+    setRiscoData(prev => ({
+      ...prev,
+      prob_residual: prob_res,
+      imp_residual: imp_res
+    }));
+  }, [riscoData.probabilidade, riscoData.impacto, riscoData.eficacia_controle]);
 
   const handleNext = () => {
     if (etapa < 3) setEtapa(etapa + 1);
@@ -317,19 +347,9 @@ const NovoPlano = () => {
                   <p>Este é o risco real que precisa ser tratado.</p>
                 </div>
                 <div className="residual-result">
-                  <div className="residual-value-group">
+                  <div className={`residual-badge ${getRiskColorClass(riscoData.prob_residual * riscoData.imp_residual)}`}>
                     <span className="residual-value">{riscoData.prob_residual * riscoData.imp_residual}</span>
                     <span className="residual-label">{getRiskLabel(riscoData.prob_residual * riscoData.imp_residual)}</span>
-                  </div>
-                  <div className="residual-sliders">
-                    <input 
-                      type="range" min="1" max="5" name="prob_residual" 
-                      value={riscoData.prob_residual} onChange={handleRiscoChange} 
-                    />
-                    <input 
-                      type="range" min="1" max="5" name="imp_residual" 
-                      value={riscoData.imp_residual} onChange={handleRiscoChange} 
-                    />
                   </div>
                 </div>
               </div>

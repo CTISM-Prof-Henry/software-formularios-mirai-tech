@@ -50,9 +50,10 @@ class Risco(models.Model):
     ]
 
     EFICACIA_CHOICES = [
-        ('Forte', 'Forte'),
-        ('Médio', 'Médio'),
+        ('Inexistente', 'Inexistente'),
         ('Fraco', 'Fraco'),
+        ('Satisfatório', 'Satisfatório'),
+        ('Forte', 'Forte'),
     ]
 
     setor = models.ForeignKey(Setor, on_delete=models.CASCADE, related_name="riscos", db_column="id_setor")
