@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
 import './styles.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [planos, setPlanos] = useState([]);
   const [busca, setBusca] = useState('');
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,7 @@ const Dashboard = () => {
             <div className="title-line"></div>
             <h1>Visão Geral</h1>
           </div>
-          <button className="new-plan-button">
+          <button className="new-plan-button" onClick={() => navigate('/novo-plano')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
