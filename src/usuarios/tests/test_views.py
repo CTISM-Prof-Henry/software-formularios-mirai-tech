@@ -62,8 +62,13 @@ class TestUsuarioViews:
         api_client.force_authenticate(user=usuario)
         url = "/api/usuarios/me/"
         novo_email = "atualizado@ufsm.br"
-        # Testando e-mail (campo genérico no loop) e senha (campo especial)
-        payload = {"email": novo_email, "senha": "nova_senha_456"}
+        # Agora exige senha_atual, nova_senha e confirmacao_senha
+        payload = {
+            "email": novo_email, 
+            "senha_atual": "senha_original",
+            "nova_senha": "nova_senha_456",
+            "confirmacao_senha": "nova_senha_456"
+        }
         response = api_client.patch(url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data["usuario"]["email"] == novo_email

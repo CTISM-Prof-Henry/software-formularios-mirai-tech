@@ -50,9 +50,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class AtualizarPerfilSerializer(serializers.ModelSerializer):
     """
-    Serializer para atualização parcial do perfil (senha, email e setores).
+    Serializer para atualização do perfil com validação de senha atual.
     """
-    senha = serializers.CharField(write_only=True, min_length=8, source='password', required=False)
+    senha_atual = serializers.CharField(write_only=True, required=False)
+    nova_senha = serializers.CharField(write_only=True, min_length=8, required=False)
+    confirmacao_senha = serializers.CharField(write_only=True, required=False)
     id_setores = serializers.PrimaryKeyRelatedField(
         queryset=Setor.objects.all(), 
         source='setores', 
@@ -62,22 +64,47 @@ class AtualizarPerfilSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['senha', 'email', 'id_setores']
+        fields = ['email', 'id_setores', 'senha_atual', 'nova_senha', 'confirmacao_senha']
 
-    def update(self, instance, dados_validados):
-        # Tratamento da senha se fornecida
-        if 'password' in dados_validados:
-            senha = dados_validados.pop('password')
-            instance.set_password(senha)
+    def validate(self, data):
+        nova_senha = data.get('nova_senha')
+        confirmacao = data.get('confirmacao_senha')
+        senha_atual = data.get('senha_atual')
+
+        # Se tentar mudar a senha, valida requisitos
+        if nova_senha or confirmacao or senha_atual:
+            if not senha_atual:
+                raise serializers.ValidationError({"senha_atual": "A senha atual é obrigatória para definir uma nova."})
             
-        # Tratamento dos setores se fornecidos
-        if 'setores' in dados_validados:
-            setores = dados_validados.pop('setores')
+            if not self.instance.check_password(senha_atual):
+                raise serializers.ValidationError({"senha_atual": "Senha atual incorreta."})
+
+            if nova_senha != confirmacao:
+                raise serializers.ValidationError({"confirmacao_senha": "A nova senha e a confirmação não coincidem."})
+            
+            if not nova_senha:
+                raise serializers.ValidationError({"nova_senha": "A nova senha não pode estar vazia."})
+
+        return data
+
+    def update(self, instance, validated_data):
+        # Remove campos de senha da atualização genérica
+        nova_senha = validated_data.pop('nova_senha', None)
+        validated_data.pop('senha_atual', None)
+        validated_data.pop('confirmacao_senha', None)
+        
+        # Trata atualização de setores
+        if 'setores' in validated_data:
+            setores = validated_data.pop('setores')
             instance.setores.set(setores)
-            
-        # Atualiza os demais campos (email)
-        for attr, value in dados_validados.items():
+
+        # Atualiza email e outros campos genéricos
+        for attr, value in validated_data.items():
             setattr(instance, attr, value)
-            
+
+        # Se houver nova senha validada, aplica o hash
+        if nova_senha:
+            instance.set_password(nova_senha)
+
         instance.save()
         return instance
