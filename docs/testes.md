@@ -67,6 +67,19 @@ Para gerar um relatório simples de cobertura, utilize:
 python -m pytest --cov=src --cov-report=term-missing
 ```
 
+## Automação no GitHub Actions
+
+Os testes automatizados também podem ser executados no GitHub Actions por meio da workflow `.github/workflows/tests.yml`.
+
+Essa automação:
+
+- executa em `push` para `main` e branches `feat/*`;
+- executa em `pull_request`;
+- sobe um serviço PostgreSQL para os testes;
+- instala as dependências do projeto;
+- aplica as migrations antes da execução;
+- roda a suíte com `pytest`.
+
 ## Observações
 
 - a documentação atual descreve os testes automatizados do backend;
