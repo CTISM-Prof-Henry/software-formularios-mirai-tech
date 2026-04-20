@@ -1,0 +1,31 @@
+site_name: Gestao de Risco UFSM
+theme:
+  name: mkdocs
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+nav:
+  - Home: index.md
+  - Instalação: instalacao.md
+  - API: api.md
+  - Banco de dados: banco-de-dados.md
+  - Frontend: frontend.md
+  - Design e protótipo: design-prototipo.md
+  - Testes: testes.md
+  - Exemplos e casos de uso: exemplos-casos-de-uso.md
+markdown_extensions:
+  - attr_list
+  - footnotes
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
