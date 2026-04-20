@@ -198,3 +198,6 @@ htmlcov/
 # Zip files
 *.zip
 *.rar
+
+# MkDocs
+site/
