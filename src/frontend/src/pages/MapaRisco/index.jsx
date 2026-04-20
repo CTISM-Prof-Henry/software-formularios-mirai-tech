@@ -7,6 +7,7 @@ import './styles.css';
 const MapaRisco = () => {
   const navigate = useNavigate();
   const [riscos, setRiscos] = useState([]);
+  const [acoes, setAcoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterSetor, setFilterSetor] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
@@ -24,8 +25,13 @@ const MapaRisco = () => {
       if (filterSetor) url += `&setor=${filterSetor}`;
       if (filterCategoria) url += `&categoria=${filterCategoria}`;
 
-      const response = await api.get(url);
-      setRiscos(response.data.results || response.data);
+      const [riscosResponse, acoesResponse] = await Promise.all([
+        api.get(url),
+        api.get('/riscos/acoes/?limit=1000'),
+      ]);
+
+      setRiscos(riscosResponse.data.results || riscosResponse.data);
+      setAcoes(acoesResponse.data.results || acoesResponse.data);
     } catch (err) {
       console.error('Erro ao carregar riscos para o mapa:', err);
     } finally {
@@ -40,6 +46,72 @@ const MapaRisco = () => {
       count: riscos.filter(r => r.categoria === cat).length
     }));
   };
+
+  const getTopSetoresByScore = () => {
+    const ranking = riscos.reduce((acc, risco) => {
+      const setorId = risco.setor_detalhes?.id || risco.setor;
+      const setorNome = risco.setor_detalhes?.nome || 'Setor não informado';
+      const setorSigla = risco.setor_detalhes?.sigla || '';
+
+      if (!acc[setorId]) {
+        acc[setorId] = {
+          id: setorId,
+          nome: setorNome,
+          sigla: setorSigla,
+          pontos: 0,
+        };
+      }
+
+      acc[setorId].pontos += Number(risco.nivel_residual || 0);
+      return acc;
+    }, {});
+
+    return Object.values(ranking)
+      .sort((a, b) => b.pontos - a.pontos || a.nome.localeCompare(b.nome))
+      .slice(0, 5);
+  };
+
+  const getRankingLabel = (index) => `${index + 1}º`;
+
+  const getMitigationRate = () => {
+    if (!riscos.length) return 0;
+    const mitigados = riscos.filter(r => Number(r.nivel_residual) < Number(r.nivel_risco)).length;
+    return ((mitigados / riscos.length) * 100).toFixed(1);
+  };
+
+  const getImprovedRiskCount = () =>
+    riscos.filter(r => Number(r.nivel_residual) < Number(r.nivel_risco)).length;
+
+  const getPlanoAcaoPorRisco = (riscoId) =>
+    acoes.find(acao => String(acao.risco) === String(riscoId));
+
+  const getTopPriorityRisks = () => {
+    return [...riscos]
+      .sort((a, b) => {
+        const diffResidual = Number(b.nivel_residual) - Number(a.nivel_residual);
+        if (diffResidual !== 0) return diffResidual;
+        const diffInerente = Number(b.nivel_risco) - Number(a.nivel_risco);
+        if (diffInerente !== 0) return diffInerente;
+        return Number(a.id) - Number(b.id);
+      })
+      .slice(0, 5);
+  };
+
+  const getRiskPriorityLabel = (score) => {
+    if (score >= 20) return 'EXTREMO';
+    if (score >= 12) return 'ALTO';
+    if (score >= 4) return 'MODERADO';
+    return 'BAIXO';
+  };
+
+  const getRiskPriorityClass = (score) => {
+    if (score >= 20) return 'priority-extremo';
+    if (score >= 12) return 'priority-alto';
+    if (score >= 4) return 'priority-moderado';
+    return 'priority-baixo';
+  };
+
+  const formatRiskIdentifier = (id) => `R-${String(id).padStart(4, '0')}`;
 
   const getRiskLevelInfo = (score) => {
     if (score >= 20) return { label: 'RE', class: 'cell-extremo' };
@@ -215,6 +287,53 @@ const MapaRisco = () => {
               </div>
             </div>
 
+            <div className="dashboard-card ranking-card">
+              <h3>Setores com Maior Pontuação</h3>
+              <div className="ranking-list">
+                {getTopSetoresByScore().length > 0 ? (
+                  getTopSetoresByScore().map((setor, index) => (
+                    <div key={setor.id} className="ranking-item">
+                      <div className="ranking-position">{getRankingLabel(index)}</div>
+                      <div className="ranking-info">
+                        <span className="ranking-name">
+                          {setor.sigla ? `${setor.sigla} - ${setor.nome}` : setor.nome}
+                        </span>
+                      </div>
+                      <div className={`ranking-score ${index < 3 ? 'highlight' : ''}`}>
+                        {setor.pontos} pontos
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-empty">Nenhum risco encontrado para calcular a pontuação.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="dashboard-card strategic-card">
+              <h3>Gestão Estratégica</h3>
+              <div className="strategic-metric-label">Taxa de Mitigação</div>
+              <div className="strategic-metric-row">
+                <span className="strategic-metric-value">{getMitigationRate()}%</span>
+                <span className="strategic-metric-trend">↗ +{getImprovedRiskCount()}</span>
+              </div>
+
+              <div className="strategic-stats">
+                <div className="strategic-stat-box">
+                  <span className="strategic-stat-label">Riscos críticos</span>
+                  <span className="strategic-stat-value">
+                    {riscos.filter(r => Number(r.nivel_residual) >= 20).length}
+                  </span>
+                </div>
+                <div className="strategic-stat-box">
+                  <span className="strategic-stat-label">Em revisão</span>
+                  <span className="strategic-stat-value">
+                    {acoes.filter(acao => acao.status === 'Em andamento').length}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="dashboard-card info-summary-card">
               <h3>Resumo do Mapa</h3>
               <div className="summary-list">
@@ -233,6 +352,63 @@ const MapaRisco = () => {
             </div>
           </div>
         </div>
+
+        <section className="priority-footer-card">
+          <div className="priority-footer-header">
+            <h3>Riscos de Maior Prioridade</h3>
+            <button className="priority-footer-link" onClick={() => navigate('/planos')}>
+              Ver Inventário Completo →
+            </button>
+          </div>
+
+          <div className="priority-table">
+            <div className="priority-table-head">
+              <span>Identificador</span>
+              <span>Descrição do Evento</span>
+              <span>Nível</span>
+              <span>Responsável</span>
+              <span>Ação Sugerida</span>
+            </div>
+
+            <div className="priority-table-body">
+              {getTopPriorityRisks().length > 0 ? (
+                getTopPriorityRisks().map((risco) => {
+                  const planoAcao = getPlanoAcaoPorRisco(risco.id);
+                  return (
+                    <div key={risco.id} className="priority-row">
+                      <div className="priority-cell priority-id">
+                        {formatRiskIdentifier(risco.id)}
+                      </div>
+                      <div className="priority-cell priority-event">
+                        <strong>{risco.evento}</strong>
+                        <span>
+                          {risco.setor_detalhes?.sigla
+                            ? `${risco.setor_detalhes.sigla} - ${risco.setor_detalhes.nome}`
+                            : 'Setor não informado'}
+                        </span>
+                      </div>
+                      <div className="priority-cell">
+                        <span className={`priority-badge ${getRiskPriorityClass(Number(risco.nivel_residual))}`}>
+                          {getRiskPriorityLabel(Number(risco.nivel_residual))}
+                        </span>
+                      </div>
+                      <div className="priority-cell priority-owner">
+                        {planoAcao?.responsavel || risco.setor_detalhes?.sigla || 'Não definido'}
+                      </div>
+                      <div className="priority-cell">
+                        <span className="priority-action-tag">
+                          {planoAcao?.tipo_resposta || 'Plano de Mitigação'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="priority-empty">Nenhum risco disponível para priorização.</div>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
