@@ -193,6 +193,7 @@ htmlcov/
 .pytest_cache/
 .coverage
 .coveragerc
+!.coveragerc
 
 # Zip files
 *.zip
