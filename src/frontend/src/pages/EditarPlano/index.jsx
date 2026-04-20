@@ -18,8 +18,10 @@ const EditarPlano = () => {
   const [error, setError] = useState('');
   
   // Dados auxiliares
+  const [desafios, setDesafios] = useState([]);
   const [objetivos, setObjetivos] = useState([]);
   const [macroprocessos, setMacroprocessos] = useState([]);
+  const [desafioSelecionado, setDesafioSelecionado] = useState('');
   
   // Step 1 & 2: Risco
   const [riscoData, setRiscoData] = useState({
@@ -55,12 +57,14 @@ const EditarPlano = () => {
     async function loadData() {
       setLoading(true);
       try {
-        const [objRes, macroRes, riscoRes] = await Promise.all([
+        const [desafiosRes, objRes, macroRes, riscoRes] = await Promise.all([
+          api.get('/riscos/desafios/'),
           api.get('/riscos/objetivos/'),
           api.get('/riscos/macroprocessos/'),
           api.get(`/riscos/planos/${id}/`)
         ]);
 
+        setDesafios(desafiosRes.data.results || desafiosRes.data);
         setObjetivos(objRes.data.results || objRes.data);
         setMacroprocessos(macroRes.data.results || macroRes.data);
         
@@ -80,6 +84,7 @@ const EditarPlano = () => {
           prob_residual: rData.prob_residual,
           imp_residual: rData.imp_residual
         });
+        setDesafioSelecionado(String(rData.objetivo_detalhes?.desafio || ''));
 
         // Tenta carregar o plano de ação vinculado
         try {
@@ -115,6 +120,11 @@ const EditarPlano = () => {
 
   const handleRiscoChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'desafio') {
+      setDesafioSelecionado(value);
+      setRiscoData(prev => ({ ...prev, objetivo: '' }));
+      return;
+    }
     setRiscoData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -211,6 +221,10 @@ const EditarPlano = () => {
     }
   };
 
+  const objetivosFiltrados = desafioSelecionado
+    ? objetivos.filter(obj => String(obj.desafio) === String(desafioSelecionado))
+    : [];
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -278,10 +292,29 @@ const EditarPlano = () => {
               </div>
 
               <div className="form-group">
+                <label>Desafio Estratégico:</label>
+                <select name="desafio" value={desafioSelecionado} onChange={handleRiscoChange}>
+                  <option value="">Selecione um desafio...</option>
+                  {desafios.map(desafio => (
+                    <option key={desafio.id} value={desafio.id}>
+                      {`Desafio ${desafio.numero} - ${desafio.descricao}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>Objetivo Estratégico (PDI):</label>
-                <select name="objetivo" value={riscoData.objetivo} onChange={handleRiscoChange}>
-                  <option value="">Selecione um objetivo...</option>
-                  {objetivos.map(obj => (
+                <select
+                  name="objetivo"
+                  value={riscoData.objetivo}
+                  onChange={handleRiscoChange}
+                  disabled={!desafioSelecionado}
+                >
+                  <option value="">
+                    {desafioSelecionado ? 'Selecione um objetivo...' : 'Selecione primeiro um desafio...'}
+                  </option>
+                  {objetivosFiltrados.map(obj => (
                     <option key={obj.id} value={obj.id}>{obj.codigo} - {obj.descricao}</option>
                   ))}
                 </select>

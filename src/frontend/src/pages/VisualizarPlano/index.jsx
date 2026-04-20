@@ -120,6 +120,12 @@ const VisualizarPlano = () => {
                 <span>{plano.categoria}</span>
               </div>
               <div className="info-item full">
+                <label>DESAFIO ESTRATÉGICO</label>
+                <span>
+                  {`Desafio ${plano.objetivo_detalhes?.desafio_detalhes?.numero} - ${plano.objetivo_detalhes?.desafio_detalhes?.descricao}`}
+                </span>
+              </div>
+              <div className="info-item full">
                 <label>OBJETIVO ESTRATÉGICO (PDI)</label>
                 <span>{plano.objetivo_detalhes?.codigo} - {plano.objetivo_detalhes?.descricao}</span>
               </div>

@@ -19,9 +19,9 @@ def infra_risco(db):
     u2 = Usuario.objects.create_user(siape="2", password="p", nome="G2", email="g2@u.br")
     u2.setores.add(s2)
     
-    desafio = DesafioPDI.objects.create(numero=1, descricao="D1")
-    obj = ObjetivoPDI.objects.create(codigo="O1", descricao="O1", desafio=desafio)
-    macro = Macroprocesso.objects.create(nome="M1")
+    desafio = DesafioPDI.objects.create(numero=998, descricao="D1")
+    obj = ObjetivoPDI.objects.create(codigo="O-TESTE-998", descricao="O1", desafio=desafio)
+    macro = Macroprocesso.objects.create(nome="M1 Exclusivo")
     
     risco = Risco.objects.create(
         setor=s1, objetivo=obj, macroprocesso=macro,
@@ -127,3 +127,31 @@ class TestRiscoViewsPermissions:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 0
+
+    def test_objetivos_pdi_sao_listados_com_ordenacao_estavel(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+        ObjetivoPDI.objects.create(codigo="A-TESTE-001", descricao="Primeiro", desafio=infra_risco["risco"].objetivo.desafio)
+        ObjetivoPDI.objects.create(codigo="Z-TESTE-001", descricao="Ultimo", desafio=infra_risco["risco"].objetivo.desafio)
+
+        response = api_client.get("/api/riscos/objetivos/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        codigos = [item["codigo"] for item in response.data]
+        assert codigos == sorted(codigos)
+        assert "A-TESTE-001" in codigos
+        assert "Z-TESTE-001" in codigos
+
+    def test_macroprocessos_sao_listados_com_ordenacao_estavel(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+        Macroprocesso.objects.create(nome="A Macroprocesso")
+        Macroprocesso.objects.create(nome="Z Macroprocesso")
+
+        response = api_client.get("/api/riscos/macroprocessos/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        nomes = [item["nome"] for item in response.data]
+        assert nomes == sorted(nomes)
+        assert "A Macroprocesso" in nomes
+        assert "Z Macroprocesso" in nomes
