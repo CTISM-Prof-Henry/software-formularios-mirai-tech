@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { downloadBlob } from '../../utils/downloadFile';
 import './styles.css';
 
 const PlanosRisco = () => {
@@ -10,6 +11,7 @@ const PlanosRisco = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [exportingExcel, setExportingExcel] = useState(false);
   const dropdownRef = useRef(null);
   
   const [stats, setStats] = useState({
@@ -87,6 +89,28 @@ const PlanosRisco = () => {
     carregarPlanos();
   };
 
+  async function exportarExcel() {
+    setExportingExcel(true);
+    try {
+      const params = new URLSearchParams({ ordenacao });
+      if (filterSetor) params.append('setor', filterSetor);
+      if (filterCategoria) params.append('categoria', filterCategoria);
+      if (filterDataInicio) params.append('data_inicio', filterDataInicio);
+      if (filterDataFim) params.append('data_fim', filterDataFim);
+      if (search) params.append('search', search);
+
+      const response = await api.get(`/riscos/planos/exportar-excel/?${params.toString()}`, {
+        responseType: 'blob',
+      });
+      downloadBlob(response.data, 'planos-risco.xlsx');
+    } catch (err) {
+      console.error('Erro ao exportar Excel:', err);
+      setError('Nao foi possivel exportar os planos para Excel.');
+    } finally {
+      setExportingExcel(false);
+    }
+  }
+
   const totalPages = Math.ceil(count / pageSize);
 
   const canEdit = (plano) => {
@@ -119,23 +143,18 @@ const PlanosRisco = () => {
           </div>
           
           <div className="header-actions">
-            <button className="export-button pdf" title="Exportar para PDF">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              PDF
-            </button>
-            <button className="export-button excel" title="Exportar para Excel">
+            <button
+              className="export-button excel"
+              title="Exportar planos filtrados para Excel"
+              onClick={exportarExcel}
+              disabled={exportingExcel}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="3" y1="9" x2="21" y2="9"></line>
                 <line x1="9" y1="21" x2="9" y2="9"></line>
               </svg>
-              Excel
+              {exportingExcel ? 'Exportando...' : 'Excel'}
             </button>
             <button className="new-plan-button" onClick={() => navigate('/novo-plano')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

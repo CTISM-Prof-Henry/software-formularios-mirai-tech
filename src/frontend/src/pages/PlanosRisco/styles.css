@@ -22,6 +22,11 @@
   color: var(--primary-blue);
 }
 
+.export-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .export-button.pdf svg {
   color: #e74c3c;
 }

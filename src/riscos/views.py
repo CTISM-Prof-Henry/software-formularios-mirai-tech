@@ -9,6 +9,7 @@ from .serializers import (
     DesafioPDISerializer, MacroprocessoSerializer, ObjetivoPDISerializer, 
     RiscoSerializer, PlanoAcaoSerializer, MonitoramentoSerializer
 )
+from .exporters import exportar_risco_excel, exportar_risco_pdf, exportar_riscos_excel
 
 class PertenceAoSetorDoRisco(permissions.BasePermission):
     """
@@ -37,7 +38,11 @@ class RiscoViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
 
     def get_queryset(self):
-        queryset = Risco.objects.all()
+        queryset = Risco.objects.select_related(
+            "setor",
+            "objetivo__desafio",
+            "macroprocesso",
+        ).prefetch_related("planos_acao")
         
         # Filtros básicos
         setor_id = self.request.query_params.get('setor')
@@ -61,6 +66,10 @@ class RiscoViewSet(viewsets.ModelViewSet):
                 Q(causa__icontains=search) | 
                 Q(consequencia__icontains=search)
             )
+        if data_inicio:
+            queryset = queryset.filter(planos_acao__data_inicio__gte=data_inicio)
+        if data_fim:
+            queryset = queryset.filter(planos_acao__data_fim__lte=data_fim)
         
         # Ordenação
         if ordenacao == 'asc':
@@ -68,7 +77,7 @@ class RiscoViewSet(viewsets.ModelViewSet):
         else:
             queryset = queryset.order_by('-id')
         
-        return queryset
+        return queryset.distinct()
 
     @action(detail=False, methods=['get'])
     def estatisticas(self, request):
@@ -97,6 +106,21 @@ class RiscoViewSet(viewsets.ModelViewSet):
             )
         return super().create(request, *args, **kwargs)
 
+    @action(detail=False, methods=['get'], url_path='exportar-excel')
+    def exportar_excel(self, request):
+        """Exporta a lista filtrada de planos de risco em Excel."""
+        return exportar_riscos_excel(self.get_queryset())
+
+    @action(detail=True, methods=['get'], url_path='exportar-excel')
+    def exportar_excel_individual(self, request, pk=None):
+        """Exporta um plano de risco em Excel."""
+        return exportar_risco_excel(self.get_object())
+
+    @action(detail=True, methods=['get'], url_path='exportar-pdf')
+    def exportar_pdf(self, request, pk=None):
+        """Exporta um plano de risco em PDF."""
+        return exportar_risco_pdf(self.get_object())
+
 class DesafioPDIViewSet(viewsets.ModelViewSet):
     queryset = DesafioPDI.objects.all()
     serializer_class = DesafioPDISerializer
@@ -119,6 +143,13 @@ class PlanoAcaoViewSet(viewsets.ModelViewSet):
     queryset = PlanoAcao.objects.all()
     serializer_class = PlanoAcaoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
+
+    def get_queryset(self):
+        queryset = PlanoAcao.objects.select_related("risco", "risco__setor").all()
+        risco_id = self.request.query_params.get("risco")
+        if risco_id:
+            queryset = queryset.filter(risco_id=risco_id)
+        return queryset.order_by("id")
 
 class MonitoramentoViewSet(viewsets.ModelViewSet):
     queryset = Monitoramento.objects.all()

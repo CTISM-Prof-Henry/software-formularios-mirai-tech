@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from rest_framework import status
 from src.usuarios.models import Setor, Usuario
-from src.riscos.models import DesafioPDI, ObjetivoPDI, Macroprocesso, Risco
+from src.riscos.models import DesafioPDI, ObjetivoPDI, Macroprocesso, PlanoAcao, Risco
 
 @pytest.fixture
 def api_client():
@@ -157,3 +157,42 @@ class TestRiscoViewsPermissions:
         assert nomes == nomes_esperados
         assert "A Macroprocesso" in nomes
         assert "Z Macroprocesso" in nomes
+
+    def test_exporta_lista_filtrada_para_excel(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get(f"/api/riscos/planos/exportar-excel/?setor={infra_risco['s1'].id}")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        assert 'filename="planos-risco.xlsx"' in response["Content-Disposition"]
+        assert response.content.startswith(b"PK")
+
+    def test_exporta_plano_individual_para_excel(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].id}/exportar-excel/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        assert f'filename="plano-risco-{infra_risco["risco"].id}.xlsx"' in response["Content-Disposition"]
+        assert response.content.startswith(b"PK")
+
+    def test_exporta_plano_individual_para_pdf(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+        PlanoAcao.objects.create(
+            risco=infra_risco["risco"],
+            tipo_resposta="Mitigar",
+            descricao_acao="Executar plano de mitigacao.",
+            responsavel="Gestor responsavel",
+            data_inicio="2026-01-01",
+            data_fim="2026-12-31",
+            status="Em andamento",
+        )
+
+        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].id}/exportar-pdf/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/pdf"
+        assert f'filename="plano-risco-{infra_risco["risco"].id}.pdf"' in response["Content-Disposition"]
+        assert response.content.startswith(b"%PDF")

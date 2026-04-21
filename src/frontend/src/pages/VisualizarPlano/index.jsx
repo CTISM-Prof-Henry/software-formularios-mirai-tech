@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { downloadBlob } from '../../utils/downloadFile';
 import './styles.css';
 
 const VisualizarPlano = () => {
@@ -11,6 +12,7 @@ const VisualizarPlano = () => {
   const [planoAcao, setPlanoAcao] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState('');
 
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
   const userSetoresIds = user.setores?.map(s => s.id) || [];
@@ -54,6 +56,22 @@ const VisualizarPlano = () => {
     return 'BAIXO';
   };
 
+  async function baixarArquivo(tipo) {
+    setExporting(tipo);
+    try {
+      const extension = tipo === 'pdf' ? 'pdf' : 'xlsx';
+      const response = await api.get(`/riscos/planos/${id}/exportar-${tipo}/`, {
+        responseType: 'blob',
+      });
+      downloadBlob(response.data, `plano-risco-${id}.${extension}`);
+    } catch (err) {
+      console.error(`Erro ao exportar ${tipo}:`, err);
+      window.alert('Nao foi possivel baixar o arquivo solicitado.');
+    } finally {
+      setExporting('');
+    }
+  }
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -93,6 +111,22 @@ const VisualizarPlano = () => {
           </div>
           
           <div className="header-actions">
+            <button
+              className="btn-export-file pdf"
+              onClick={() => baixarArquivo('pdf')}
+              disabled={exporting === 'pdf'}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              {exporting === 'pdf' ? 'Gerando...' : 'PDF'}
+            </button>
+            <button
+              className="btn-export-file excel"
+              onClick={() => baixarArquivo('excel')}
+              disabled={exporting === 'excel'}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              {exporting === 'excel' ? 'Gerando...' : 'Excel'}
+            </button>
             <button className="btn-back-outline" onClick={() => navigate('/planos')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
               Voltar
