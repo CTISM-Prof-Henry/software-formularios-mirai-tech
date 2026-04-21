@@ -161,6 +161,68 @@ classDiagram
     note for Monitoramento "Mantém o histórico de acompanhamento e análise do risco."
 ```
 
+## Diagrama de casos de uso - Mermaid 
+
+Utilizando a ferramenta Mermaid para representar os principais casos de uso relacionados às funções do sistema e às tabelas persistidas. 
+
+```mermaid
+flowchart LR
+    gestor[Gestor]
+    admin[Administrador]
+
+    uc1((Autenticar no sistema))
+    uc2((Cadastrar gestor))
+    uc3((Vincular gestor a setor))
+    uc4((Recuperar senha))
+    uc5((Gerenciar perfil))
+    uc6((Consultar setores))
+    uc7((Cadastrar risco))
+    uc8((Editar risco))
+    uc9((Consultar planos de risco))
+    uc10((Cadastrar plano de ação))
+    uc11((Registrar monitoramento))
+    uc12((Manter estrutura PDI))
+
+    gestor --> uc1
+    gestor --> uc4
+    gestor --> uc5
+    gestor --> uc6
+    gestor --> uc7
+    gestor --> uc8
+    gestor --> uc9
+    gestor --> uc10
+    gestor --> uc11
+
+    admin --> uc2
+    admin --> uc3
+    admin --> uc12
+    admin --> uc6
+    admin --> uc9
+
+    uc1 --> db1[(USUARIOS)]
+    uc2 --> db1
+    uc3 --> db2[(USUARIO_SETORES)]
+    uc3 --> db3[(SETORES)]
+    uc4 --> db4[(CODIGOS_RECUPERACAO)]
+    uc4 --> db1
+    uc5 --> db1
+    uc5 --> db2
+    uc6 --> db3
+    uc7 --> db5[(RISCOS)]
+    uc7 --> db3
+    uc7 --> db6[(OBJETIVOS_PDI)]
+    uc7 --> db7[(MACROPROCESSOS)]
+    uc8 --> db5
+    uc9 --> db5
+    uc9 --> db8[(PLANOS_ACAO)]
+    uc9 --> db9[(MONITORAMENTOS)]
+    uc10 --> db8
+    uc11 --> db9
+    uc12 --> db10[(DESAFIOS_PDI)]
+    uc12 --> db6
+    uc12 --> db7
+```
+
 ## Diagrama entidade relacionamento (ER) (Padrão ISO/Min-max) - Dbdiagram.io
 
 Utilizando a sintaxe do Dbdiagram.io para representar a estrutura relacional do banco com base nas tabelas atuais do projeto.
