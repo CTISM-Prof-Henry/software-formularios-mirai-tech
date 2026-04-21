@@ -181,18 +181,24 @@ const MapaRisco = () => {
             </section>
 
             <div className="map-wrapper">
-              <h2 className="map-title">MATRIZ DE RISCO RESIDUAL</h2>
+              <div className="map-header">
+                <h2 className="map-title">Matriz de Probabilidade x Impacto</h2>
+                <div className="map-active-indicator">
+                  <span className="map-active-dot"></span>
+                  <span>Riscos Ativos</span>
+                </div>
+              </div>
               
               <div className="map-container">
-                {/* Eixo Y: Impacto */}
+                {/* Eixo Y: Probabilidade */}
                 <div className="axis-y">
-                  <div className="axis-label-vertical">I M P A C T O</div>
+                  <div className="axis-label-vertical">PROBABILIDADE</div>
                   <div className="axis-values-y">
-                    <span>5 - Catastrófico</span>
-                    <span>4 - Grande</span>
-                    <span>3 - Moderado</span>
-                    <span>2 - Pequeno</span>
-                    <span>1 - Insignificante</span>
+                    <span>5 - Muito Alta</span>
+                    <span>4 - Alta</span>
+                    <span>3 - Média</span>
+                    <span>2 - Baixa</span>
+                    <span>1 - Muito Baixa</span>
                   </div>
                 </div>
 
@@ -212,16 +218,16 @@ const MapaRisco = () => {
                 {/* Espaçador para o canto inferior esquerdo */}
                 <div className="axis-spacer"></div>
 
-                {/* Eixo X: Probabilidade */}
+                {/* Eixo X: Impacto */}
                 <div className="axis-x">
                   <div className="axis-values-x">
-                    <span>1 - Raro</span>
-                    <span>2 - Improvável</span>
-                    <span>3 - Possível</span>
-                    <span>4 - Provável</span>
-                    <span>5 - Quase Certo</span>
+                    <span>1 - Insignificante</span>
+                    <span>2 - Pequeno</span>
+                    <span>3 - Moderado</span>
+                    <span>4 - Grande</span>
+                    <span>5 - Catastrófico</span>
                   </div>
-                  <div className="axis-label-horizontal">P R O B A B I L I D A D E</div>
+                  <div className="axis-label-horizontal">IMPACTO</div>
                 </div>
               </div>
 
