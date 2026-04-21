@@ -39,7 +39,11 @@ const GestaoEquipe = () => {
       setMembros(response.data);
     } catch (err) {
       console.error('Erro ao carregar membros:', err);
-      setError('Não foi possível carregar os membros da equipe.');
+      if (err.response?.status === 401) {
+        setError('Sessao expirada. Faca login novamente para carregar os membros da equipe.');
+      } else {
+        setError('Nao foi possivel carregar os membros da equipe.');
+      }
     } finally {
       setLoadingMembros(false);
     }

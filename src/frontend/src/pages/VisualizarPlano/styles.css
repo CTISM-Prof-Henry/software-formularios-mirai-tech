@@ -239,6 +239,38 @@
   border-color: #a0aec0;
 }
 
+.btn-export-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #d8e1ec;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #4a5568;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-export-file.pdf svg {
+  color: #e74c3c;
+}
+
+.btn-export-file.excel svg {
+  color: #27ae60;
+}
+
+.btn-export-file:hover:not(:disabled) {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  background: #f8fbff;
+}
+
+.btn-export-file:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .btn-edit-main {
   display: flex;
   align-items: center;
