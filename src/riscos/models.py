@@ -9,6 +9,7 @@ class DesafioPDI(models.Model):
         db_table = "desafios_pdi"
         verbose_name = "Desafio PDI"
         verbose_name_plural = "Desafios PDI"
+        ordering = ["numero"]
 
     def __str__(self):
         return f"{self.numero} - {self.descricao}"
@@ -21,6 +22,7 @@ class Macroprocesso(models.Model):
         db_table = "macroprocessos"
         verbose_name = "Macroprocesso"
         verbose_name_plural = "Macroprocessos"
+        ordering = ["nome"]
 
     def __str__(self):
         return self.nome
@@ -35,6 +37,7 @@ class ObjetivoPDI(models.Model):
         db_table = "objetivos_pdi"
         verbose_name = "Objetivo PDI"
         verbose_name_plural = "Objetivos PDI"
+        ordering = ["codigo"]
 
     def __str__(self):
         return f"{self.codigo} - {self.descricao[:50]}"

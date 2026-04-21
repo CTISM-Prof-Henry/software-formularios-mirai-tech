@@ -4,9 +4,9 @@ from src.usuarios.models import Setor
 
 @pytest.fixture
 def infra_pdi(db):
-    desafio = DesafioPDI.objects.create(numero=1, descricao="Desafio Teste")
-    objetivo = ObjetivoPDI.objects.create(codigo="OBJ1", descricao="Objetivo Teste", desafio=desafio)
-    macro = Macroprocesso.objects.create(nome="Processo Teste")
+    desafio = DesafioPDI.objects.create(numero=999, descricao="Desafio Teste")
+    objetivo = ObjetivoPDI.objects.create(codigo="OBJ-TESTE-999", descricao="Objetivo Teste", desafio=desafio)
+    macro = Macroprocesso.objects.create(nome="Processo Teste Exclusivo")
     setor = Setor.objects.create(nome="Setor Teste", sigla="ST")
     return {"desafio": desafio, "objetivo": objetivo, "macro": macro, "setor": setor}
 
@@ -33,9 +33,9 @@ class TestRiscoModel:
         # 2 * 3 = 6 (Nível Residual)
         assert risco.nivel_residual == 6
         assert str(risco) == f"Risco {risco.id} - ST"
-        assert str(infra_pdi['desafio']) == "1 - Desafio Teste"
-        assert str(infra_pdi['macro']) == "Processo Teste"
-        assert str(infra_pdi['objetivo']) == "OBJ1 - Objetivo Teste"
+        assert str(infra_pdi['desafio']) == "999 - Desafio Teste"
+        assert str(infra_pdi['macro']) == "Processo Teste Exclusivo"
+        assert str(infra_pdi['objetivo']) == "OBJ-TESTE-999 - Objetivo Teste"
 
 @pytest.mark.django_db
 class TestPlanoAcaoModel:

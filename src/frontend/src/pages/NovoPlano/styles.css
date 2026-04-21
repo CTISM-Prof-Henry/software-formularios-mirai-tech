@@ -93,11 +93,25 @@
 .form-group input, 
 .form-group select, 
 .form-group textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
   outline: none;
+}
+
+.form-group select {
+  min-width: 0;
+}
+
+.form-container,
+.step-content,
+.form-group,
+.input-row {
+  max-width: 100%;
 }
 
 .form-group textarea {

@@ -12,8 +12,10 @@ const NovoPlano = () => {
   const [error, setError] = useState('');
   
   // Dados auxiliares
+  const [desafios, setDesafios] = useState([]);
   const [objetivos, setObjetivos] = useState([]);
   const [macroprocessos, setMacroprocessos] = useState([]);
+  const [desafioSelecionado, setDesafioSelecionado] = useState('');
   
   // Step 1 & 2: Risco
   const [riscoData, setRiscoData] = useState({
@@ -49,10 +51,12 @@ const NovoPlano = () => {
   useEffect(() => {
     async function loadData() {
       try {
-        const [objRes, macroRes] = await Promise.all([
+        const [desafiosRes, objRes, macroRes] = await Promise.all([
+          api.get('/riscos/desafios/'),
           api.get('/riscos/objetivos/'),
           api.get('/riscos/macroprocessos/')
         ]);
+        setDesafios(desafiosRes.data.results || desafiosRes.data);
         setObjetivos(objRes.data.results || objRes.data);
         setMacroprocessos(macroRes.data.results || macroRes.data);
       } catch (err) {
@@ -64,6 +68,11 @@ const NovoPlano = () => {
 
   const handleRiscoChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'desafio') {
+      setDesafioSelecionado(value);
+      setRiscoData(prev => ({ ...prev, objetivo: '' }));
+      return;
+    }
     setRiscoData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -155,6 +164,10 @@ const NovoPlano = () => {
     }
   };
 
+  const objetivosFiltrados = desafioSelecionado
+    ? objetivos.filter(obj => String(obj.desafio) === String(desafioSelecionado))
+    : [];
+
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -211,10 +224,29 @@ const NovoPlano = () => {
               </div>
 
               <div className="form-group">
+                <label>Desafio Estratégico:</label>
+                <select name="desafio" value={desafioSelecionado} onChange={handleRiscoChange}>
+                  <option value="">Selecione um desafio...</option>
+                  {desafios.map(desafio => (
+                    <option key={desafio.id} value={desafio.id}>
+                      {`Desafio ${desafio.numero} - ${desafio.descricao}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>Objetivo Estratégico (PDI):</label>
-                <select name="objetivo" value={riscoData.objetivo} onChange={handleRiscoChange}>
-                  <option value="">Selecione um objetivo...</option>
-                  {objetivos.map(obj => (
+                <select
+                  name="objetivo"
+                  value={riscoData.objetivo}
+                  onChange={handleRiscoChange}
+                  disabled={!desafioSelecionado}
+                >
+                  <option value="">
+                    {desafioSelecionado ? 'Selecione um objetivo...' : 'Selecione primeiro um desafio...'}
+                  </option>
+                  {objetivosFiltrados.map(obj => (
                     <option key={obj.id} value={obj.id}>{obj.codigo} - {obj.descricao}</option>
                   ))}
                 </select>

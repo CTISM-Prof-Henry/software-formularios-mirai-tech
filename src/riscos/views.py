@@ -101,16 +101,19 @@ class DesafioPDIViewSet(viewsets.ModelViewSet):
     queryset = DesafioPDI.objects.all()
     serializer_class = DesafioPDISerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
 class MacroprocessoViewSet(viewsets.ModelViewSet):
     queryset = Macroprocesso.objects.all()
     serializer_class = MacroprocessoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
 class ObjetivoPDIViewSet(viewsets.ModelViewSet):
     queryset = ObjetivoPDI.objects.all()
     serializer_class = ObjetivoPDISerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
 class PlanoAcaoViewSet(viewsets.ModelViewSet):
     queryset = PlanoAcao.objects.all()
