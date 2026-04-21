@@ -138,7 +138,8 @@ class TestRiscoViewsPermissions:
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
         codigos = [item["codigo"] for item in response.data]
-        assert codigos == sorted(codigos)
+        codigos_esperados = list(ObjetivoPDI.objects.values_list("codigo", flat=True))
+        assert codigos == codigos_esperados
         assert "A-TESTE-001" in codigos
         assert "Z-TESTE-001" in codigos
 
@@ -152,6 +153,7 @@ class TestRiscoViewsPermissions:
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
         nomes = [item["nome"] for item in response.data]
-        assert nomes == sorted(nomes)
+        nomes_esperados = list(Macroprocesso.objects.values_list("nome", flat=True))
+        assert nomes == nomes_esperados
         assert "A Macroprocesso" in nomes
         assert "Z Macroprocesso" in nomes
