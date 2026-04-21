@@ -96,6 +96,34 @@ class RiscoViewSet(viewsets.ModelViewSet):
             "concluidos": concluidos
         })
 
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        """Retorna os dados consolidados da dashboard respeitando filtros."""
+        queryset = self.get_queryset()
+        planos = list(queryset)
+        planos_ids = [plano.id for plano in planos]
+        acoes_filtradas = PlanoAcao.objects.filter(risco_id__in=planos_ids)
+        setores_filtrados = {plano.setor_id for plano in planos}
+        primeira_acao_por_risco = {}
+        for acao in acoes_filtradas.order_by("risco_id", "data_inicio", "id"):
+            primeira_acao_por_risco.setdefault(acao.risco_id, acao)
+
+        planos_data = RiscoSerializer(planos, many=True).data
+        for plano_data in planos_data:
+            acao = primeira_acao_por_risco.get(plano_data["id"])
+            plano_data["periodo_acao"] = {
+                "data_inicio": acao.data_inicio.isoformat() if acao else None,
+                "data_fim": acao.data_fim.isoformat() if acao else None,
+            }
+
+        return Response({
+            "total_planos": len(planos),
+            "riscos_criticos": sum(1 for plano in planos if plano.nivel_residual >= 15),
+            "tratamentos_ativos": acoes_filtradas.filter(status='Em andamento').count(),
+            "setores_filtrados": len(setores_filtrados),
+            "planos": planos_data,
+        })
+
     def create(self, request, *args, **kwargs):
         # Garante que o gestor só crie riscos para os seus próprios setores
         id_setor = request.data.get('setor')
