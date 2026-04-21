@@ -1,5 +1,11 @@
 # Banco de dados
 
+## Diagrama entidade relacionamento (ER) (Padrão ISO/Min-max) - Dbdiagram.io
+
+Utilizando a sintaxe do Dbdiagram.io para representar a estrutura relacional do banco com base nas tabelas atuais do projeto.
+
+![Modelo ER](images/model-banco/modelo-er.png)
+
 ## Tecnologia utilizada
 
 O sistema utiliza **PostgreSQL 16**, executado localmente por meio do Docker Compose.
@@ -31,16 +37,18 @@ DATABASE_PORT=5433
 As entidades mais relevantes do sistema incluem:
 
 - `setores`
-  - armazena os setores disponíveis para vínculo de usuários e riscos;
+  - armazena as unidades administrativas vinculadas a usuários e riscos;
 - `usuarios`
-  - modelo customizado de autenticação com SIAPE;
+  - representa os gestores autenticados no sistema;
 - `usuario_setores`
-  - tabela de relacionamento entre usuários e setores;
+  - tabela intermediária para o relacionamento muitos-para-muitos entre gestores e setores;
 - `codigos_recuperacao`
-  - armazena os códigos temporários de recuperação de senha;
-- tabelas do módulo `riscos`
-  - armazenam desafios, objetivos, macroprocessos, planos, ações e monitoramentos.
-
-## Dados iniciais
-
-O projeto possui uma migration de carga inicial para setores. Após executar `python manage.py migrate`, o sistema já cria setores básicos da UFSM para uso no cadastro e no vínculo de usuários.
+  - registra códigos temporários usados no fluxo de recuperação de senha;
+- `desafios_pdi`, `objetivos_pdi` e `macroprocessos`
+  - representam a estrutura estratégica utilizada como referência para os riscos;
+- `riscos`
+  - armazena os registros centrais do sistema e os níveis calculados;
+- `planos_acao`
+  - guarda as ações de tratamento associadas a cada risco;
+- `monitoramentos`
+  - mantém o histórico de acompanhamento dos riscos.
