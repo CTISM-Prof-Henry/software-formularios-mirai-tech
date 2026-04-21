@@ -21,6 +21,7 @@ As páginas do MkDocs foram organizadas para facilitar a navegação entre área
 
 - **Home**: visão geral do sistema e do conteúdo disponível;
 - **Instalação**: preparação do ambiente e passos para executar o projeto;
+- **Arquitetura**: organização do projeto, fluxo Django/DRF, camadas e integração com o frontend;
 - **API**: rotas principais, autenticação e módulos expostos pelo backend;
 - **Banco de dados**: visão das entidades e relacionamento das informações;
 - **Frontend**: organização da aplicação cliente e estrutura das telas;
