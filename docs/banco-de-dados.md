@@ -1,5 +1,234 @@
 # Banco de dados
 
+## Diagrama de classes (UML) - Mermaid
+
+Utilizando a ferramenta Mermaid para representar as principais classes persistidas no banco de dados e seus relacionamentos.
+
+```mermaid
+classDiagram
+    class Setor {
+        +id: Integer
+        +nome: String
+        +sigla: String
+    }
+
+    class GerenciadorUsuario {
+        <<service>>
+        +createUser(siape: String, password: String): Usuario
+        +createSuperuser(siape: String, password: String): Usuario
+        +validarSiape(): void
+        +definirPermissoesSuperusuario(): void
+    }
+
+    class Usuario {
+        +id: Integer
+        +siape: String
+        +nome: String
+        +email: String
+        +password: String
+        +ativo: Boolean
+        +equipe: Boolean
+        +lastLogin: DateTime
+        +isSuperuser: Boolean
+        +isStaff(): Boolean
+        +isActive(): Boolean
+    }
+
+    class UsuarioSetor {
+        +id: Integer
+    }
+
+    class CodigoRecuperacao {
+        +id: Integer
+        +email: String
+        +codigo: String
+        +criadoEm: DateTime
+        +gerarCodigo(): String
+        +validarExpiracao(): Boolean
+    }
+
+    class DesafioPDI {
+        +id: Integer
+        +numero: Integer
+        +descricao: String
+    }
+
+    class ObjetivoPDI {
+        +id: Integer
+        +codigo: String
+        +descricao: String
+    }
+
+    class Macroprocesso {
+        +id: Integer
+        +nome: String
+    }
+
+    class Risco {
+        +id: Integer
+        +categoria: CategoriaRisco
+        +evento: String
+        +causa: String
+        +consequencia: String
+        +controlesAtuais: String
+        +eficaciaControle: EficaciaControle
+        +probabilidade: Integer
+        +impacto: Integer
+        +nivelRisco: Integer
+        +probResidual: Integer
+        +impResidual: Integer
+        +nivelResidual: Integer
+        +calcularNivelRisco(): Integer
+        +calcularNivelResidual(): Integer
+    }
+
+    class PlanoAcao {
+        +id: Integer
+        +tipoResposta: TipoResposta
+        +descricaoAcao: String
+        +responsavel: String
+        +parceiros: String
+        +dataInicio: Date
+        +dataFim: Date
+        +status: StatusPlanoAcao
+        +observacoes: String
+        +atualizarStatus(): void
+    }
+
+    class Monitoramento {
+        +id: Integer
+        +dataVerificacao: Date
+        +resultados: String
+        +acoesFuturas: String
+        +analiseCritica: String
+        +registrarAnalise(): void
+    }
+
+    class CategoriaRisco {
+        <<enumeration>>
+        Operacional
+        Estrategico
+        Integridade
+        Imagem
+        Financeiro
+    }
+
+    class EficaciaControle {
+        <<enumeration>>
+        Inexistente
+        Fraco
+        Satisfatorio
+        Forte
+    }
+
+    class TipoResposta {
+        <<enumeration>>
+        Mitigar
+        Evitar
+        Transferir
+        Aceitar
+    }
+
+    class StatusPlanoAcao {
+        <<enumeration>>
+        NaoIniciada
+        EmAndamento
+        Concluida
+        Atrasada
+    }
+
+    GerenciadorUsuario ..> Usuario : cria e gerencia
+    Usuario "1" --> "0..*" UsuarioSetor : associa
+    Setor "1" --> "0..*" UsuarioSetor : associa
+    Usuario "1" --> "0..*" CodigoRecuperacao : solicita
+    DesafioPDI "1" --> "0..*" ObjetivoPDI : organiza
+    Setor "1" --> "0..*" Risco : possui
+    ObjetivoPDI "1" --> "0..*" Risco : referencia
+    Macroprocesso "1" --> "0..*" Risco : classifica
+    Risco "1" --> "0..*" PlanoAcao : gera
+    Risco "1" --> "0..*" Monitoramento : recebe
+    Risco --> CategoriaRisco : categoria
+    Risco --> EficaciaControle : eficaciaControle
+    PlanoAcao --> TipoResposta : tipoResposta
+    PlanoAcao --> StatusPlanoAcao : status
+
+    note for GerenciadorUsuario "Serviço de suporte à criação de usuários no Django."
+    note for Usuario "Modelo customizado baseado em SIAPE no lugar de username."
+    note for UsuarioSetor "Representa a associação muitos-para-muitos entre usuário e setor."
+    note for CodigoRecuperacao "Usado no fluxo de envio, validação e redefinição de senha; o e-mail é mantido como dado operacional."
+    note for Risco "A classe concentra as regras de cálculo do nível de risco e do nível residual."
+    note for PlanoAcao "Representa o tratamento do risco em formato 5W2H."
+    note for Monitoramento "Mantém o histórico de acompanhamento e análise do risco."
+```
+
+## Diagrama de casos de uso - Mermaid 
+
+Utilizando a ferramenta Mermaid para representar os principais casos de uso relacionados às funções do sistema e às tabelas persistidas. 
+
+```mermaid
+flowchart LR
+    gestor[Gestor]
+    admin[Administrador]
+
+    uc1((Autenticar no sistema))
+    uc2((Cadastrar gestor))
+    uc3((Vincular gestor a setor))
+    uc4((Recuperar senha))
+    uc5((Gerenciar perfil))
+    uc6((Consultar setores))
+    uc7((Cadastrar risco))
+    uc8((Editar risco))
+    uc9((Consultar planos de risco))
+    uc10((Cadastrar plano de ação))
+    uc11((Registrar monitoramento))
+    uc12((Manter estrutura PDI))
+
+    gestor --> uc1
+    gestor --> uc4
+    gestor --> uc5
+    gestor --> uc6
+    gestor --> uc7
+    gestor --> uc8
+    gestor --> uc9
+    gestor --> uc10
+    gestor --> uc11
+
+    admin --> uc2
+    admin --> uc3
+    admin --> uc12
+    admin --> uc6
+    admin --> uc9
+
+    uc1 --> db1[(USUARIOS)]
+    uc2 --> db1
+    uc3 --> db2[(USUARIO_SETORES)]
+    uc3 --> db3[(SETORES)]
+    uc4 --> db4[(CODIGOS_RECUPERACAO)]
+    uc4 --> db1
+    uc5 --> db1
+    uc5 --> db2
+    uc6 --> db3
+    uc7 --> db5[(RISCOS)]
+    uc7 --> db3
+    uc7 --> db6[(OBJETIVOS_PDI)]
+    uc7 --> db7[(MACROPROCESSOS)]
+    uc8 --> db5
+    uc9 --> db5
+    uc9 --> db8[(PLANOS_ACAO)]
+    uc9 --> db9[(MONITORAMENTOS)]
+    uc10 --> db8
+    uc11 --> db9
+    uc12 --> db10[(DESAFIOS_PDI)]
+    uc12 --> db6
+    uc12 --> db7
+```
+
+## Diagrama entidade relacionamento (ER) (Padrão ISO/Min-max) - Dbdiagram.io
+
+Utilizando a sintaxe do Dbdiagram.io para representar a estrutura relacional do banco com base nas tabelas atuais do projeto.
+
+![Modelo ER](images/model-banco/modelo-er.png)
+
 ## Tecnologia utilizada
 
 O sistema utiliza **PostgreSQL 16**, executado localmente por meio do Docker Compose.
@@ -31,16 +260,18 @@ DATABASE_PORT=5433
 As entidades mais relevantes do sistema incluem:
 
 - `setores`
-  - armazena os setores disponíveis para vínculo de usuários e riscos;
+  - armazena as unidades administrativas vinculadas a usuários e riscos;
 - `usuarios`
-  - modelo customizado de autenticação com SIAPE;
+  - representa os gestores autenticados no sistema;
 - `usuario_setores`
-  - tabela de relacionamento entre usuários e setores;
+  - tabela intermediária para o relacionamento muitos-para-muitos entre gestores e setores;
 - `codigos_recuperacao`
-  - armazena os códigos temporários de recuperação de senha;
-- tabelas do módulo `riscos`
-  - armazenam desafios, objetivos, macroprocessos, planos, ações e monitoramentos.
-
-## Dados iniciais
-
-O projeto possui uma migration de carga inicial para setores. Após executar `python manage.py migrate`, o sistema já cria setores básicos da UFSM para uso no cadastro e no vínculo de usuários.
+  - registra códigos temporários usados no fluxo de recuperação de senha;
+- `desafios_pdi`, `objetivos_pdi` e `macroprocessos`
+  - representam a estrutura estratégica utilizada como referência para os riscos;
+- `riscos`
+  - armazena os registros centrais do sistema e os níveis calculados;
+- `planos_acao`
+  - guarda as ações de tratamento associadas a cada risco;
+- `monitoramentos`
+  - mantém o histórico de acompanhamento dos riscos.
