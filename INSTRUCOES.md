@@ -28,9 +28,35 @@ docker-compose up -d
 python manage.py makemigrations
 python manage.py migrate
 
+# Criar usuarios de teste para validar a gestao de equipes (opcional)
+python manage.py seed_usuarios_teste
+
 # Criar um administrador (opcional)
 python manage.py createsuperuser
 ```
+
+#### Usuarios de teste para Gestao de Equipes
+
+Para testar gestores vinculados a multiplos setores, execute:
+
+```bash
+python manage.py seed_usuarios_teste
+```
+
+O comando e idempotente, ou seja, pode ser executado mais de uma vez sem duplicar usuarios. Caso queira redefinir a senha dos usuarios de teste, use:
+
+```bash
+python manage.py seed_usuarios_teste --reset-password
+```
+
+Senha padrao dos usuarios criados: **Teste@12345**
+
+Usuarios criados:
+*   `2030001` - Ana Paula Multissetorial (`CAL`, `CCS`, `CT`)
+*   `2030002` - Bruno Gestor Centros (`CAL`, `CCR`)
+*   `2030003` - Carla Gestora Pesquisa (`CCS`, `CCNE`, `CCSH`)
+*   `2030004` - Diego Gestor Ensino (`CE`, `CEFD`)
+*   `2030005` - Elisa Gestora Tecnologia (`CT`, `CTISM`, `Politecnico`)
 
 ### 5. Rodar o Servidor Backend
 ```bash
