@@ -2,14 +2,14 @@
 
 ## Diagrama de classes (UML) - Mermaid
 
-Utilizando a ferramenta Mermaid para representar as principais classes persistidas no banco de dados e seus relacionamentos.
+Utilizando a ferramenta Mermaid para representar as principais classes persistidas no banco de dados e seus relacionamentos. Por se tratar de um diagrama UML conceitual, os atributos foram representados como privados (`-`) e os comportamentos como públicos (`+`).
 
 ```mermaid
 classDiagram
     class Setor {
-        +id: Integer
-        +nome: String
-        +sigla: String
+        -id: Integer
+        -nome: String
+        -sigla: String
     }
 
     class GerenciadorUsuario {
@@ -21,86 +21,86 @@ classDiagram
     }
 
     class Usuario {
-        +id: Integer
-        +siape: String
-        +nome: String
-        +email: String
-        +password: String
-        +ativo: Boolean
-        +equipe: Boolean
-        +lastLogin: DateTime
-        +isSuperuser: Boolean
+        -id: Integer
+        -siape: String
+        -nome: String
+        -email: String
+        -senha: String
+        -ativo: Boolean
+        -equipe: Boolean
+        -lastLogin: DateTime
+        -isSuperuser: Boolean
         +isStaff(): Boolean
         +isActive(): Boolean
     }
 
     class UsuarioSetor {
-        +id: Integer
+        -id: Integer
     }
 
     class CodigoRecuperacao {
-        +id: Integer
-        +email: String
-        +codigo: String
-        +criadoEm: DateTime
+        -id: Integer
+        -email: String
+        -codigo: String
+        -criadoEm: DateTime
         +gerarCodigo(): String
         +validarExpiracao(): Boolean
     }
 
     class DesafioPDI {
-        +id: Integer
-        +numero: Integer
-        +descricao: String
+        -id: Integer
+        -numero: Integer
+        -descricao: String
     }
 
     class ObjetivoPDI {
-        +id: Integer
-        +codigo: String
-        +descricao: String
+        -id: Integer
+        -codigo: String
+        -descricao: String
     }
 
     class Macroprocesso {
-        +id: Integer
-        +nome: String
+        -id: Integer
+        -nome: String
     }
 
     class Risco {
-        +id: Integer
-        +categoria: CategoriaRisco
-        +evento: String
-        +causa: String
-        +consequencia: String
-        +controlesAtuais: String
-        +eficaciaControle: EficaciaControle
-        +probabilidade: Integer
-        +impacto: Integer
-        +nivelRisco: Integer
-        +probResidual: Integer
-        +impResidual: Integer
-        +nivelResidual: Integer
+        -id: Integer
+        -categoria: CategoriaRisco
+        -evento: String
+        -causa: String
+        -consequencia: String
+        -controlesAtuais: String
+        -eficaciaControle: EficaciaControle
+        -probabilidade: Integer
+        -impacto: Integer
+        -nivelRisco: Integer
+        -probResidual: Integer
+        -impResidual: Integer
+        -nivelResidual: Integer
         +calcularNivelRisco(): Integer
         +calcularNivelResidual(): Integer
     }
 
     class PlanoAcao {
-        +id: Integer
-        +tipoResposta: TipoResposta
-        +descricaoAcao: String
-        +responsavel: String
-        +parceiros: String
-        +dataInicio: Date
-        +dataFim: Date
-        +status: StatusPlanoAcao
-        +observacoes: String
+        -id: Integer
+        -tipoResposta: TipoResposta
+        -descricaoAcao: String
+        -responsavel: String
+        -parceiros: String
+        -dataInicio: Date
+        -dataFim: Date
+        -status: StatusPlanoAcao
+        -observacoes: String
         +atualizarStatus(): void
     }
 
     class Monitoramento {
-        +id: Integer
-        +dataVerificacao: Date
-        +resultados: String
-        +acoesFuturas: String
-        +analiseCritica: String
+        -id: Integer
+        -dataVerificacao: Date
+        -resultados: String
+        -acoesFuturas: String
+        -analiseCritica: String
         +registrarAnalise(): void
     }
 
@@ -153,7 +153,7 @@ classDiagram
     PlanoAcao --> StatusPlanoAcao : status
 
     note for GerenciadorUsuario "Serviço de suporte à criação de usuários no Django."
-    note for Usuario "Modelo customizado baseado em SIAPE no lugar de username."
+    note for Usuario "Modelo conceitual de usuário baseado em SIAPE; no Django os campos são acessados pelo ORM, mas no UML acadêmico aparecem encapsulados."
     note for UsuarioSetor "Representa a associação muitos-para-muitos entre usuário e setor."
     note for CodigoRecuperacao "Usado no fluxo de envio, validação e redefinição de senha; o e-mail é mantido como dado operacional."
     note for Risco "A classe concentra as regras de cálculo do nível de risco e do nível residual."
