@@ -153,7 +153,7 @@ classDiagram
     PlanoAcao --> StatusPlanoAcao : status
 
     note for GerenciadorUsuario "Serviço de suporte à criação de usuários no Django."
-    note for Usuario "Modelo conceitual de usuário baseado em SIAPE; no Django os campos são acessados pelo ORM, mas no UML acadêmico aparecem encapsulados."
+    note for Usuario "Modelo conceitual de usuário baseado em SIAPE; no Django os campos são acessados pelo ORM, mas no UML aparecem encapsulados."
     note for UsuarioSetor "Representa a associação muitos-para-muitos entre usuário e setor."
     note for CodigoRecuperacao "Usado no fluxo de envio, validação e redefinição de senha; o e-mail é mantido como dado operacional."
     note for Risco "A classe concentra as regras de cálculo do nível de risco e do nível residual."
