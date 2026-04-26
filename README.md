@@ -12,75 +12,182 @@ Sistema web para gestão e monitoramento de riscos institucionais da UFSM, com b
 
 ## Pré-requisitos
 
-Para executar o projeto localmente, é necessário ter Python instalado para o backend, Node.js para o frontend e Docker para subir o banco PostgreSQL. O projeto foi desenvolvido e validado em ambiente Windows/Unix, com backend rodando localmente e banco isolado em container.
+Para executar o projeto localmente, é necessário ter:
 
-| Configuração        | Valor                              |
-|---------------------|------------------------------------|
-| Sistema operacional | Windows 10/11 64 bits              |
-| Processador         | Intel Core i7 ou equivalente       |
-| Memória RAM         | 16 GB                              |
-| Necessita rede?     | Sim, para instalar dependências    |
-| Python              | 3.11 ou 3.12                       |
-| Node.js             | 18+ recomendado                    |
-| Docker              | Docker Desktop com Compose ativo   |
+- Python 3.11 ou 3.12;
+- Node.js 18 ou superior;
+- Docker com suporte a Compose;
+- Git;
+- acesso à internet para instalar dependências.
+
+O projeto pode ser executado tanto em **Windows 11** quanto em **Ubuntu/Linux**, com backend rodando localmente e PostgreSQL isolado em container.
+
+| Configuração        | Valor                                     |
+|---------------------|-------------------------------------------|
+| Sistema operacional | Windows 11 ou Ubuntu 22.04+               |
+| Processador         | Intel Core i5 / Ryzen 5 ou equivalente    |
+| Memória RAM         | 8 GB ou mais                              |
+| Python              | 3.11 ou 3.12                              |
+| Node.js             | 18+ recomendado                           |
+| Docker              | Docker Desktop ou Docker Engine + Compose |
 
 ## Instalação
 
-Siga os passos abaixo para preparar o ambiente:
+### 1. Clonar o repositório
 
 ```bash
-# 1. Clonar o repositório
 git clone <url-do-repositorio>
 cd gestao-risco-ufsm-main
-
-# 2. Criar e ativar ambiente virtual no Windows
-python -m venv .venv
-.\.venv\Scripts\activate
-
-# 3. Instalar dependências do backend
-pip install -r requirements.txt
-pip install "psycopg[binary]"
-pip install pytest pytest-django pytest-cov
-
-# 4. Criar arquivo de ambiente
-copy .env.example .env
-
-# 5. Subir o banco de dados
-docker-compose up -d
-
-# 6. Aplicar migrations
-python manage.py migrate
-
-# 7. Instalar dependências do frontend
-cd src/frontend
-npm install
 ```
 
-## Instruções de Uso
-
-Depois de instalar as dependências, utilize o projeto da seguinte forma:
+### 2. Criar o ambiente virtual
 
 ```bash
-# Terminal 1 - backend
-.\.venv\Scripts\activate
-python manage.py runserver
+python -m venv .venv
+```
 
-# Terminal 2 - frontend
+### 3. Ativar o ambiente virtual
+
+No **Windows 11**:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+No **Ubuntu/Linux**:
+
+```bash
+source .venv/bin/activate
+```
+
+### 4. Instalar dependências do backend
+
+```bash
+pip install -r requirements.txt
+pip install "psycopg[binary]"
+```
+
+### 5. Criar o arquivo de ambiente
+
+No **Windows 11**:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+No **Ubuntu/Linux**:
+
+```bash
+cp .env.example .env
+```
+
+Use os valores abaixo no `.env` para execução local:
+
+```env
+DATABASE_NAME=gestao_risco_ufsm
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5433
+DEBUG=True
+```
+
+### 6. Subir o banco de dados
+
+Use preferencialmente:
+
+```bash
+docker compose up -d
+```
+
+Se sua instalação ainda usar o binário legado, também funciona:
+
+```bash
+docker-compose up -d
+```
+
+### 7. Aplicar migrations
+
+```bash
+python manage.py migrate
+```
+
+### 8. Criar usuários de teste para gestão de equipes (opcional)
+
+```bash
+python manage.py seed_usuarios_teste
+```
+
+Para redefinir a senha padrão dos usuários de teste:
+
+```bash
+python manage.py seed_usuarios_teste --reset-password
+```
+
+Senha padrão:
+
+```text
+Teste@12345
+```
+
+### 9. Instalar dependências do frontend
+
+```bash
+cd src/frontend
+npm install
+cd ../..
+```
+
+## Instruções de uso
+
+Depois da instalação, utilize três terminais.
+
+### Terminal 1 - backend
+
+No **Windows 11**:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python manage.py runserver
+```
+
+No **Ubuntu/Linux**:
+
+```bash
+source .venv/bin/activate
+python manage.py runserver
+```
+
+### Terminal 2 - frontend
+
+```bash
 cd src/frontend
 npm run dev
+```
 
-# Terminal 3 - testes
-.\.venv\Scripts\activate
+### Terminal 3 - testes
+
+No **Windows 11**:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
 python -m pytest
 ```
 
-Fluxo esperado:
+No **Ubuntu/Linux**:
+
+```bash
+source .venv/bin/activate
+python -m pytest
+```
+
+## Fluxo esperado
 
 1. O backend ficará disponível em `http://localhost:8000/`.
 2. O frontend ficará disponível em `http://localhost:5173/`.
-3. O banco PostgreSQL sobe pelo Docker em `localhost:5433`.
-4. O cadastro de usuários consome os setores disponíveis pelo endpoint público `/api/usuarios/setores/`.
-5. As principais rotas de autenticação e gestão de riscos ficam expostas sob `/api/usuarios/` e `/api/riscos/`.
+3. O banco PostgreSQL subirá pelo Docker em `localhost:5433`.
+4. O cadastro de usuários consumirá os setores disponíveis pelo endpoint público `/api/usuarios/setores/`.
+5. As principais rotas de autenticação e gestão de riscos ficarão expostas sob `/api/usuarios/` e `/api/riscos/`.
 
 ## Contato
 
@@ -92,8 +199,6 @@ O repositório foi originalmente desenvolvido por <br>
 - [Pablo]()
 
 ## Bibliografia
-
-Adicione aqui entradas numa lista com a documentação pertinente:
 
 * [Documentação Django](https://docs.djangoproject.com/)
 * [Documentação Django REST Framework](https://www.django-rest-framework.org/)

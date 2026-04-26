@@ -1,97 +1,177 @@
-# Instruções para Rodar o Backend (Gestão de Risco UFSM)
+# Instruções para Rodar o Projeto (Gestão de Risco UFSM)
 
-Siga estes passos para configurar e executar o servidor localmente no Windows.
+Este guia resume a execução do projeto em **Windows 11** e em sistemas **Unix**, como **Ubuntu**.
 
-### 1. Pré-requisitos
-*   Python 3.11 ou 3.12 (Estável)
-*   Docker Desktop (para o Banco de Dados)
+## 1. Pré-requisitos
 
-### 2. Configuração Inicial
+- Python 3.11 ou 3.12;
+- Node.js 18 ou superior;
+- Docker com suporte a Compose;
+- Git.
+
+## 2. Configuração inicial
+
+Crie o ambiente virtual:
+
 ```bash
-# Ativar o ambiente virtual (Git Bash)
-source venv/Scripts/activate
-
-# Instalar dependências
-pip install -r requirements.txt
-pip install "psycopg[binary]"  # Garante o driver moderno do Postgres
+python -m venv .venv
 ```
 
-### 3. Banco de Dados
-Certifique-se de que o Docker está rodando e inicie o container:
+Ative o ambiente virtual.
+
+No **Windows 11**:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+No **Ubuntu/Linux**:
+
+```bash
+source .venv/bin/activate
+```
+
+Instale as dependências do backend:
+
+```bash
+pip install -r requirements.txt
+pip install "psycopg[binary]"
+```
+
+## 3. Variáveis de ambiente
+
+Crie o `.env` a partir do exemplo.
+
+No **Windows 11**:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+No **Ubuntu/Linux**:
+
+```bash
+cp .env.example .env
+```
+
+Use os valores locais abaixo:
+
+```env
+DATABASE_NAME=gestao_risco_ufsm
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5433
+DEBUG=True
+```
+
+## 4. Banco de dados
+
+Com o Docker em execução, suba o PostgreSQL:
+
+```bash
+docker compose up -d
+```
+
+Se sua instalação ainda usar o comando legado:
+
 ```bash
 docker-compose up -d
 ```
 
-### 4. Preparar o Django
+## 5. Preparar o Django
+
 ```bash
-# Gerar e aplicar tabelas no banco
-python manage.py makemigrations
 python manage.py migrate
-
-# Criar usuarios de teste para validar a gestao de equipes (opcional)
-python manage.py seed_usuarios_teste
-
-# Criar um administrador (opcional)
-python manage.py createsuperuser
 ```
 
-#### Usuarios de teste para Gestao de Equipes
-
-Para testar gestores vinculados a multiplos setores, execute:
+Opcionalmente, crie usuários de teste para validar a gestão de equipes:
 
 ```bash
 python manage.py seed_usuarios_teste
 ```
 
-O comando e idempotente, ou seja, pode ser executado mais de uma vez sem duplicar usuarios. Caso queira redefinir a senha dos usuarios de teste, use:
+Para redefinir a senha dos usuários de teste:
 
 ```bash
 python manage.py seed_usuarios_teste --reset-password
 ```
 
-Senha padrao dos usuarios criados: **Teste@12345**
+Senha padrão dos usuários criados:
 
-Usuarios criados:
-*   `2030001` - Ana Paula Multissetorial (`CAL`, `CCS`, `CT`)
-*   `2030002` - Bruno Gestor Centros (`CAL`, `CCR`)
-*   `2030003` - Carla Gestora Pesquisa (`CCS`, `CCNE`, `CCSH`)
-*   `2030004` - Diego Gestor Ensino (`CE`, `CEFD`)
-*   `2030005` - Elisa Gestora Tecnologia (`CT`, `CTISM`, `Politecnico`)
+```text
+Teste@12345
+```
 
-### 5. Rodar o Servidor Backend
+Usuários criados:
+
+- `2030001` - Ana Paula Multissetorial (`CAL`, `CCS`, `CT`)
+- `2030002` - Bruno Gestor Centros (`CAL`, `CCR`)
+- `2030003` - Carla Gestora Pesquisa (`CCS`, `CCNE`, `CCSH`)
+- `2030004` - Diego Gestor Ensino (`CE`, `CEFD`)
+- `2030005` - Elisa Gestora Tecnologia (`CT`, `CTISM`, `Politecnico`)
+
+Se necessário, também é possível criar um superusuário:
+
+```bash
+python manage.py createsuperuser
+```
+
+## 6. Rodar o backend
+
 ```bash
 python manage.py runserver
 ```
-O servidor estará disponível em: **http://localhost:8000/**
 
-### 6. Rodar o Frontend (React)
-Em um novo terminal:
+O backend ficará disponível em:
+
+```text
+http://localhost:8000/
+```
+
+## 7. Rodar o frontend
+
+Em outro terminal:
+
 ```bash
 cd src/frontend
 npm install
 npm run dev
 ```
-O frontend estará disponível em: **http://localhost:5173/**
 
-### 7. Endpoints Principais (API)
-...
+O frontend ficará disponível em:
 
-#### Usuários
-*   **Login**: `POST /api/usuarios/login/` (Requer `siape` e `senha`)
-*   **Registro**: `POST /api/usuarios/registro/` (Requer `siape`, `senha`, `nome`, `email`, `id_setores`)
-*   **Setores**: `GET/POST /api/usuarios/setores/`
-*   **Atualizar Perfil**: `PATCH /api/usuarios/me/`
-*   **Recuperação de Senha**: `POST /api/usuarios/recuperar-senha/enviar/`, `validar/` e `redefinir/`
+```text
+http://localhost:5173/
+```
 
-#### Gestão de Riscos
-*   **Desafios/Objetivos/Processos**: `/api/riscos/desafios/`, `/api/riscos/objetivos/`, `/api/riscos/macroprocessos/`
-*   **Planos de Risco**: `/api/riscos/planos/`
-*   **Ações de Tratamento**: `/api/riscos/acoes/`
-*   **Monitoramento**: `/api/riscos/monitoramentos/`
+## 8. Endpoints principais
 
-### 7. Validação
-Para validar as funcionalidades e verificar a cobertura de código, execute:
+### Usuários
+
+- **Login**: `POST /api/usuarios/login/`
+- **Registro**: `POST /api/usuarios/registro/`
+- **Setores**: `GET /api/usuarios/setores/`
+- **Atualizar perfil**: `PATCH /api/usuarios/me/`
+- **Recuperação de senha**: `POST /api/usuarios/recuperar-senha/enviar/`, `validar/` e `redefinir/`
+
+### Gestão de riscos
+
+- **Desafios, objetivos e macroprocessos**: `/api/riscos/desafios/`, `/api/riscos/objetivos/`, `/api/riscos/macroprocessos/`
+- **Planos de risco**: `/api/riscos/planos/`
+- **Ações de tratamento**: `/api/riscos/acoes/`
+- **Monitoramento**: `/api/riscos/monitoramentos/`
+
+## 9. Validação
+
+Para executar os testes automatizados:
+
 ```bash
 python -m pytest
 ```
-O comando acima executará todos os testes unitários e de integração, gerando um relatório de cobertura no terminal.
+
+Para validar a documentação:
+
+```bash
+python -m mkdocs build
+```

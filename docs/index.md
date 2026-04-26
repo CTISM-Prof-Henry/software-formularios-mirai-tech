@@ -35,4 +35,5 @@ As páginas do MkDocs foram organizadas para facilitar a navegação entre área
 - **Frontend**: React 18, React Router DOM, Axios e Vite;
 - **Banco de dados**: PostgreSQL 16;
 - **Infraestrutura local**: Docker e Docker Compose;
+- **Sistemas suportados para execução local**: Windows 11 e Ubuntu/Linux;
 - **Testes**: Pytest, Pytest-Django e Pytest-Cov.
