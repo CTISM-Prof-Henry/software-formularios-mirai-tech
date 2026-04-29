@@ -227,6 +227,10 @@
   overflow-x: auto;
 }
 
+.plans-mobile-list {
+  display: none;
+}
+
 .plans-table {
   width: 100%;
   border-collapse: collapse;
@@ -460,8 +464,61 @@
     grid-template-columns: 1fr;
   }
 
-  .plans-table {
-    min-width: 860px;
+  .plans-table-wrapper {
+    display: none;
+  }
+
+  .plans-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .plan-mobile-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fff;
+  }
+
+  .plan-mobile-card h3 {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #17324d;
+  }
+
+  .plan-mobile-top,
+  .plan-mobile-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .plan-mobile-id {
+    font-size: 12px;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.06em;
+  }
+
+  .plan-mobile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+  }
+
+  .mobile-action-button {
+    min-height: 40px;
+    padding: 0 14px;
+    gap: 8px;
   }
 
   .pagination {

@@ -437,14 +437,23 @@
 @media (max-width: 760px) {
   .stepper-container {
     margin: 20px 0 24px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
   }
 
   .step-item {
-    align-items: flex-start;
+    align-items: center;
+    min-width: 92px;
+    flex-shrink: 0;
   }
 
   .step-label {
-    font-size: 11px;
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.3;
   }
 
   .form-container {
@@ -461,6 +470,7 @@
 
   .form-actions {
     flex-direction: column-reverse;
+    gap: 12px;
   }
 
   .btn-primary,
@@ -469,8 +479,37 @@
     width: 100%;
   }
 
+  .step-content h3 {
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .step-desc {
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .matrix-grid {
+    padding: 16px;
+  }
+
   .preview-value {
     font-size: 48px;
+  }
+
+  .risk-preview-card {
+    padding: 22px 18px;
   }
 
   .efficacy-buttons {
@@ -480,5 +519,9 @@
   .residual-badge {
     width: 100%;
     min-width: 0;
+  }
+
+  .residual-value {
+    font-size: 40px;
   }
 }

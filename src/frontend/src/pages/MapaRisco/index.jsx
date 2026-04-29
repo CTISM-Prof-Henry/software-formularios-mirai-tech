@@ -375,6 +375,12 @@ const MapaRisco = () => {
               {getTopPriorityRisks().length > 0 ? (
                 getTopPriorityRisks().map((risco) => {
                   const planoAcao = getPlanoAcaoPorRisco(risco.id);
+                  const suggestedAction = planoAcao?.tipo_resposta || 'Plano de Mitigação';
+                  const owner =
+                    planoAcao?.responsavel ||
+                    risco.setor_detalhes?.sigla_centro ||
+                    risco.setor_detalhes?.sigla ||
+                    'Não definido';
                   return (
                     <div key={risco.id} className="priority-row">
                       <div className="priority-cell priority-id">
@@ -392,12 +398,36 @@ const MapaRisco = () => {
                         </span>
                       </div>
                       <div className="priority-cell priority-owner">
-                        {planoAcao?.responsavel || risco.setor_detalhes?.sigla_centro || risco.setor_detalhes?.sigla || 'Não definido'}
+                        {owner}
                       </div>
                       <div className="priority-cell">
                         <span className="priority-action-tag">
-                          {planoAcao?.tipo_resposta || 'Plano de Mitigação'}
+                          {suggestedAction}
                         </span>
+                      </div>
+                      <div className="priority-mobile-card">
+                        <div className="priority-mobile-top">
+                          <span className="priority-id">{formatRiskIdentifier(risco.id)}</span>
+                          <span className={`priority-badge ${getRiskPriorityClass(Number(risco.nivel_residual))}`}>
+                            {getRiskPriorityLabel(Number(risco.nivel_residual))}
+                          </span>
+                        </div>
+                        <div className="priority-mobile-body">
+                          <strong>{risco.evento}</strong>
+                          <span className="priority-mobile-unit">
+                            {getSetorLabel(risco.setor_detalhes) || 'Unidade não informada'}
+                          </span>
+                        </div>
+                        <div className="priority-mobile-meta">
+                          <div className="priority-mobile-meta-item">
+                            <span>Responsável</span>
+                            <strong>{owner}</strong>
+                          </div>
+                          <div className="priority-mobile-meta-item">
+                            <span>Ação sugerida</span>
+                            <strong>{suggestedAction}</strong>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
