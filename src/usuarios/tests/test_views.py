@@ -199,8 +199,39 @@ class TestUsuarioViews:
         api_client.force_authenticate(user=admin_usuario)
         response = api_client.get("/api/usuarios/setores/admin/")
         assert response.status_code == status.HTTP_200_OK
-        assert isinstance(response.data, list)
-        assert response.data[0]["label_completo"]
+        assert isinstance(response.data, dict)
+        assert response.data["count"] >= 1
+        assert response.data["results"][0]["label_completo"]
+        assert "centros" in response.data
+        assert "tipos" in response.data
+
+    def test_listar_unidades_admin_com_filtro_e_paginacao(self, api_client, admin_usuario):
+        unidade_ct = Setor.objects.create(
+            nome="Departamento de Computacao",
+            sigla="CT",
+            sigla_centro="CT",
+            nome_centro="Centro de Tecnologia",
+            tipo_unidade="Departamento Didatico",
+            fonte_oficial=True,
+        )
+        Setor.objects.create(
+            nome="Biblioteca Central",
+            sigla="BC",
+            sigla_centro="REI",
+            nome_centro="Reitoria",
+            tipo_unidade="Orgao Suplementar",
+            fonte_oficial=True,
+        )
+        api_client.force_authenticate(user=admin_usuario)
+        response = api_client.get(
+            "/api/usuarios/setores/admin/",
+            {"centro": "CT", "search": "Computacao", "page": 1, "page_size": 1},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["count"] == 1
+        assert response.data["page"] == 1
+        assert response.data["total_pages"] == 1
+        assert response.data["results"][0]["id"] == unidade_ct.id
 
     def test_remover_membro_setor_sucesso(self, api_client, usuario, setor):
         api_client.force_authenticate(user=usuario)
@@ -221,7 +252,7 @@ class TestUsuarioViews:
         payload = {"usuario_id": usuario.id}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["erro"] == "Usuário não pertence a este setor."
+        assert response.data["erro"] == "Usuário não pertence a esta unidade."
 
     def test_adicionar_membro_setor_sucesso(self, api_client, usuario, setor):
         # Novo usuário que não pertence ao setor
@@ -242,7 +273,7 @@ class TestUsuarioViews:
         payload = {"siape": usuario.siape}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["erro"] == "Este usuário já faz parte deste setor."
+        assert response.data["erro"] == "Este usuário já faz parte desta unidade."
 
     def test_adicionar_membro_nao_encontrado(self, api_client, usuario, setor):
         api_client.force_authenticate(user=usuario)

@@ -2,6 +2,7 @@ import random
 from datetime import timedelta
 
 from django.contrib.auth import authenticate
+from django.core.paginator import Paginator
 from django.utils import timezone
 from rest_framework import generics, status, viewsets
 from rest_framework.authtoken.models import Token
@@ -10,17 +11,24 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CodigoRecuperacao, Setor, Usuario
+from .models import CodigoRecuperacao, UnidadeOrganizacional, Usuario
 from .serializers import (
     AtualizarPerfilSerializer,
     RegistroUsuarioSerializer,
-    SetorSerializer,
+    UnidadeOrganizacionalSerializer,
     UsuarioSerializer,
 )
 
 
 def _usuario_eh_superusuario(usuario):
     return bool(getattr(usuario, "is_superuser", False))
+
+
+def _query_int(request, nome, padrao):
+    try:
+        return int(request.query_params.get(nome, padrao))
+    except (TypeError, ValueError):
+        return padrao
 
 class EnviarCodigoRecuperacaoView(APIView):
     """
@@ -124,13 +132,13 @@ class RedefinirSenhaView(APIView):
             return Response({'erro': 'Dados inválidos ou sessão expirada.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SetorViewSet(viewsets.ModelViewSet):
+class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
     """
     CRUD completo de Setores da UFSM.
     Inclui gestão de equipe (membros).
     """
-    queryset = Setor.objects.filter(ativo=True).order_by("sigla_centro", "nome")
-    serializer_class = SetorSerializer
+    queryset = UnidadeOrganizacional.objects.filter(ativo=True).order_by("sigla_centro", "nome")
+    serializer_class = UnidadeOrganizacionalSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
     pagination_class = None
 
@@ -144,12 +152,64 @@ class SetorViewSet(viewsets.ModelViewSet):
             )
 
         queryset = self.get_queryset().order_by("sigla_centro", "tipo_unidade", "nome")
-        serializador = self.get_serializer(queryset, many=True)
-        return Response(serializador.data)
+        termo = request.query_params.get("search", "").strip()
+        centro = request.query_params.get("centro", "").strip()
+        tipo = request.query_params.get("tipo", "").strip()
+        page_number = max(_query_int(request, "page", 1), 1)
+        page_size = max(_query_int(request, "page_size", 20), 1)
+
+        if termo:
+            termo_lower = termo.lower()
+            queryset = [
+                unidade for unidade in queryset
+                if any(
+                    termo_lower in (valor or "").lower()
+                    for valor in [
+                        unidade.label_curto,
+                        unidade.label_completo,
+                        unidade.nome,
+                        unidade.sigla_centro,
+                        unidade.nome_centro,
+                        unidade.tipo_unidade,
+                    ]
+                )
+            ]
+        else:
+            queryset = list(queryset)
+
+        if centro:
+            queryset = [unidade for unidade in queryset if unidade.sigla_centro == centro]
+        if tipo:
+            queryset = [unidade for unidade in queryset if unidade.tipo_unidade == tipo]
+
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page_number)
+        serializador = self.get_serializer(page_obj.object_list, many=True)
+        return Response({
+            "count": paginator.count,
+            "page": page_obj.number,
+            "page_size": page_size,
+            "total_pages": paginator.num_pages,
+            "centros": list(
+                self.get_queryset()
+                .exclude(sigla_centro="")
+                .values_list("sigla_centro", flat=True)
+                .distinct()
+                .order_by("sigla_centro")
+            ),
+            "tipos": list(
+                self.get_queryset()
+                .exclude(tipo_unidade="")
+                .values_list("tipo_unidade", flat=True)
+                .distinct()
+                .order_by("tipo_unidade")
+            ),
+            "results": serializador.data,
+        })
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def membros(self, request, pk=None):
-        """Retorna a lista de gestores vinculados a este setor."""
+        """Retorna a lista de gestores vinculados a esta unidade."""
         setor = self.get_object()
         usuarios = setor.usuarios.all()
         serializador = UsuarioSerializer(usuarios, many=True)
@@ -157,7 +217,7 @@ class SetorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def remover_membro(self, request, pk=None):
-        """Remove o vínculo de um gestor com este setor."""
+        """Remove o vínculo de um gestor com esta unidade."""
         setor = self.get_object()
         usuario_id = request.data.get('usuario_id')
         
@@ -166,13 +226,13 @@ class SetorViewSet(viewsets.ModelViewSet):
             if setor in usuario.setores.all():
                 usuario.setores.remove(setor)
                 return Response({'mensagem': 'Membro removido da equipe com sucesso.'})
-            return Response({'erro': 'Usuário não pertence a este setor.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'erro': 'Usuário não pertence a esta unidade.'}, status=status.HTTP_400_BAD_REQUEST)
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def adicionar_membro(self, request, pk=None):
-        """Adiciona um usuário (existente pelo SIAPE) a este setor."""
+        """Adiciona um usuário (existente pelo SIAPE) a esta unidade."""
         setor = self.get_object()
         siape = request.data.get('siape')
         
@@ -182,7 +242,7 @@ class SetorViewSet(viewsets.ModelViewSet):
         try:
             usuario = Usuario.objects.get(siape=siape)
             if setor in usuario.setores.all():
-                return Response({'erro': 'Este usuário já faz parte deste setor.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'erro': 'Este usuário já faz parte desta unidade.'}, status=status.HTTP_400_BAD_REQUEST)
             
             usuario.setores.add(setor)
             return Response({
@@ -254,7 +314,7 @@ class UsuarioLogadoView(APIView):
         return Response(serializador.data)
 
     def patch(self, request):
-        """Atualiza parcialmente os dados do usuário (senha, e-mail e setores)."""
+        """Atualiza parcialmente os dados do usuário (senha, e-mail e unidades)."""
         serializador = AtualizarPerfilSerializer(
             instance=request.user, 
             data=request.data, 
@@ -268,3 +328,6 @@ class UsuarioLogadoView(APIView):
             "mensagem": "Perfil atualizado com sucesso!",
             "usuario": UsuarioSerializer(request.user).data
         })
+
+
+SetorViewSet = UnidadeOrganizacionalViewSet

@@ -233,7 +233,7 @@ const PlanosRisco = () => {
             <div className="advanced-filters-panel">
               <div className="filters-row">
                 <div className="filter-group">
-                  <label>Setor/Departamento:</label>
+                  <label>Unidade/Departamento:</label>
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                     <option value="">Todos os Setores</option>
                     {user.setores?.map(s => (
@@ -301,7 +301,7 @@ const PlanosRisco = () => {
                   <tr>
                     <th>ID</th>
                     <th>EVENTO DE RISCO</th>
-                    <th>DEPARTAMENTO</th>
+                    <th>UNIDADE</th>
                     <th>CATEGORIA</th>
                     <th>NÍVEL (RESIDUAL)</th>
                     <th>AÇÕES</th>

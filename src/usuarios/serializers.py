@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from .models import Setor, Usuario
+from .models import UnidadeOrganizacional, Usuario
 
 
-class SetorSerializer(serializers.ModelSerializer):
+class UnidadeOrganizacionalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Setor
+        model = UnidadeOrganizacional
         fields = [
             'id',
             'nome',
@@ -20,13 +20,16 @@ class SetorSerializer(serializers.ModelSerializer):
         ]
 
 
+SetorSerializer = UnidadeOrganizacionalSerializer
+
+
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
     """
     Serializer para o cadastro de novos usuários.
     """
     senha = serializers.CharField(write_only=True, min_length=8, source='password')
     id_setores = serializers.PrimaryKeyRelatedField(
-        queryset=Setor.objects.all(), 
+        queryset=UnidadeOrganizacional.objects.all(), 
         source='setores', 
         many=True,
         required=False
@@ -54,7 +57,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
     """
     Serializer para exibir dados do usuário logado (incluindo lista de setores).
     """
-    setores = SetorSerializer(many=True, read_only=True)
+    setores = UnidadeOrganizacionalSerializer(many=True, read_only=True)
 
     class Meta:
         model = Usuario
@@ -69,7 +72,7 @@ class AtualizarPerfilSerializer(serializers.ModelSerializer):
     nova_senha = serializers.CharField(write_only=True, min_length=8, required=False)
     confirmacao_senha = serializers.CharField(write_only=True, required=False)
     id_setores = serializers.PrimaryKeyRelatedField(
-        queryset=Setor.objects.all(), 
+        queryset=UnidadeOrganizacional.objects.all(), 
         source='setores', 
         many=True,
         required=False

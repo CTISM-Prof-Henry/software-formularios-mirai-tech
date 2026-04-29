@@ -65,7 +65,7 @@ def exportar_riscos_excel(riscos):
 
     headers = [
         "ID",
-        "Setor",
+        "Unidade/Departamento",
         "Categoria",
         "Desafio PDI",
         "Objetivo PDI",
@@ -136,7 +136,7 @@ def exportar_risco_excel(risco):
     desafio = risco.objetivo.desafio
     dados = [
         ("ID", risco.id),
-        ("Setor", risco.setor.label_curto),
+        ("Unidade/Departamento", risco.setor.label_curto),
         ("Categoria", risco.categoria),
         ("Desafio PDI", f"Desafio {desafio.numero} - {desafio.descricao}"),
         ("Objetivo PDI", f"{risco.objetivo.codigo} - {risco.objetivo.descricao}"),

@@ -11,10 +11,24 @@ const UnidadesAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busca, setBusca] = useState('');
+  const [centroSelecionado, setCentroSelecionado] = useState('');
+  const [tipoSelecionado, setTipoSelecionado] = useState('');
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [totalResultados, setTotalResultados] = useState(0);
+  const [centrosDisponiveis, setCentrosDisponiveis] = useState([]);
+  const [tiposDisponiveis, setTiposDisponiveis] = useState([]);
+  const pageSize = 20;
 
   useEffect(() => {
     if (!user.is_superuser) {
       navigate('/dashboard', { replace: true });
+      return;
+    }
+  }, [navigate, user.is_superuser]);
+
+  useEffect(() => {
+    if (!user.is_superuser) {
       return;
     }
 
@@ -22,8 +36,20 @@ const UnidadesAdmin = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await api.get('/usuarios/setores/admin/');
-        setUnidades(Array.isArray(response.data) ? response.data : []);
+        const response = await api.get('/usuarios/setores/admin/', {
+          params: {
+            search: busca,
+            centro: centroSelecionado,
+            tipo: tipoSelecionado,
+            page: paginaAtual,
+            page_size: pageSize,
+          },
+        });
+        setUnidades(Array.isArray(response.data.results) ? response.data.results : []);
+        setTotalResultados(response.data.count || 0);
+        setTotalPaginas(response.data.total_pages || 1);
+        setCentrosDisponiveis(Array.isArray(response.data.centros) ? response.data.centros : []);
+        setTiposDisponiveis(Array.isArray(response.data.tipos) ? response.data.tipos : []);
       } catch (err) {
         setError(err.response?.data?.erro || 'Nao foi possivel carregar as unidades da UFSM.');
       } finally {
@@ -32,27 +58,24 @@ const UnidadesAdmin = () => {
     }
 
     carregarUnidades();
-  }, [navigate, user.is_superuser]);
+  }, [busca, centroSelecionado, navigate, paginaAtual, tipoSelecionado, user.is_superuser]);
 
-  const unidadesFiltradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return unidades;
-
-    return unidades.filter((unidade) =>
-      [
-        unidade.label_completo,
-        unidade.label_curto,
-        unidade.nome,
-        unidade.sigla_centro,
-        unidade.nome_centro,
-        unidade.tipo_unidade,
-      ]
-        .filter(Boolean)
-        .some((valor) => valor.toLowerCase().includes(termo))
-    );
-  }, [busca, unidades]);
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca, centroSelecionado, tipoSelecionado]);
 
   const totalOficiais = unidades.filter((unidade) => unidade.fonte_oficial).length;
+  const descricaoFiltros = useMemo(() => {
+    if (!centroSelecionado && !tipoSelecionado && !busca.trim()) {
+      return 'Mostrando a base completa com paginação administrativa.';
+    }
+
+    const partes = [];
+    if (centroSelecionado) partes.push(`centro ${centroSelecionado}`);
+    if (tipoSelecionado) partes.push(`tipo ${tipoSelecionado}`);
+    if (busca.trim()) partes.push(`busca "${busca.trim()}"`);
+    return `Filtro ativo por ${partes.join(', ')}.`;
+  }, [busca, centroSelecionado, tipoSelecionado]);
 
   return (
     <div className="dashboard-container">
@@ -70,12 +93,12 @@ const UnidadesAdmin = () => {
           <div className="unidades-summary-card">
             <span className="summary-kicker">BASE OFICIAL</span>
             <strong>{String(totalOficiais).padStart(4, '0')}</strong>
-            <span>unidades ativas importadas</span>
+            <span>unidades nesta página atual</span>
           </div>
           <div className="unidades-summary-card">
             <span className="summary-kicker">VISUALIZACAO</span>
-            <strong>{String(unidadesFiltradas.length).padStart(4, '0')}</strong>
-            <span>resultados no filtro atual</span>
+            <strong>{String(totalResultados).padStart(4, '0')}</strong>
+            <span>resultados totais no filtro atual</span>
           </div>
         </section>
 
@@ -83,7 +106,7 @@ const UnidadesAdmin = () => {
           <div className="unidades-panel-header">
             <div>
               <h2>Estrutura institucional completa</h2>
-              <p>Visao administrativa das unidades oficiais da UFSM com centro e tipo de unidade.</p>
+              <p>Visao administrativa das unidades oficiais da UFSM com centro, tipo e exibicao completa.</p>
             </div>
             <div className="unidades-search">
               <input
@@ -95,34 +118,96 @@ const UnidadesAdmin = () => {
             </div>
           </div>
 
+          <div className="unidades-filters-row">
+            <div className="unidades-filter-group">
+              <label>Centro</label>
+              <select value={centroSelecionado} onChange={(e) => setCentroSelecionado(e.target.value)}>
+                <option value="">Todos</option>
+                {centrosDisponiveis.map((centro) => (
+                  <option key={centro} value={centro}>
+                    {centro}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="unidades-filter-group">
+              <label>Tipo de unidade</label>
+              <select value={tipoSelecionado} onChange={(e) => setTipoSelecionado(e.target.value)}>
+                <option value="">Todos</option>
+                {tiposDisponiveis.map((tipo) => (
+                  <option key={tipo} value={tipo}>
+                    {tipo}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              className="unidades-clear-button"
+              onClick={() => {
+                setBusca('');
+                setCentroSelecionado('');
+                setTipoSelecionado('');
+              }}
+            >
+              Limpar filtros
+            </button>
+          </div>
+
+          <p className="unidades-filter-description">{descricaoFiltros}</p>
+
           {error && <div className="unidades-error">{error}</div>}
 
           <div className="unidades-table-wrapper">
             {loading ? (
               <div className="unidades-empty">Carregando unidades...</div>
-            ) : unidadesFiltradas.length === 0 ? (
+            ) : unidades.length === 0 ? (
               <div className="unidades-empty">Nenhuma unidade encontrada para o filtro informado.</div>
             ) : (
-              <table className="unidades-table">
-                <thead>
-                  <tr>
-                    <th>Exibicao comum</th>
-                    <th>Exibicao completa</th>
-                    <th>Centro</th>
-                    <th>Tipo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unidadesFiltradas.map((unidade) => (
-                    <tr key={unidade.id}>
-                      <td>{unidade.label_curto}</td>
-                      <td>{unidade.label_completo}</td>
-                      <td>{unidade.nome_centro || 'Nao informado'}</td>
-                      <td>{unidade.tipo_unidade || 'Nao informado'}</td>
+              <>
+                <table className="unidades-table">
+                  <thead>
+                    <tr>
+                      <th>Exibicao comum</th>
+                      <th>Exibicao completa</th>
+                      <th>Centro</th>
+                      <th>Tipo</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {unidades.map((unidade) => (
+                      <tr key={unidade.id}>
+                        <td>{unidade.label_curto}</td>
+                        <td>{unidade.label_completo}</td>
+                        <td>{unidade.nome_centro || 'Nao informado'}</td>
+                        <td>{unidade.tipo_unidade || 'Nao informado'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="unidades-pagination">
+                  <span>
+                    Pagina {paginaAtual} de {totalPaginas}
+                  </span>
+                  <div className="unidades-pagination-actions">
+                    <button
+                      type="button"
+                      onClick={() => setPaginaAtual((pagina) => Math.max(1, pagina - 1))}
+                      disabled={paginaAtual === 1}
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaginaAtual((pagina) => Math.min(totalPaginas, pagina + 1))}
+                      disabled={paginaAtual >= totalPaginas}
+                    >
+                      Proxima
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </section>

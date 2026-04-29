@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Setor, Usuario
+from .models import UnidadeOrganizacional, Usuario
 
 
-@admin.register(Setor)
-class SetorAdmin(admin.ModelAdmin):
+@admin.register(UnidadeOrganizacional)
+class UnidadeOrganizacionalAdmin(admin.ModelAdmin):
     list_display = (
         'label_curto_admin',
         'nome_centro',
@@ -28,4 +28,4 @@ class UsuarioAdmin(admin.ModelAdmin):
 
     def exibir_setores(self, obj):
         return ", ".join([s.label_curto for s in obj.setores.all()])
-    exibir_setores.short_description = "Setores"
+    exibir_setores.short_description = "Unidades"
