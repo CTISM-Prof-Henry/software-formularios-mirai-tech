@@ -208,7 +208,7 @@ npm run build
 1. O backend ficará disponível em `http://localhost:8000/`.
 2. O frontend ficará disponível em `http://localhost:5173/`.
 3. O banco PostgreSQL subirá pelo Docker em `localhost:5433`.
-4. O cadastro de usuários consumirá os setores disponíveis pelo endpoint público `/api/usuarios/setores/`.
+4. O cadastro de usuários consumirá as unidades/departamentos disponíveis pelo endpoint público `/api/usuarios/setores/`.
 5. As principais rotas de autenticação e gestão de riscos ficarão expostas sob `/api/usuarios/` e `/api/riscos/`.
 
 ## Contato

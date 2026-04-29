@@ -1,543 +1,592 @@
 {
-	"info": {
-		"_postman_id": "8a2f4c5d-3b1a-4e9f-8c7d-2b1a0e9f8c7d",
-		"name": "Gestão de Risco UFSM - API",
-		"description": "Coleção para testes da API de Gestão de Risco UFSM",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Usuários",
-			"item": [
-				{
-					"name": "Registrar Usuário",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"siape\": \"1234567\",\n    \"senha\": \"senha_segura_123\",\n    \"nome\": \"João da Silva\",\n    \"email\": \"joao@ufsm.br\",\n    \"id_setores\": [1]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/registro/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"registro",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"siape\": \"1234567\",\n    \"senha\": \"senha_segura_123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/login/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"login",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Dados do Usuário (Me)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Token {{authToken}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/me/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"me",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Atualizar Perfil",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Token {{authToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"novo_email@ufsm.br\",\n    \"senha\": \"nova_senha_123\",\n    \"id_setores\": [1, 2]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/me/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"me",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Setores",
-			"item": [
-				{
-					"name": "Listar Setores",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/setores/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"setores",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Criar Setor",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"nome\": \"Centro de Tecnologia\",\n    \"sigla\": \"CT\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/usuarios/setores/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"usuarios",
-								"setores",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Gestão de Riscos",
-			"item": [
-				{
-					"name": "Infraestrutura PDI",
-					"item": [
-						{
-							"name": "Listar Desafios",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/desafios/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"desafios",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Criar Desafio",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"numero\": 1,\n    \"descricao\": \"Educação Inovadora\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/desafios/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"desafios",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Criar Objetivo",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"codigo\": \"OBJ-01\",\n    \"descricao\": \"Implementar metodologias ativas\",\n    \"desafio\": 1\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/objetivos/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"objetivos",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Criar Macroprocesso",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"nome\": \"Ensino de Graduação\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/macroprocessos/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"macroprocessos",
-										""
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Planos de Risco",
-					"item": [
-						{
-							"name": "Listar Planos (Todos)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/planos/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"planos",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Criar Novo Plano (Risco)",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"setor\": 1,\n    \"objetivo\": 1,\n    \"macroprocesso\": 1,\n    \"categoria\": \"Operacional\",\n    \"evento\": \"Interrupção do sistema acadêmico\",\n    \"causa\": \"Falha de hardware no servidor\",\n    \"consequencia\": \"Atraso no lançamento de notas\",\n    \"controles_atuais\": \"Backup diário\",\n    \"eficacia_controle\": \"Médio\",\n    \"probabilidade\": 3,\n    \"impacto\": 4,\n    \"prob_residual\": 2,\n    \"imp_residual\": 2\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/planos/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"planos",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Atualizar Risco (Somente Setor Responsável)",
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"eficacia_controle\": \"Forte\",\n    \"prob_residual\": 1\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/planos/1/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"planos",
-										"1",
-										""
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Tratamento e Ações",
-					"item": [
-						{
-							"name": "Criar Plano de Ação (5W2H)",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"risco\": 1,\n    \"tipo_resposta\": \"Mitigar\",\n    \"descricao_acao\": \"Adquirir novo servidor de redundância\",\n    \"responsavel\": \"Coordenador de TI\",\n    \"parceiros\": \"Pró-Reitoria de Administração\",\n    \"data_inicio\": \"2024-06-01\",\n    \"data_fim\": \"2024-12-31\",\n    \"status\": \"Não iniciada\",\n    \"observacoes\": \"Aguardando liberação de verba\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/acoes/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"acoes",
-										""
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Monitoramento",
-					"item": [
-						{
-							"name": "Registrar Monitoramento",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Token {{authToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"risco\": 1,\n    \"resultados\": \"Os backups estão sendo realizados sem erros.\",\n    \"acoes_futuras\": \"Contratar suporte especializado para o banco de dados.\",\n    \"analise_critica\": \"O tempo de recuperação precisa ser reduzido.\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/api/riscos/monitoramentos/",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"riscos",
-										"monitoramentos",
-										""
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8000",
-			"type": "string"
-		},
-		{
-			"key": "authToken",
-			"value": "seu_token_aqui",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "8a2f4c5d-3b1a-4e9f-8c7d-2b1a0e9f8c7d",
+    "name": "Gestao de Risco UFSM - API",
+    "description": "Colecao para testes da API de Gestao de Risco UFSM",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar Usuario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siape\": \"2030999\",\n  \"senha\": \"Teste@12345\",\n  \"nome\": \"Usuario de Exemplo\",\n  \"email\": \"usuario.exemplo@ufsm.br\",\n  \"id_setores\": [1]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/registro/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "registro",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siape\": \"202512603\",\n  \"senha\": \"12345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/login/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dados do Usuario (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/me/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "me",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"novo_email@ufsm.br\",\n  \"senha_atual\": \"12345678\",\n  \"nova_senha\": \"NovaSenha@123\",\n  \"confirmacao_senha\": \"NovaSenha@123\",\n  \"id_setores\": [1, 2]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/me/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "me",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Unidades (rota /setores/)",
+      "item": [
+        {
+          "name": "Listar Unidades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/setores/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "setores",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Unidade",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Departamento de Computacao Aplicada\",\n  \"sigla\": \"CT - Departamento de Computacao Aplicada\",\n  \"sigla_centro\": \"CT\",\n  \"nome_centro\": \"Centro de Tecnologia\",\n  \"tipo_unidade\": \"Departamento Didatico\",\n  \"fonte_oficial\": true,\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/setores/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "setores",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Unidades Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/setores/admin/?search=computacao&centro=CT&tipo=Departamento%20Didatico&page=1&page_size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "setores",
+                "admin",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "computacao"
+                },
+                {
+                  "key": "centro",
+                  "value": "CT"
+                },
+                {
+                  "key": "tipo",
+                  "value": "Departamento Didatico"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gestao de Riscos",
+      "item": [
+        {
+          "name": "Infraestrutura PDI",
+          "item": [
+            {
+              "name": "Listar Desafios",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/desafios/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "desafios",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criar Desafio",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": 1,\n  \"descricao\": \"Educacao Inovadora\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/desafios/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "desafios",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criar Objetivo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"codigo\": \"OBJ-01\",\n  \"descricao\": \"Implementar metodologias ativas\",\n  \"desafio\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/objetivos/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "objetivos",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criar Macroprocesso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Ensino de Graduacao\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/macroprocessos/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "macroprocessos",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Planos de Risco",
+          "item": [
+            {
+              "name": "Listar Planos (Todos)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/planos/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "planos",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criar Novo Plano (Risco)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"setor\": 1,\n  \"objetivo\": 1,\n  \"macroprocesso\": 1,\n  \"categoria\": \"Operacional\",\n  \"evento\": \"Interrupcao do sistema academico\",\n  \"causa\": \"Falha de hardware no servidor\",\n  \"consequencia\": \"Atraso no lancamento de notas\",\n  \"controles_atuais\": \"Backup diario\",\n  \"eficacia_controle\": \"Satisfatorio\",\n  \"probabilidade\": 3,\n  \"impacto\": 4,\n  \"prob_residual\": 2,\n  \"imp_residual\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/planos/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "planos",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Atualizar Risco (Somente Unidade Responsavel)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eficacia_controle\": \"Forte\",\n  \"prob_residual\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/planos/1/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "planos",
+                    "1",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Tratamento e Acoes",
+          "item": [
+            {
+              "name": "Criar Plano de Acao (5W2H)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"risco\": 1,\n  \"tipo_resposta\": \"Mitigar\",\n  \"descricao_acao\": \"Adquirir novo servidor de redundancia\",\n  \"responsavel\": \"Coordenador de TI\",\n  \"parceiros\": \"Pro-Reitoria de Administracao\",\n  \"data_inicio\": \"2026-06-01\",\n  \"data_fim\": \"2026-12-31\",\n  \"status\": \"Em andamento\",\n  \"observacoes\": \"Aguardando liberacao de verba\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/acoes/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "acoes",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Monitoramento",
+          "item": [
+            {
+              "name": "Registrar Monitoramento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"risco\": 1,\n  \"resultados\": \"Os backups estao sendo realizados sem erros.\",\n  \"acoes_futuras\": \"Contratar suporte especializado para o banco de dados.\",\n  \"analise_critica\": \"O tempo de recuperacao precisa ser reduzido.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/riscos/monitoramentos/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "riscos",
+                    "monitoramentos",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "seu_token_aqui",
+      "type": "string"
+    }
+  ]
 }

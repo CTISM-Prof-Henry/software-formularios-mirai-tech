@@ -149,7 +149,8 @@ http://localhost:5173/
 
 - **Login**: `POST /api/usuarios/login/`
 - **Registro**: `POST /api/usuarios/registro/`
-- **Setores**: `GET /api/usuarios/setores/`
+- **Unidades/Departamentos**: `GET /api/usuarios/setores/`  
+  A rota continua com o nome `setores` por compatibilidade, mas retorna as unidades reais da UFSM.
 - **Atualizar perfil**: `PATCH /api/usuarios/me/`
 - **Recuperação de senha**: `POST /api/usuarios/recuperar-senha/enviar/`, `validar/` e `redefinir/`
 
