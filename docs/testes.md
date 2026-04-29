@@ -34,6 +34,7 @@ Arquivos atualmente presentes:
 - `src/usuarios/tests/test_models.py`
 - `src/usuarios/tests/test_importar_unidades_ufsm.py`
 - `src/usuarios/tests/test_normalizar_setores_legados.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/usuarios/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_models.py`
@@ -93,6 +94,7 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 
 - `src/usuarios/tests/test_views.py`
 - `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -107,6 +109,7 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 - atualização de perfil;
 - envio, validação e redefinição de senha;
 - listagem pública de setores;
+- listagem administrativa de unidades da UFSM exclusiva para superusuário;
 - listagem de membros por setor;
 - adição e remoção de membros da equipe;
 - comportamento auxiliar do admin para exibição de setores.
@@ -118,6 +121,14 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 - geração correta de labels curto e completo;
 - idempotência da importação;
 - desativação opcional de setores legados.
+
+#### `src/usuarios/tests/test_seed_base_demo.py`
+
+- execução do comando `seed_base_demo`;
+- criação de usuários comuns adicionais para demonstração;
+- criação de riscos, planos de ação e monitoramentos de exemplo;
+- idempotência da base demo;
+- garantia de que o seed não cria novos superusuários.
 
 #### `src/riscos/tests/test_views.py`
 
@@ -174,6 +185,7 @@ Os principais exemplos são:
 - `src/usuarios/tests/test_views.py`
 - `src/usuarios/tests/test_importar_unidades_ufsm.py`
 - `src/usuarios/tests/test_normalizar_setores_legados.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -186,8 +198,10 @@ Os principais exemplos são:
 - registro persistindo usuário e vínculo com setor;
 - fluxo de recuperação de senha usando banco e regras temporais;
 - gestão de equipe adicionando e removendo vínculos entre usuário e setor.
+- proteção de rota administrativa para visualização completa das unidades da UFSM;
 - importação de unidades oficiais a partir de CSV institucional;
 - normalização de vínculos legados de usuários e riscos para unidades oficiais.
+- população de uma base demo com usuários comuns, riscos, planos e monitoramentos.
 
 #### Integração no módulo de riscos
 
@@ -214,6 +228,7 @@ Os principais exemplos são:
 
 - `src/usuarios/tests/test_views.py`
 - `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -223,6 +238,7 @@ Os principais exemplos são:
 - parte dos testes de `test_views.py`;
 - `test_importar_unidades_ufsm.py`;
 - `test_normalizar_setores_legados.py`;
+- `test_seed_base_demo.py`;
 - `test_seed_usuarios_teste.py`;
 - `test_seed_data.py`.
 

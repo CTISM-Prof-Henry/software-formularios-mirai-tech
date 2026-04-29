@@ -86,6 +86,23 @@ const Sidebar = () => {
     },
   ];
 
+  if (user.is_superuser) {
+    navItems.push({
+      label: 'Unidades UFSM',
+      path: '/unidades',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21h18"></path>
+          <path d="M5 21V7l8-4v18"></path>
+          <path d="M19 21V11l-6-4"></path>
+          <path d="M9 9v.01"></path>
+          <path d="M9 13v.01"></path>
+          <path d="M9 17v.01"></path>
+        </svg>
+      )
+    });
+  }
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">

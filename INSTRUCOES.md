@@ -105,11 +105,25 @@ Teste@12345
 
 Usuários criados:
 
-- `2030001` - Ana Paula Multissetorial (`CAL`, `CCS`, `CT`)
-- `2030002` - Bruno Gestor Centros (`CAL`, `CCR`)
-- `2030003` - Carla Gestora Pesquisa (`CCS`, `CCNE`, `CCSH`)
-- `2030004` - Diego Gestor Ensino (`CE`, `CEFD`)
-- `2030005` - Elisa Gestora Tecnologia (`CT`, `CTISM`, `Politecnico`)
+- `2030001` - Ana Paula Multissetorial (`CT - Departamento de Computação Aplicada`, `PM - Departamento de Administração - PM`, `CTISM - Núcleo Pedagógico do CTISM`)
+- `2030002` - Bruno Gestor Centros (`CT - Departamento de Engenharia Mecânica`, `PM - Departamento de Ciências Econômicas - PM`)
+- `2030003` - Carla Gestora Pesquisa (`CT - Departamento de Eletrônica e Computação`, `PM - Departamento de Ciências da Saúde - PM`, `CT - Departamento de Engenharia Sanitária e Ambiental`)
+- `2030004` - Diego Gestor Ensino (`CT - Departamento de Engenharia de Produção e Sistemas`, `PM - Departamento de Alimentos e Nutrição - PM`)
+- `2030005` - Elisa Gestora Tecnologia (`CT - Departamento de Linguagens e Sistemas de Computação`, `CT - Departamento de Transportes`, `PM - Departamento de Zootecnia e Ciências Biológicas - PM`)
+
+Se quiser popular o sistema com uma base mais completa para demonstração, incluindo
+mais usuários comuns, planos de risco, ações de tratamento e alguns monitoramentos:
+
+```bash
+python manage.py seed_base_demo
+```
+
+Esse comando:
+
+- reutiliza/importa as unidades oficiais da UFSM;
+- cria apenas usuários comuns de demonstração;
+- não cria novos superusuários;
+- popula riscos e planos de ação adicionais para dashboard, mapa de riscos e exportações.
 
 Se necessário, também é possível criar um superusuário:
 

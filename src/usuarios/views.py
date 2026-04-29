@@ -16,6 +16,10 @@ from .serializers import (
     AtualizarPerfilSerializer
 )
 
+
+def _usuario_eh_superusuario(usuario):
+    return bool(getattr(usuario, "is_superuser", False))
+
 class EnviarCodigoRecuperacaoView(APIView):
     """
     Gera e "envia" um código de 6 dígitos para o e-mail informado.
@@ -127,6 +131,19 @@ class SetorViewSet(viewsets.ModelViewSet):
     serializer_class = SetorSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
     pagination_class = None
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='admin')
+    def listar_admin(self, request):
+        """Retorna a lista completa de unidades para administradores do sistema."""
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores do sistema podem visualizar esta tela.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        queryset = self.get_queryset().order_by("sigla_centro", "tipo_unidade", "nome")
+        serializador = self.get_serializer(queryset, many=True)
+        return Response(serializador.data)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def membros(self, request, pk=None):
