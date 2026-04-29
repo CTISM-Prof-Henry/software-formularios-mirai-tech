@@ -11,7 +11,6 @@ from src.usuarios.normalizacao_legado import (
     normalizar_vinculos_legados,
 )
 
-
 USUARIOS_DEMO = [
     {
         "siape": "2030001",

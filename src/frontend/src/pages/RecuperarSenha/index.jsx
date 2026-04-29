@@ -112,7 +112,7 @@ const RecuperarSenha = () => {
       setTimer(60);
       setCodigo(['', '', '', '', '', '']);
       setError('');
-    } catch (err) {
+    } catch {
       setError('Erro ao reenviar código.');
     } finally {
       setLoading(false);

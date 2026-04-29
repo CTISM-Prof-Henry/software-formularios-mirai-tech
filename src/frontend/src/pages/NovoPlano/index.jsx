@@ -158,7 +158,7 @@ const NovoPlano = () => {
       });
       alert('Plano de Risco completo salvo com sucesso!');
       navigate('/planos');
-    } catch (err) {
+    } catch {
       setError('Erro ao salvar o tratamento. O risco foi salvo, mas o plano de ação não.');
     } finally {
       setLoading(false);

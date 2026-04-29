@@ -1,6 +1,5 @@
 from django.db import migrations
 
-
 DESAFIOS_PDI = [
     (1, "Internacionalização"),
     (2, "Educação inovadora e transformadora com excelência acadêmica"),

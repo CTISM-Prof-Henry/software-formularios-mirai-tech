@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Usuario, Setor
+
+from .models import Setor, Usuario
+
 
 @admin.register(Setor)
 class SetorAdmin(admin.ModelAdmin):

@@ -10,7 +10,6 @@ const PlanosRisco = () => {
   const navigate = useNavigate();
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [exportingExcel, setExportingExcel] = useState(false);
   const dropdownRef = useRef(null);
@@ -78,7 +77,6 @@ const PlanosRisco = () => {
       setCount(response.data.count);
     } catch (err) {
       console.error('Erro ao carregar planos:', err);
-      setError('Não foi possível carregar os planos de risco.');
     } finally {
       setLoading(false);
     }
@@ -106,7 +104,6 @@ const PlanosRisco = () => {
       downloadBlob(response.data, 'planos-risco.xlsx');
     } catch (err) {
       console.error('Erro ao exportar Excel:', err);
-      setError('Nao foi possivel exportar os planos para Excel.');
     } finally {
       setExportingExcel(false);
     }
@@ -123,13 +120,6 @@ const PlanosRisco = () => {
     if (nivel >= 12) return 'risk-alto';
     if (nivel >= 4) return 'risk-moderado';
     return 'risk-baixo';
-  };
-
-  const getRiskLabel = (nivel) => {
-    if (nivel >= 20) return 'RISCO EXTREMO';
-    if (nivel >= 12) return 'RISCO ALTO';
-    if (nivel >= 4) return 'RISCO MODERADO';
-    return 'RISCO BAIXO';
   };
 
   return (

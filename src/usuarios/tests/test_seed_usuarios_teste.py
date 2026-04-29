@@ -1,5 +1,5 @@
-from django.core.management import call_command
 import pytest
+from django.core.management import call_command
 from rest_framework.authtoken.models import Token
 
 from src.usuarios.management.commands.seed_usuarios_teste import USUARIOS_TESTE

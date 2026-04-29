@@ -1,0 +1,51 @@
+name: build-linter.yml
+
+on:
+  push:
+    branches:
+      - main
+      - feat/**
+      - tests/**
+      - refactor/**
+  pull_request:
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clona o repositório
+        uses: actions/checkout@v5
+
+      - name: Configura o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instala dependências do backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Executa linter do backend
+        run: python -m ruff check .
+
+      - name: Configura o Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Instala dependências do frontend
+        working-directory: src/frontend
+        run: npm ci
+
+      - name: Executa linter do frontend
+        working-directory: src/frontend
+        run: npm run lint
+
+      - name: Executa build do frontend
+        working-directory: src/frontend
+        run: npm run build

@@ -4,7 +4,6 @@ from rest_framework.authtoken.models import Token
 from src.usuarios.importacao_unidades import importar_unidades_csv
 from src.usuarios.models import Setor, Usuario
 
-
 USUARIOS_TESTE = [
     {
         "siape": "2030001",

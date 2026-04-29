@@ -1,6 +1,5 @@
 from src.riscos.models import Risco
 
-
 SIGLAS_LEGADAS_ALIASES = {
     "Politecnico": "POLI",
 }

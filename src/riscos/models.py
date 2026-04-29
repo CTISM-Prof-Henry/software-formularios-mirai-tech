@@ -1,5 +1,7 @@
 from django.db import models
+
 from src.usuarios.models import Setor
+
 
 class DesafioPDI(models.Model):
     numero = models.IntegerField(unique=True, verbose_name="Número do Desafio", db_column="numero")

@@ -1,8 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    DesafioPDIViewSet, MacroprocessoViewSet, ObjetivoPDIViewSet, 
-    RiscoViewSet, PlanoAcaoViewSet, MonitoramentoViewSet
+    DesafioPDIViewSet,
+    MacroprocessoViewSet,
+    MonitoramentoViewSet,
+    ObjetivoPDIViewSet,
+    PlanoAcaoViewSet,
+    RiscoViewSet,
 )
 
 router = DefaultRouter()

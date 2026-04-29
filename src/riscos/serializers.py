@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import (
-    DesafioPDI, Macroprocesso, ObjetivoPDI, 
-    Risco, PlanoAcao, Monitoramento
-)
+
 from src.usuarios.serializers import SetorSerializer
+
+from .models import DesafioPDI, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+
 
 class DesafioPDISerializer(serializers.ModelSerializer):
     class Meta:

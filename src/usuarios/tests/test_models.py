@@ -1,5 +1,7 @@
 import pytest
+
 from src.usuarios.models import Setor, Usuario
+
 
 @pytest.mark.django_db
 class TestSetorModel:

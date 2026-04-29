@@ -105,7 +105,7 @@ const EditarPlano = () => {
               observacoes: acao.observacoes || ''
             });
           }
-        } catch (e) {
+        } catch {
           console.log('Nenhum plano de ação encontrado ou erro ao carregar.');
         }
 
@@ -176,10 +176,6 @@ const EditarPlano = () => {
     }));
   }, [riscoData.probabilidade, riscoData.impacto, riscoData.eficacia_controle]);
 
-  const handleNext = () => {
-    if (etapa < 3) setEtapa(etapa + 1);
-  };
-
   const handleBack = () => {
     if (etapa > 1) setEtapa(etapa - 1);
   };
@@ -215,7 +211,7 @@ const EditarPlano = () => {
       }
       alert('Plano de Risco atualizado com sucesso!');
       navigate('/planos');
-    } catch (err) {
+    } catch {
       setError('Erro ao salvar o tratamento.');
     } finally {
       setSaving(false);

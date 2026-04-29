@@ -1,8 +1,10 @@
 import pytest
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
+
+from src.riscos.models import DesafioPDI, Macroprocesso, ObjetivoPDI, PlanoAcao, Risco
 from src.usuarios.models import Setor, Usuario
-from src.riscos.models import DesafioPDI, ObjetivoPDI, Macroprocesso, PlanoAcao, Risco
+
 
 @pytest.fixture
 def api_client():
