@@ -54,17 +54,6 @@ No **Ubuntu/Linux**:
 cp .env.example .env
 ```
 
-Use os valores locais abaixo:
-
-```env
-DATABASE_NAME=gestao_risco_ufsm
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_HOST=localhost
-DATABASE_PORT=5433
-DEBUG=True
-```
-
 ## 4. Banco de dados
 
 Com o Docker em execução, suba o PostgreSQL:
@@ -73,16 +62,11 @@ Com o Docker em execução, suba o PostgreSQL:
 docker compose up -d
 ```
 
-Se sua instalação ainda usar o comando legado:
-
-```bash
-docker-compose up -d
-```
-
 ## 5. Preparar o Django
 
 ```bash
 python manage.py migrate
+python manage.py makemigrations
 ```
 
 Opcionalmente, crie usuários de teste para validar a gestão de equipes:
