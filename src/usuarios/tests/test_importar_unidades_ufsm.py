@@ -3,7 +3,6 @@ from django.core.management import call_command
 
 from src.usuarios.models import Setor
 
-
 CSV_EXEMPLO = """COD_ESTRUTURADO,NOME_UNIDADE,NOME_CENTRO,SIGLA_CENTRO,TIPO_UNIDADE,SITUACAO
 07.67.00.00.0.0,Departamento de Computacao Aplicada,Centro de Tecnologia,CT,Departamento Didatico,Formal
 07.37.00.00.0.0,Departamento de Eletromecanica e Sistemas de Potencia,Centro de Tecnologia,CT,Departamento Didatico,Formal

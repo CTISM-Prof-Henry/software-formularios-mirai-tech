@@ -1,7 +1,9 @@
 import pytest
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
+
 from src.usuarios.models import Setor, Usuario
+
 
 @pytest.fixture
 def api_client():
@@ -128,9 +130,11 @@ class TestUsuarioViews:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_validar_codigo_expirado(self, api_client, usuario):
-        from src.usuarios.models import CodigoRecuperacao
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+
+        from src.usuarios.models import CodigoRecuperacao
         
         # Cria o código
         registro = CodigoRecuperacao.objects.create(email=usuario.email, codigo="123456")
@@ -249,8 +253,9 @@ class TestUsuarioViews:
         assert response.data["erro"] == "Usuário com este SIAPE não encontrado."
 
     def test_admin_exibir_setores(self, db, usuario, setor):
-        from src.usuarios.admin import UsuarioAdmin
         from django.contrib.admin.sites import AdminSite
+
+        from src.usuarios.admin import UsuarioAdmin
         
         ua = UsuarioAdmin(Usuario, AdminSite())
         display = ua.exibir_setores(usuario)

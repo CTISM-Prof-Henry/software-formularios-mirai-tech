@@ -1,6 +1,5 @@
 from django.db import migrations
 
-
 SETORES_INICIAIS = [
     "CAL",
     "CCR",

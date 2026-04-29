@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Usuario, Setor
+
+from .models import Setor, Usuario
+
 
 class SetorSerializer(serializers.ModelSerializer):
     class Meta:

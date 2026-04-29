@@ -181,6 +181,28 @@ source .venv/bin/activate
 python -m pytest
 ```
 
+### Validação de qualidade
+
+Lint do backend:
+
+```bash
+python -m ruff check .
+```
+
+Lint do frontend:
+
+```bash
+cd src/frontend
+npm run lint
+```
+
+Build do frontend:
+
+```bash
+cd src/frontend
+npm run build
+```
+
 ## Fluxo esperado
 
 1. O backend ficará disponível em `http://localhost:8000/`.

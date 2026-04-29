@@ -9,7 +9,6 @@ const MapaRisco = () => {
   const navigate = useNavigate();
   const [riscos, setRiscos] = useState([]);
   const [acoes, setAcoes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filterSetor, setFilterSetor] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
   
@@ -20,7 +19,6 @@ const MapaRisco = () => {
   }, [filterSetor, filterCategoria]);
 
   async function carregarRiscos() {
-    setLoading(true);
     try {
       let url = '/riscos/planos/?limit=1000'; // Pega todos para o mapa
       if (filterSetor) url += `&setor=${filterSetor}`;
@@ -35,8 +33,6 @@ const MapaRisco = () => {
       setAcoes(acoesResponse.data.results || acoesResponse.data);
     } catch (err) {
       console.error('Erro ao carregar riscos para o mapa:', err);
-    } finally {
-      setLoading(false);
     }
   }
 

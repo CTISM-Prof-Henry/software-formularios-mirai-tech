@@ -1,7 +1,6 @@
 import csv
 from pathlib import Path
 
-
 CAMPOS_OBRIGATORIOS = (
     "NOME_UNIDADE",
     "NOME_CENTRO",

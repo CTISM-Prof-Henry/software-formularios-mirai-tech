@@ -1,5 +1,5 @@
-from django.core.management import call_command
 import pytest
+from django.core.management import call_command
 from rest_framework.authtoken.models import Token
 
 from src.riscos.models import Monitoramento, PlanoAcao, Risco

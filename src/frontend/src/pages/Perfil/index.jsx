@@ -14,7 +14,7 @@ const Perfil = () => {
     try {
       const stored = localStorage.getItem('@SIGR:user');
       return stored ? JSON.parse(stored) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   });

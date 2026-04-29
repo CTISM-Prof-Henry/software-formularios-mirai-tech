@@ -1,6 +1,15 @@
 import pytest
-from src.riscos.models import DesafioPDI, ObjetivoPDI, Macroprocesso, Risco, PlanoAcao, Monitoramento
+
+from src.riscos.models import (
+    DesafioPDI,
+    Macroprocesso,
+    Monitoramento,
+    ObjetivoPDI,
+    PlanoAcao,
+    Risco,
+)
 from src.usuarios.models import Setor
+
 
 @pytest.fixture
 def infra_pdi(db):

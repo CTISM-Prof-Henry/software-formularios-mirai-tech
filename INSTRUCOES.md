@@ -184,6 +184,26 @@ Para executar os testes automatizados:
 python -m pytest
 ```
 
+Para validar o linter do backend:
+
+```bash
+python -m ruff check .
+```
+
+Para validar o linter do frontend:
+
+```bash
+cd src/frontend
+npm run lint
+```
+
+Para validar o build do frontend:
+
+```bash
+cd src/frontend
+npm run build
+```
+
 Para validar a documentação:
 
 ```bash

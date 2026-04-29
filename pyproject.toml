@@ -1,23 +1,13 @@
-[project]
-name = "gestao-risco-ufsm"
-version = "0.1.0"
-description = "Sistema de Gestão de Riscos UFSM"
-authors = [
-    { name = "UFSM Engineering Team" }
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [
+    "site",
+    "src/frontend/dist",
 ]
-dependencies = [
-    "django>=5.1",
-    "psycopg2-binary>=2.9.9",
-    "djangorestframework>=3.15.2",
-    "django-cors-headers>=4.4.0",
-    "python-dotenv>=1.0.1",
-    "whitenoise>=6.7.0",
-]
-requires-python = ">=3.11"
 
-[tool.uv]
-managed = true
+[tool.ruff.lint]
+select = ["F", "I"]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
