@@ -34,6 +34,7 @@ const Login = () => {
     <div className="login-container">
       <main className="login-card">
         <header className="login-header">
+          <p className="login-title-small">Acesso institucional</p>
           <h1 className="login-title-large">Sistema de Gestão de Riscos</h1>
         </header>
 
@@ -62,7 +63,7 @@ const Login = () => {
             />
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          {error && <div className="feedback-banner error">{error}</div>}
 
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar no Sistema'}

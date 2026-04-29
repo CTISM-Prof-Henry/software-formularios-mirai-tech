@@ -1,6 +1,8 @@
 .header-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .export-button {
@@ -114,6 +116,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input-wrapper {
@@ -218,6 +221,10 @@
   border: 1px solid #eee;
   border-radius: 12px;
   overflow: hidden;
+}
+
+.plans-table-wrapper {
+  overflow-x: auto;
 }
 
 .plans-table {
@@ -400,4 +407,65 @@
   padding: 60px;
   text-align: center;
   color: var(--text-grey);
+}
+
+@media (max-width: 1200px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filters-row {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .filter-group {
+    flex: 1 1 220px;
+  }
+
+  .plans-table th,
+  .plans-table td {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .header-actions,
+  .search-box,
+  .filters-row,
+  .col-acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .export-button,
+  .btn-search,
+  .btn-advanced,
+  .new-plan-button,
+  .btn-clear-filters {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .advanced-filters-panel {
+    padding: 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plans-table {
+    min-width: 860px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
 }

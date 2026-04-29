@@ -111,3 +111,18 @@
   margin-top: 12px;
   font-size: 13px;
 }
+
+@media (max-width: 720px) {
+  .login-container {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 28px 20px;
+    border-radius: 14px;
+  }
+
+  .login-title-large {
+    font-size: 24px;
+  }
+}

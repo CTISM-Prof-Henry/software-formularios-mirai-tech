@@ -228,6 +228,25 @@
   cursor: pointer;
 }
 
+@media (max-width: 720px) {
+  .cadastro-container {
+    padding: 20px 16px;
+  }
+
+  .cadastro-card {
+    padding: 28px 20px;
+    border-radius: 14px;
+  }
+
+  .cadastro-title-large {
+    font-size: 24px;
+  }
+
+  .custom-select-options {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 600px) {
   .input-row {
     flex-direction: column;

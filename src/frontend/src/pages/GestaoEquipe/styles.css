@@ -46,7 +46,10 @@
 
 .equipe-actions {
   margin-bottom: 48px;
-  max-width: 600px;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .add-membro-form .input-group {
@@ -250,4 +253,106 @@
   padding: 40px;
   text-align: center;
   color: var(--text-grey);
+}
+
+.table-feedback {
+  margin: 18px;
+}
+
+@media (max-width: 1200px) {
+  .list-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-bar {
+    max-width: none;
+  }
+
+  .list-header,
+  .membro-row {
+    grid-template-columns: 52px minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.4fr) 72px;
+    padding-inline: 18px;
+  }
+
+  .membro-email {
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 760px) {
+  .equipe-content {
+    margin-top: 24px;
+  }
+
+  .selector-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .tab-button {
+    width: 100%;
+    text-align: left;
+  }
+
+  .add-membro-form .input-group {
+    flex-direction: column;
+  }
+
+  .add-button {
+    min-height: 48px;
+    justify-content: center;
+  }
+
+  .list-header {
+    display: none;
+  }
+
+  .membro-row {
+    grid-template-columns: 44px 1fr;
+    gap: 8px 14px;
+    padding: 16px;
+  }
+
+  .membro-avatar {
+    grid-row: span 2;
+  }
+
+  .membro-nome-cell,
+  .membro-siape-cell,
+  .membro-email-cell,
+  .membro-acoes-cell {
+    min-width: 0;
+  }
+
+  .membro-nome::after,
+  .membro-siape::before,
+  .membro-email::before {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .membro-siape::before {
+    content: 'SIAPE';
+  }
+
+  .membro-email::before {
+    content: 'E-mail';
+  }
+
+  .membro-acoes-cell {
+    grid-column: 2;
+    justify-content: flex-start;
+    margin-top: 6px;
+  }
+
+  .remove-membro-button,
+  .current-user-tag {
+    min-height: 40px;
+  }
 }

@@ -6,8 +6,10 @@
 
 .perfil-main {
   flex: 1;
-  margin-left: 260px; /* Largura da sidebar */
-  padding: 32px 48px;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+  padding: 32px var(--layout-gutter-desktop);
+  transition: margin-left 0.25s ease, padding 0.25s ease;
 }
 
 .perfil-header {
@@ -235,10 +237,49 @@
 }
 
 @media (max-width: 1000px) {
+  .perfil-main {
+    margin-left: 0;
+    padding: 88px var(--layout-gutter-notebook) 28px;
+  }
+
+  .perfil-content,
+  .perfil-tabs {
+    padding-inline: 24px;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .form-group.full-width {
     grid-column: span 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .perfil-main {
+    padding: 82px var(--layout-gutter-mobile) 24px;
+  }
+
+  .perfil-header h1 {
+    font-size: 24px;
+  }
+
+  .perfil-content,
+  .perfil-tabs {
+    padding-inline: 18px;
+  }
+
+  .perfil-content {
+    padding-block: 24px;
+  }
+
+  .perfil-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancelar,
+  .btn-salvar {
+    width: 100%;
   }
 }

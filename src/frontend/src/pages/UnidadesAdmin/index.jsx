@@ -156,13 +156,19 @@ const UnidadesAdmin = () => {
 
           <p className="unidades-filter-description">{descricaoFiltros}</p>
 
-          {error && <div className="unidades-error">{error}</div>}
+          {error && <div className="feedback-banner error">{error}</div>}
 
           <div className="unidades-table-wrapper">
             {loading ? (
-              <div className="unidades-empty">Carregando unidades...</div>
+              <div className="feedback-panel">
+                <strong>Carregando unidades oficiais</strong>
+                <span>Buscando a estrutura institucional da UFSM para exibicao administrativa.</span>
+              </div>
             ) : unidades.length === 0 ? (
-              <div className="unidades-empty">Nenhuma unidade encontrada para o filtro informado.</div>
+              <div className="feedback-panel">
+                <strong>Nenhuma unidade encontrada</strong>
+                <span>Refine os filtros ou limpe a busca para visualizar outras unidades.</span>
+              </div>
             ) : (
               <>
                 <table className="unidades-table">

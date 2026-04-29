@@ -17,6 +17,7 @@ const EditarPlano = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   
   // Dados auxiliares
   const [desafios, setDesafios] = useState([]);
@@ -183,8 +184,10 @@ const EditarPlano = () => {
   const handleSubmitRisco = async () => {
     setSaving(true);
     setError('');
+    setSuccess('');
     try {
       await api.patch(`/riscos/planos/${id}/`, riscoData);
+      setSuccess('Etapa salva com sucesso.');
       setEtapa(3);
     } catch (err) {
       setError(err.response?.data?.erro || 'Erro ao atualizar identificação e análise.');
@@ -197,6 +200,7 @@ const EditarPlano = () => {
     e.preventDefault();
     setSaving(true);
     setError('');
+    setSuccess('');
     try {
       if (planoAcaoData.id) {
         await api.patch(`/riscos/acoes/${planoAcaoData.id}/`, {
@@ -209,8 +213,8 @@ const EditarPlano = () => {
           risco: id
         });
       }
-      alert('Plano de Risco atualizado com sucesso!');
-      navigate('/planos');
+      setSuccess('Plano de risco atualizado com sucesso! Redirecionando para a listagem...');
+      setTimeout(() => navigate('/planos'), 1200);
     } catch {
       setError('Erro ao salvar o tratamento.');
     } finally {
@@ -227,7 +231,10 @@ const EditarPlano = () => {
       <div className="dashboard-container">
         <Sidebar />
         <main className="dashboard-main">
-          <div className="loading-state">Carregando dados do plano...</div>
+          <div className="feedback-panel">
+            <strong>Carregando edicao do plano</strong>
+            <span>Buscando dados do risco, objetivos e plano de acao vinculado.</span>
+          </div>
         </main>
       </div>
     );
@@ -263,6 +270,7 @@ const EditarPlano = () => {
         </section>
 
         <div className="form-container">
+          {success && <div className="feedback-banner success">{success}</div>}
           {error && <div className="error-message">{error}</div>}
 
           {etapa === 1 && (

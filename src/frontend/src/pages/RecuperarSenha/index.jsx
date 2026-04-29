@@ -12,6 +12,7 @@ const RecuperarSenha = () => {
   const [confirmacaoSenha, setConfirmacaoSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
@@ -30,12 +31,14 @@ const RecuperarSenha = () => {
   const handleEnviarEmail = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
     
     try {
       await api.post('/usuarios/recuperar-senha/enviar/', { email });
       setEtapa(2);
       setTimer(60);
+      setSuccess('Codigo enviado com sucesso. Verifique seu e-mail institucional.');
     } catch (err) {
       setError(err.response?.data?.erro || 'Erro ao enviar código.');
     } finally {
@@ -46,6 +49,7 @@ const RecuperarSenha = () => {
   const handleValidarCodigo = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     const codigoCompleto = codigo.join('');
     
     if (codigoCompleto.length < 6) {
@@ -57,6 +61,7 @@ const RecuperarSenha = () => {
     try {
       await api.post('/usuarios/recuperar-senha/validar/', { email, codigo: codigoCompleto });
       setEtapa(3);
+      setSuccess('Codigo validado. Agora escolha sua nova senha.');
     } catch (err) {
       setError(err.response?.data?.erro || 'Código inválido ou expirado.');
     } finally {
@@ -67,6 +72,7 @@ const RecuperarSenha = () => {
   const handleRedefinirSenha = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (novaSenha !== confirmacaoSenha) {
       setError('As senhas não coincidem.');
@@ -81,8 +87,8 @@ const RecuperarSenha = () => {
         nova_senha: novaSenha,
         confirmacao_senha: confirmacaoSenha
       });
-      alert('Senha alterada com sucesso! Você será redirecionado para o login.');
-      navigate('/login');
+      setSuccess('Senha alterada com sucesso! Redirecionando para o login...');
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
       setError(err.response?.data?.erro || 'Erro ao redefinir senha.');
     } finally {
@@ -112,6 +118,7 @@ const RecuperarSenha = () => {
       setTimer(60);
       setCodigo(['', '', '', '', '', '']);
       setError('');
+      setSuccess('Novo codigo enviado com sucesso.');
     } catch {
       setError('Erro ao reenviar código.');
     } finally {
@@ -143,7 +150,8 @@ const RecuperarSenha = () => {
                     <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ex: nome.sobrenome@ufsm.br" required />
                   </div>
                 </div>
-                {error && <p className="error-message">{error}</p>}
+                {success && <div className="feedback-banner success">{success}</div>}
+                {error && <div className="feedback-banner error">{error}</div>}
                 <button type="submit" className="recuperar-button" disabled={loading}>
                   {loading ? 'Enviando...' : (<>Enviar <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></>)}
                 </button>
@@ -172,7 +180,8 @@ const RecuperarSenha = () => {
                     {timer > 0 ? `Reenviar código em 00:${timer.toString().padStart(2, '0')}` : 'Reenviar código agora'}
                   </span>
                 </div>
-                {error && <p className="error-message">{error}</p>}
+                {success && <div className="feedback-banner success">{success}</div>}
+                {error && <div className="feedback-banner error">{error}</div>}
                 <button type="submit" className="recuperar-button" disabled={loading}>
                   {loading ? 'Validando...' : (<>Validar Código <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></>)}
                 </button>
@@ -212,7 +221,8 @@ const RecuperarSenha = () => {
                   </div>
                 </div>
 
-                {error && <p className="error-message">{error}</p>}
+                {success && <div className="feedback-banner success">{success}</div>}
+                {error && <div className="feedback-banner error">{error}</div>}
 
                 <button type="submit" className="recuperar-button" disabled={loading}>
                   {loading ? 'Processando...' : (<>Concluir e Acessar <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></>)}

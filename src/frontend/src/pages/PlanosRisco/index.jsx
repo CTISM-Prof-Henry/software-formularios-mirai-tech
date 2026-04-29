@@ -296,6 +296,7 @@ const PlanosRisco = () => {
             <div className="loading-state">Carregando planos de risco...</div>
           ) : planos.length > 0 ? (
             <>
+              <div className="plans-table-wrapper">
               <table className="plans-table">
                 <thead>
                   <tr>
@@ -351,6 +352,7 @@ const PlanosRisco = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
 
               <div className="pagination">
                 <button 
