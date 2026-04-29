@@ -64,6 +64,7 @@ class TestUsuarioViews:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data["siape"] == usuario.siape
+        assert response.data["setores"][0]["label_curto"] == "SA - Setor A"
 
     def test_atualizar_perfil(self, api_client, usuario):
         api_client.force_authenticate(user=usuario)
@@ -229,4 +230,4 @@ class TestUsuarioViews:
         
         ua = UsuarioAdmin(Usuario, AdminSite())
         display = ua.exibir_setores(usuario)
-        assert setor.sigla in display
+        assert setor.label_curto in display

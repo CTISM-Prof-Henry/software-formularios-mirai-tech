@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const GestaoEquipe = () => {
@@ -140,7 +141,7 @@ const GestaoEquipe = () => {
                   className={`tab-button ${setorSelecionado?.id === setor.id ? 'active' : ''}`}
                   onClick={() => setSetorSelecionado(setor)}
                 >
-                  {setor.sigla} - {setor.nome}
+                  {getSetorLabel(setor)}
                 </button>
               ))}
             </div>
@@ -171,7 +172,7 @@ const GestaoEquipe = () => {
 
           <div className="membros-list-container">
             <div className="list-header-row">
-              <h2>Membros do Setor: {setorSelecionado?.sigla}</h2>
+              <h2>Membros da Unidade: {getSetorLabel(setorSelecionado)}</h2>
               <div className="search-bar">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>

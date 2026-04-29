@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const Perfil = () => {
@@ -92,7 +93,7 @@ const Perfil = () => {
 
     const selecionados = setoresDisponiveis
       .filter(s => currentIds.includes(s.id))
-      .map(s => s.sigla);
+      .map(s => getSetorLabel(s));
       
     return selecionados.length > 0 ? selecionados.join(', ') : 'Selecione seus setores';
   };
@@ -214,7 +215,7 @@ const Perfil = () => {
                           checked={formData.id_setores.includes(setor.id)}
                           readOnly
                         />
-                        <span>{setor.sigla} - {setor.nome}</span>
+                        <span>{getSetorLabel(setor, { completo: user.is_superuser })}</span>
                       </div>
                     ))}
                   </div>

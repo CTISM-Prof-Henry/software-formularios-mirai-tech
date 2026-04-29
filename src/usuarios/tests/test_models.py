@@ -8,6 +8,22 @@ class TestSetorModel:
         assert str(setor) == "TST - Setor de Teste"
         assert setor._meta.db_table == "setores"
 
+    def test_labels_curto_e_completo(self):
+        setor = Setor.objects.create(
+            nome="Departamento de Computacao Aplicada",
+            sigla="CT",
+            sigla_centro="CT",
+            nome_centro="Centro de Tecnologia",
+            tipo_unidade="Departamento Didatico",
+            fonte_oficial=True,
+        )
+
+        assert setor.label_curto == "CT - Departamento de Computacao Aplicada"
+        assert (
+            setor.label_completo
+            == "CT - Departamento de Computacao Aplicada - Centro de Tecnologia - Departamento Didatico"
+        )
+
 @pytest.mark.django_db
 class TestUsuarioModel:
     def test_criar_usuario(self, db):

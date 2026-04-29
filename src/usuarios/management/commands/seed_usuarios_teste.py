@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 
+from src.usuarios.importacao_unidades import importar_unidades_csv
 from src.usuarios.models import Setor, Usuario
 
 
@@ -9,35 +10,53 @@ USUARIOS_TESTE = [
         "siape": "2030001",
         "nome": "Ana Paula Multissetorial",
         "email": "ana.multissetorial@teste.ufsm.br",
-        "setores": ["CAL", "CCS", "CT"],
+        "setores": [
+            {"sigla_centro": "CT", "nome": "Departamento de Computação Aplicada"},
+            {"sigla_centro": "PM", "nome": "Departamento de Administração - PM"},
+            {"sigla_centro": "CTISM", "nome": "Núcleo Pedagógico do CTISM"},
+        ],
         "equipe": True,
     },
     {
         "siape": "2030002",
         "nome": "Bruno Gestor Centros",
         "email": "bruno.centros@teste.ufsm.br",
-        "setores": ["CAL", "CCR"],
+        "setores": [
+            {"sigla_centro": "CT", "nome": "Departamento de Engenharia Mecânica"},
+            {"sigla_centro": "PM", "nome": "Departamento de Ciências Econômicas - PM"},
+        ],
         "equipe": False,
     },
     {
         "siape": "2030003",
         "nome": "Carla Gestora Pesquisa",
         "email": "carla.pesquisa@teste.ufsm.br",
-        "setores": ["CCS", "CCNE", "CCSH"],
+        "setores": [
+            {"sigla_centro": "CT", "nome": "Departamento de Eletrônica e Computação"},
+            {"sigla_centro": "PM", "nome": "Departamento de Ciências da Saúde - PM"},
+            {"sigla_centro": "CT", "nome": "Departamento de Engenharia Sanitária e Ambiental"},
+        ],
         "equipe": False,
     },
     {
         "siape": "2030004",
         "nome": "Diego Gestor Ensino",
         "email": "diego.ensino@teste.ufsm.br",
-        "setores": ["CE", "CEFD"],
+        "setores": [
+            {"sigla_centro": "CT", "nome": "Departamento de Engenharia de Produção e Sistemas"},
+            {"sigla_centro": "PM", "nome": "Departamento de Alimentos e Nutrição - PM"},
+        ],
         "equipe": False,
     },
     {
         "siape": "2030005",
         "nome": "Elisa Gestora Tecnologia",
         "email": "elisa.tecnologia@teste.ufsm.br",
-        "setores": ["CT", "CTISM", "Politecnico"],
+        "setores": [
+            {"sigla_centro": "CT", "nome": "Departamento de Linguagens e Sistemas de Computação"},
+            {"sigla_centro": "CT", "nome": "Departamento de Transportes"},
+            {"sigla_centro": "PM", "nome": "Departamento de Zootecnia e Ciências Biológicas - PM"},
+        ],
         "equipe": False,
     },
 ]
@@ -64,10 +83,16 @@ class Command(BaseCommand):
         criados = 0
         atualizados = 0
 
+        importar_unidades_csv(Setor, desativar_legado=True)
+
         for dados_usuario in USUARIOS_TESTE:
             setores = [
-                Setor.objects.get_or_create(sigla=sigla, defaults={"nome": sigla})[0]
-                for sigla in dados_usuario["setores"]
+                Setor.objects.get(
+                    sigla_centro=setor["sigla_centro"],
+                    nome=setor["nome"],
+                    fonte_oficial=True,
+                )
+                for setor in dados_usuario["setores"]
             ]
             usuario, criado = Usuario.objects.get_or_create(
                 siape=dados_usuario["siape"],

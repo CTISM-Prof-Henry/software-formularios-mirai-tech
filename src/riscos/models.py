@@ -90,7 +90,7 @@ class Risco(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Risco {self.id} - {self.setor.sigla}"
+        return f"Risco {self.id} - {self.setor.label_curto}"
 
 
 class PlanoAcao(models.Model):

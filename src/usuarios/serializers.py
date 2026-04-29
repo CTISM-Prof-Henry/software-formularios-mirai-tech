@@ -4,7 +4,18 @@ from .models import Usuario, Setor
 class SetorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setor
-        fields = ['id', 'nome', 'sigla']
+        fields = [
+            'id',
+            'nome',
+            'sigla',
+            'sigla_centro',
+            'nome_centro',
+            'tipo_unidade',
+            'fonte_oficial',
+            'ativo',
+            'label_curto',
+            'label_completo',
+        ]
 
 
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
@@ -45,7 +56,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['id', 'siape', 'nome', 'email', 'setores']
+        fields = ['id', 'siape', 'nome', 'email', 'setores', 'is_superuser']
 
 
 class AtualizarPerfilSerializer(serializers.ModelSerializer):

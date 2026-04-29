@@ -123,7 +123,7 @@ class SetorViewSet(viewsets.ModelViewSet):
     CRUD completo de Setores da UFSM.
     Inclui gestão de equipe (membros).
     """
-    queryset = Setor.objects.all()
+    queryset = Setor.objects.filter(ativo=True).order_by("sigla_centro", "nome")
     serializer_class = SetorSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
     pagination_class = None

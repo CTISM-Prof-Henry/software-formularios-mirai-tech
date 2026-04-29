@@ -93,7 +93,7 @@ def exportar_riscos_excel(riscos):
         desafio = risco.objetivo.desafio
         ws.append([
             risco.id,
-            f"{risco.setor.sigla} - {risco.setor.nome}",
+            risco.setor.label_curto,
             risco.categoria,
             f"Desafio {desafio.numero} - {desafio.descricao}",
             f"{risco.objetivo.codigo} - {risco.objetivo.descricao}",
@@ -136,7 +136,7 @@ def exportar_risco_excel(risco):
     desafio = risco.objetivo.desafio
     dados = [
         ("ID", risco.id),
-        ("Setor", f"{risco.setor.sigla} - {risco.setor.nome}"),
+        ("Setor", risco.setor.label_curto),
         ("Categoria", risco.categoria),
         ("Desafio PDI", f"Desafio {desafio.numero} - {desafio.descricao}"),
         ("Objetivo PDI", f"{risco.objetivo.codigo} - {risco.objetivo.descricao}"),
@@ -189,7 +189,7 @@ def exportar_risco_pdf(risco):
     styles = getSampleStyleSheet()
     story = [
         Paragraph(f"Plano de Risco #{risco.id}", styles["Title"]),
-        Paragraph(f"{risco.setor.sigla} - {risco.setor.nome}", styles["Normal"]),
+        Paragraph(risco.setor.label_curto, styles["Normal"]),
         Spacer(1, 16),
     ]
 

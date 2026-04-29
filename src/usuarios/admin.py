@@ -3,8 +3,19 @@ from .models import Usuario, Setor
 
 @admin.register(Setor)
 class SetorAdmin(admin.ModelAdmin):
-    list_display = ('sigla', 'nome')
-    search_fields = ('sigla', 'nome')
+    list_display = (
+        'label_curto_admin',
+        'nome_centro',
+        'tipo_unidade',
+        'fonte_oficial',
+        'ativo',
+    )
+    search_fields = ('nome', 'sigla', 'sigla_centro', 'nome_centro', 'tipo_unidade')
+    list_filter = ('fonte_oficial', 'ativo', 'tipo_unidade', 'sigla_centro')
+
+    def label_curto_admin(self, obj):
+        return obj.label_completo
+    label_curto_admin.short_description = "Unidade"
 
 @admin.register(Usuario)
 class UsuarioAdmin(admin.ModelAdmin):
@@ -14,5 +25,5 @@ class UsuarioAdmin(admin.ModelAdmin):
     ordering = ('nome',)
 
     def exibir_setores(self, obj):
-        return ", ".join([s.sigla for s in obj.setores.all()])
+        return ", ".join([s.label_curto for s in obj.setores.all()])
     exibir_setores.short_description = "Setores"

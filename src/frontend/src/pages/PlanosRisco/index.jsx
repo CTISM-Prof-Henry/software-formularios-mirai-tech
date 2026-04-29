@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const PlanosRisco = () => {
@@ -246,7 +247,7 @@ const PlanosRisco = () => {
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                     <option value="">Todos os Setores</option>
                     {user.setores?.map(s => (
-                      <option key={s.id} value={s.id}>{s.sigla} - {s.nome}</option>
+                      <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
                     ))}
                   </select>
                 </div>
@@ -321,7 +322,7 @@ const PlanosRisco = () => {
                     <tr key={plano.id}>
                       <td>#{plano.id}</td>
                       <td className="col-evento" title={plano.evento}>{plano.evento}</td>
-                      <td>{plano.setor_detalhes?.sigla}</td>
+                      <td>{getSetorLabel(plano.setor_detalhes)}</td>
                       <td>{plano.categoria}</td>
                       <td>
                         <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>

@@ -6,16 +6,65 @@ class Setor(models.Model):
     Representa as unidades administrativas da UFSM.
     """
     nome = models.CharField(max_length=255, verbose_name="Nome do Setor", db_column="nome")
-    sigla = models.CharField(max_length=20, unique=True, verbose_name="Sigla", db_column="sigla")
+    sigla = models.CharField(max_length=255, verbose_name="Sigla", db_column="sigla")
+    sigla_centro = models.CharField(
+        max_length=20,
+        verbose_name="Sigla do Centro",
+        db_column="sigla_centro",
+        blank=True,
+        default="",
+    )
+    nome_centro = models.CharField(
+        max_length=255,
+        verbose_name="Nome do Centro",
+        db_column="nome_centro",
+        blank=True,
+        default="",
+    )
+    tipo_unidade = models.CharField(
+        max_length=100,
+        verbose_name="Tipo da Unidade",
+        db_column="tipo_unidade",
+        blank=True,
+        default="",
+    )
+    fonte_oficial = models.BooleanField(
+        default=False,
+        db_column="fonte_oficial",
+        verbose_name="Importado de base oficial",
+    )
+    ativo = models.BooleanField(default=True, db_column="ativo")
 
     class Meta:
         db_table = "setores"
         verbose_name = "Setor"
         verbose_name_plural = "Setores"
-        ordering = ['nome']
+        ordering = ["sigla_centro", "nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["nome", "sigla_centro", "tipo_unidade"],
+                name="uniq_setor_nome_centro_tipo",
+            )
+        ]
+
+    @property
+    def label_curto(self):
+        sigla_base = self.sigla_centro or self.sigla
+        if sigla_base:
+            return f"{sigla_base} - {self.nome}"
+        return self.nome
+
+    @property
+    def label_completo(self):
+        partes = [self.label_curto]
+        if self.nome_centro:
+            partes.append(self.nome_centro)
+        if self.tipo_unidade:
+            partes.append(self.tipo_unidade)
+        return " - ".join(partes)
 
     def __str__(self):
-        return f"{self.sigla} - {self.nome}"
+        return self.label_curto
 
 
 class GerenciadorUsuario(BaseUserManager):
