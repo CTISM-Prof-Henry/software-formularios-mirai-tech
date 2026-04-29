@@ -7,6 +7,14 @@
   --text-grey: rgba(0, 0, 0, 0.55);
   --text-white: rgba(255, 255, 255, 1);
   --bg-white: rgba(255, 255, 255, 1);
+  --sidebar-width: 260px;
+  --sidebar-width-compact: 224px;
+  --layout-gutter-desktop: 48px;
+  --layout-gutter-notebook: 28px;
+  --layout-gutter-mobile: 16px;
+  --surface-muted: #f4f7f9;
+  --border-soft: #e5e7eb;
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -21,6 +29,7 @@ body {
   color: var(--text-black);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 button {
@@ -36,4 +45,93 @@ input {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-shell-surface {
+  background-color: var(--surface-muted);
+}
+
+.app-shell-content {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  padding: 32px var(--layout-gutter-desktop);
+  transition: margin-left 0.25s ease, padding 0.25s ease;
+}
+
+.page-section-card {
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.feedback-banner {
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.feedback-banner.error {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.feedback-banner.success {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.feedback-banner.info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.feedback-panel {
+  background: #ffffff;
+  border: 1px dashed #dbe3ec;
+  border-radius: 18px;
+  padding: 28px 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.feedback-panel strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #17324d;
+  font-size: 16px;
+}
+
+@media (max-width: 1440px) {
+  .app-shell-content {
+    margin-left: var(--sidebar-width-compact);
+    padding-inline: 36px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .app-shell-content {
+    margin-left: 0;
+    padding: 88px var(--layout-gutter-notebook) 32px;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell-content {
+    padding: 82px var(--layout-gutter-mobile) 24px;
+  }
 }

@@ -400,3 +400,128 @@
     background-color: #000000;
     color: #ffffff;
 }
+
+@media (max-width: 1200px) {
+  .stepper-container {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .step-divider {
+    display: none;
+  }
+
+  .form-container {
+    max-width: 100%;
+    padding: 28px 24px;
+  }
+
+  .matrix-grid,
+  .evaluation-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .efficacy-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .residual-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .stepper-container {
+    margin: 20px 0 24px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .step-item {
+    align-items: center;
+    min-width: 92px;
+    flex-shrink: 0;
+  }
+
+  .step-label {
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .form-container {
+    padding: 22px 16px;
+    border-radius: 14px;
+  }
+
+  .input-row,
+  .matrix-grid,
+  .evaluation-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .btn-primary,
+  .btn-cancel,
+  .btn-back {
+    width: 100%;
+  }
+
+  .step-content h3 {
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .step-desc {
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .matrix-grid {
+    padding: 16px;
+  }
+
+  .preview-value {
+    font-size: 48px;
+  }
+
+  .risk-preview-card {
+    padding: 22px 18px;
+  }
+
+  .efficacy-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .residual-badge {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .residual-value {
+    font-size: 40px;
+  }
+}

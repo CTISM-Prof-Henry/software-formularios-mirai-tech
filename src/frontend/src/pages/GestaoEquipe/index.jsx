@@ -113,7 +113,10 @@ const GestaoEquipe = () => {
       <div className="dashboard-container">
         <Sidebar />
         <main className="dashboard-main">
-          <p>Carregando...</p>
+          <div className="feedback-panel">
+            <strong>Carregando gestao de equipe</strong>
+            <span>Estamos preparando as unidades e os membros vinculados.</span>
+          </div>
         </main>
       </div>
     );
@@ -166,8 +169,8 @@ const GestaoEquipe = () => {
               </div>
             </form>
 
-            {error && <p className="message error">{error}</p>}
-            {success && <p className="message success">{success}</p>}
+            {error && <div className="feedback-banner error">{error}</div>}
+            {success && <div className="feedback-banner success">{success}</div>}
           </div>
 
           <div className="membros-list-container">
@@ -197,7 +200,10 @@ const GestaoEquipe = () => {
               </div>
 
               {loadingMembros ? (
-                <p className="loading-text">Carregando membros...</p>
+                <div className="feedback-panel table-feedback">
+                  <strong>Carregando membros</strong>
+                  <span>Buscando a equipe vinculada a esta unidade.</span>
+                </div>
               ) : membrosProcessados.length > 0 ? (
                 membrosProcessados.map(membro => (
                   <div key={membro.id} className="membro-row">
@@ -232,7 +238,10 @@ const GestaoEquipe = () => {
                   </div>
                 ))
               ) : (
-                <p className="empty-text">Nenhum membro encontrado nesta unidade.</p>
+                <div className="feedback-panel table-feedback">
+                  <strong>Nenhum membro encontrado</strong>
+                  <span>Essa unidade ainda nao possui membros visiveis para o filtro atual.</span>
+                </div>
               )}
             </div>
           </div>

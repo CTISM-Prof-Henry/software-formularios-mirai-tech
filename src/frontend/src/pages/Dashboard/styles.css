@@ -6,14 +6,17 @@
 
 .dashboard-main {
   flex: 1;
-  margin-left: 260px;
-  padding: 32px 48px;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+  padding: 32px var(--layout-gutter-desktop);
+  transition: margin-left 0.25s ease, padding 0.25s ease;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 18px;
   margin-bottom: 32px;
 }
 
@@ -39,6 +42,7 @@
 .new-plan-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 12px 24px;
   background-color: #003470;
@@ -335,30 +339,91 @@
   font-weight: 600;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1480px) {
+  .dashboard-main {
+    margin-left: var(--sidebar-width-compact);
+    padding-inline: 36px;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-button,
+  .clear-filter-button {
+    width: 100%;
+  }
+
+  .search-input-wrapper {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1200px) {
+  .dashboard-main {
+    margin-left: 0;
+    padding: 88px var(--layout-gutter-notebook) 28px;
+  }
+
+  .dashboard-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .filter-bar {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .filter-button,
+  .clear-filter-button {
+    width: 100%;
+  }
+
+  .plan-item {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
 @media (max-width: 760px) {
   .dashboard-main {
-    margin-left: 0;
-    padding: 24px;
+    padding: 82px var(--layout-gutter-mobile) 24px;
   }
 
-  .dashboard-header,
-  .plan-item {
-    align-items: flex-start;
-    flex-direction: column;
+  .dashboard-header {
+    margin-bottom: 24px;
+  }
+
+  .header-title h1,
+  .content-title {
+    font-size: 22px;
   }
 
   .stats-grid,
   .filter-bar {
     grid-template-columns: 1fr;
+  }
+
+  .stat-card,
+  .plans-container {
+    border-radius: 14px;
+  }
+
+  .plan-item {
+    padding: 18px;
+  }
+
+  .plan-details h3 {
+    white-space: normal;
+  }
+
+  .new-plan-button,
+  .filter-button,
+  .clear-filter-button {
+    width: 100%;
   }
 }

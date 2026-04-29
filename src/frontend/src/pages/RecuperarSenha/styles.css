@@ -241,3 +241,54 @@
   color: rgba(255, 255, 255, 0.6);
   text-align: center;
 }
+
+@media (max-width: 960px) {
+  .recuperar-card,
+  .recuperar-card.redefinir-layout {
+    max-width: 560px;
+    flex-direction: column;
+  }
+
+  .recuperar-form-section,
+  .recuperar-sidebar-info {
+    padding: 32px 24px;
+  }
+
+  .recuperar-sidebar-info {
+    border-left: none;
+    border-top: 1px solid #eee;
+  }
+}
+
+@media (max-width: 720px) {
+  .recuperar-container {
+    padding: 16px;
+  }
+
+  .recuperar-card,
+  .recuperar-card.redefinir-layout {
+    border-radius: 14px;
+  }
+
+  .recuperar-form-section,
+  .recuperar-sidebar-info {
+    padding: 24px 18px;
+  }
+
+  .recuperar-title-main {
+    font-size: 24px;
+  }
+
+  .recuperar-subtitle-section {
+    font-size: 20px;
+  }
+
+  .code-inputs-container {
+    gap: 8px;
+  }
+
+  .code-input-box {
+    width: 40px;
+    height: 52px;
+  }
+}

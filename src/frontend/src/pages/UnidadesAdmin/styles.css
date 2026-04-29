@@ -220,3 +220,55 @@
     min-width: 100%;
   }
 }
+
+@media (max-width: 1200px) {
+  .unidades-panel {
+    padding: 24px 20px;
+  }
+
+  .unidades-filters-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .unidades-clear-button {
+    width: 100%;
+  }
+
+  .unidades-table {
+    min-width: 780px;
+  }
+}
+
+@media (max-width: 760px) {
+  .unidades-panel {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+
+  .unidades-summary-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .unidades-summary-card strong {
+    font-size: 1.6rem;
+  }
+
+  .unidades-filters-row {
+    grid-template-columns: 1fr;
+  }
+
+  .unidades-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .unidades-pagination-actions {
+    width: 100%;
+  }
+
+  .unidades-pagination-actions button {
+    flex: 1;
+  }
+}

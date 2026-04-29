@@ -14,6 +14,7 @@ const Cadastro = () => {
   });
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingSetores, setLoadingSetores] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -96,6 +97,7 @@ const Cadastro = () => {
   const handleCadastro = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (formData.id_setores.length === 0) {
       setError('Selecione pelo menos um setor.');
@@ -106,8 +108,8 @@ const Cadastro = () => {
 
     try {
       await api.post('/usuarios/registro/', formData);
-      alert('Cadastro realizado com sucesso! Faça login para continuar.');
-      navigate('/login');
+      setSuccess('Cadastro realizado com sucesso! Redirecionando para o login...');
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
       setError(err.response?.data?.erro || 'Erro ao realizar cadastro. Tente novamente.');
     } finally {
@@ -225,7 +227,8 @@ const Cadastro = () => {
             )}
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          {success && <div className="feedback-banner success">{success}</div>}
+          {error && <div className="feedback-banner error">{error}</div>}
 
           <button type="submit" className="cadastro-button" disabled={loading}>
             {loading ? 'Processando...' : 'Concluir Cadastro'}
