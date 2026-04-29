@@ -38,8 +38,8 @@ class Setor(models.Model):
 
     class Meta:
         db_table = "setores"
-        verbose_name = "Setor"
-        verbose_name_plural = "Setores"
+        verbose_name = "Unidade Organizacional"
+        verbose_name_plural = "Unidades Organizacionais"
         ordering = ["sigla_centro", "nome"]
         constraints = [
             models.UniqueConstraint(
@@ -101,11 +101,11 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     nome = models.CharField(max_length=255, verbose_name="Nome Completo", db_column="nome")
     email = models.EmailField(verbose_name="E-mail", unique=True, db_column="email", null=True, blank=True)
     setores = models.ManyToManyField(
-        Setor, 
+        Setor,
         related_name="usuarios",
         blank=True,
-        verbose_name="Setores do Usuário",
-        db_table="usuario_setores" # Tabela intermediária traduzida
+        verbose_name="Unidades do Usuário",
+        db_table="usuario_setores",
     )
     ativo = models.BooleanField(default=True, db_column="ativo")
     equipe = models.BooleanField(default=False, db_column="equipe")
@@ -141,3 +141,6 @@ class CodigoRecuperacao(models.Model):
         db_table = "codigos_recuperacao"
         verbose_name = "Código de Recuperação"
         verbose_name_plural = "Códigos de Recuperação"
+
+
+UnidadeOrganizacional = Setor

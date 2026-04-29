@@ -205,7 +205,7 @@ const NovoPlano = () => {
             <div className="step-content">
               <div className="input-row">
                 <div className="form-group">
-                  <label>Setor/Departamento:</label>
+                  <label>Unidade/Departamento:</label>
                   <select name="setor" value={riscoData.setor} onChange={handleRiscoChange}>
                     {user.setores?.map(s => (
                       <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>

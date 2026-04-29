@@ -133,7 +133,7 @@ const GestaoEquipe = () => {
 
         <section className="equipe-content">
           <div className="equipe-selector">
-            <label>Selecione o Setor/Departamento:</label>
+            <label>Selecione a Unidade/Departamento:</label>
             <div className="selector-tabs">
               {setores.map(setor => (
                 <button 
@@ -232,7 +232,7 @@ const GestaoEquipe = () => {
                   </div>
                 ))
               ) : (
-                <p className="empty-text">Nenhum membro encontrado neste setor.</p>
+                <p className="empty-text">Nenhum membro encontrado nesta unidade.</p>
               )}
             </div>
           </div>

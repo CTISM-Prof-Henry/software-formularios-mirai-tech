@@ -54,17 +54,6 @@ No **Ubuntu/Linux**:
 cp .env.example .env
 ```
 
-Use os valores locais abaixo:
-
-```env
-DATABASE_NAME=gestao_risco_ufsm
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_HOST=localhost
-DATABASE_PORT=5433
-DEBUG=True
-```
-
 ## 4. Banco de dados
 
 Com o Docker em execução, suba o PostgreSQL:
@@ -73,16 +62,11 @@ Com o Docker em execução, suba o PostgreSQL:
 docker compose up -d
 ```
 
-Se sua instalação ainda usar o comando legado:
-
-```bash
-docker-compose up -d
-```
-
 ## 5. Preparar o Django
 
 ```bash
 python manage.py migrate
+python manage.py makemigrations
 ```
 
 Opcionalmente, crie usuários de teste para validar a gestão de equipes:
@@ -165,7 +149,8 @@ http://localhost:5173/
 
 - **Login**: `POST /api/usuarios/login/`
 - **Registro**: `POST /api/usuarios/registro/`
-- **Setores**: `GET /api/usuarios/setores/`
+- **Unidades/Departamentos**: `GET /api/usuarios/setores/`  
+  A rota continua com o nome `setores` por compatibilidade, mas retorna as unidades reais da UFSM.
 - **Atualizar perfil**: `PATCH /api/usuarios/me/`
 - **Recuperação de senha**: `POST /api/usuarios/recuperar-senha/enviar/`, `validar/` e `redefinir/`
 

@@ -47,7 +47,7 @@ const MapaRisco = () => {
   const getTopSetoresByScore = () => {
     const ranking = riscos.reduce((acc, risco) => {
       const setorId = risco.setor_detalhes?.id || risco.setor;
-      const setorNome = getSetorLabel(risco.setor_detalhes) || 'Setor não informado';
+      const setorNome = getSetorLabel(risco.setor_detalhes) || 'Unidade não informada';
 
       if (!acc[setorId]) {
         acc[setorId] = {
@@ -153,9 +153,9 @@ const MapaRisco = () => {
             <section className="plans-filters mapa-filters">
               <div className="filters-row">
                 <div className="filter-group">
-                  <label>Setor/Departamento:</label>
+                  <label>Unidade/Departamento:</label>
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
-                    <option value="">Todos os Setores</option>
+                    <option value="">Todas as Unidades</option>
                     {user.setores?.map(s => (
                       <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
                     ))}
@@ -289,7 +289,7 @@ const MapaRisco = () => {
             </div>
 
             <div className="dashboard-card ranking-card">
-              <h3>Setores com Maior Pontuação</h3>
+              <h3>Unidades com Maior Pontuação</h3>
               <div className="ranking-list">
                 {getTopSetoresByScore().length > 0 ? (
                   getTopSetoresByScore().map((setor, index) => (
@@ -383,7 +383,7 @@ const MapaRisco = () => {
                       <div className="priority-cell priority-event">
                         <strong>{risco.evento}</strong>
                         <span>
-                          {getSetorLabel(risco.setor_detalhes) || 'Setor não informado'}
+                          {getSetorLabel(risco.setor_detalhes) || 'Unidade não informada'}
                         </span>
                       </div>
                       <div className="priority-cell">

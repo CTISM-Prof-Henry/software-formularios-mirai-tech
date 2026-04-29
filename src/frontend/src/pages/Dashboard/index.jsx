@@ -150,11 +150,11 @@ const Dashboard = () => {
           <div className="stat-card">
             <div className="stat-icon-wrapper green">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><path d="M9 9v.01"></path><path d="M9 13v.01"></path><path d="M9 17v.01"></path></svg>
-              <span className="stat-badge target">SETOR</span>
+              <span className="stat-badge target">UNIDADE</span>
             </div>
             <div className="stat-info">
               <span className="stat-value">{String(setoresResumo).padStart(2, '0')}</span>
-              <span className="stat-label">{filterSetor ? 'SETOR FILTRADO' : 'MEUS SETORES'}</span>
+              <span className="stat-label">{filterSetor ? 'UNIDADE FILTRADA' : 'MINHAS UNIDADES'}</span>
             </div>
           </div>
         </section>
@@ -174,7 +174,7 @@ const Dashboard = () => {
             </div>
 
             <div className="dashboard-filter-group">
-              <label>Departamento</label>
+              <label>Unidade/Departamento</label>
               <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                 <option value="">Todos</option>
                 {user.setores?.map((setor) => (
@@ -218,7 +218,7 @@ const Dashboard = () => {
                   <div className="plan-details">
                     <h3>{plano.evento}</h3>
                     <p className="plan-meta">
-                      Setor: {getSetorLabel(plano.setor_detalhes) || 'Não informado'} • ID: #{plano.id}
+                      Unidade: {getSetorLabel(plano.setor_detalhes) || 'Não informado'} • ID: #{plano.id}
                     </p>
                     <p className="plan-date">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

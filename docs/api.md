@@ -1,36 +1,41 @@
 # API
 
-## Visão geral
+## Visao geral
 
-O backend expõe uma API REST organizada em dois grandes grupos:
+O backend expoe uma API REST organizada em dois grandes grupos:
 
 - `/api/usuarios/`
 - `/api/riscos/`
 
-O projeto utiliza **Token Authentication** com Django REST Framework. Algumas rotas são públicas, especialmente login, registro, recuperação de senha e listagem de setores.
+O projeto utiliza **Token Authentication** com Django REST Framework. Algumas rotas sao publicas, especialmente login, registro, recuperacao de senha e listagem de unidades.
 
-## Rotas de usuários
+## Rotas de usuarios
 
-### Autenticação e cadastro
+### Autenticacao e cadastro
 
 - `POST /api/usuarios/login/`
-  - autentica um usuário com `siape` e `senha`;
+  - autentica um usuario com `siape` e `senha`;
 - `POST /api/usuarios/registro/`
-  - cadastra um novo usuário;
+  - cadastra um novo usuario;
 - `GET /api/usuarios/setores/`
-  - lista os setores disponíveis para seleção no cadastro;
+  - lista as unidades/departamentos disponiveis para selecao no cadastro;
 - `GET /api/usuarios/me/`
-  - retorna os dados do usuário autenticado;
+  - retorna os dados do usuario autenticado;
 - `PATCH /api/usuarios/me/`
-  - atualiza e-mail, setores e senha.
+  - atualiza e-mail, unidades e senha.
 
-### Recuperação de senha
+Observacoes:
+
+- a rota continua como `setores` por compatibilidade com o frontend e com integracoes ja existentes, mas o recurso retornado representa **unidades/departamentos da UFSM**;
+- para administradores do sistema, existe tambem `GET /api/usuarios/setores/admin/`, com busca, filtros e paginacao.
+
+### Recuperacao de senha
 
 - `POST /api/usuarios/recuperar-senha/enviar/`
 - `POST /api/usuarios/recuperar-senha/validar/`
 - `POST /api/usuarios/recuperar-senha/redefinir/`
 
-### Gestão de equipe por setor
+### Gestao de equipe por unidade
 
 - `GET /api/usuarios/setores/{id}/membros/`
 - `POST /api/usuarios/setores/{id}/adicionar_membro/`
@@ -38,7 +43,7 @@ O projeto utiliza **Token Authentication** com Django REST Framework. Algumas ro
 
 ## Rotas de riscos
 
-As rotas principais do módulo de riscos são:
+As rotas principais do modulo de riscos sao:
 
 - `GET|POST /api/riscos/desafios/`
 - `GET|POST /api/riscos/objetivos/`
@@ -47,9 +52,10 @@ As rotas principais do módulo de riscos são:
 - `GET|POST /api/riscos/acoes/`
 - `GET|POST /api/riscos/monitoramentos/`
 
-## Observações importantes
+## Observacoes importantes
 
-- a listagem de setores é pública e não exige autenticação;
-- as rotas de perfil e edição exigem token válido;
-- a listagem de planos de risco possui filtros e paginação;
-- a edição de riscos respeita o vínculo do usuário com o setor correspondente.
+- a listagem de unidades (`/api/usuarios/setores/`) e publica e nao exige autenticacao;
+- a listagem administrativa de unidades exige usuario com `is_superuser = true`;
+- as rotas de perfil e edicao exigem token valido;
+- a listagem de planos de risco possui filtros e paginacao;
+- a edicao de riscos respeita o vinculo do usuario com a unidade correspondente.

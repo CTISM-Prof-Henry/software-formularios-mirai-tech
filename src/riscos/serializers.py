@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.usuarios.serializers import SetorSerializer
+from src.usuarios.serializers import UnidadeOrganizacionalSerializer
 
 from .models import DesafioPDI, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
 
@@ -25,7 +25,7 @@ class ObjetivoPDISerializer(serializers.ModelSerializer):
 class RiscoSerializer(serializers.ModelSerializer):
     nivel_risco = serializers.IntegerField(read_only=True)
     nivel_residual = serializers.IntegerField(read_only=True)
-    setor_detalhes = SetorSerializer(source='setor', read_only=True)
+    setor_detalhes = UnidadeOrganizacionalSerializer(source='setor', read_only=True)
     objetivo_detalhes = ObjetivoPDISerializer(source='objetivo', read_only=True)
     macroprocesso_detalhes = MacroprocessoSerializer(source='macroprocesso', read_only=True)
 
