@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const MapaRisco = () => {
@@ -50,14 +51,12 @@ const MapaRisco = () => {
   const getTopSetoresByScore = () => {
     const ranking = riscos.reduce((acc, risco) => {
       const setorId = risco.setor_detalhes?.id || risco.setor;
-      const setorNome = risco.setor_detalhes?.nome || 'Setor não informado';
-      const setorSigla = risco.setor_detalhes?.sigla || '';
+      const setorNome = getSetorLabel(risco.setor_detalhes) || 'Setor não informado';
 
       if (!acc[setorId]) {
         acc[setorId] = {
           id: setorId,
           nome: setorNome,
-          sigla: setorSigla,
           pontos: 0,
         };
       }
@@ -162,7 +161,7 @@ const MapaRisco = () => {
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                     <option value="">Todos os Setores</option>
                     {user.setores?.map(s => (
-                      <option key={s.id} value={s.id}>{s.sigla} - {s.nome}</option>
+                      <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
                     ))}
                   </select>
                 </div>
@@ -302,7 +301,7 @@ const MapaRisco = () => {
                       <div className="ranking-position">{getRankingLabel(index)}</div>
                       <div className="ranking-info">
                         <span className="ranking-name">
-                          {setor.sigla ? `${setor.sigla} - ${setor.nome}` : setor.nome}
+                          {setor.nome}
                         </span>
                       </div>
                       <div className={`ranking-score ${index < 3 ? 'highlight' : ''}`}>
@@ -388,9 +387,7 @@ const MapaRisco = () => {
                       <div className="priority-cell priority-event">
                         <strong>{risco.evento}</strong>
                         <span>
-                          {risco.setor_detalhes?.sigla
-                            ? `${risco.setor_detalhes.sigla} - ${risco.setor_detalhes.nome}`
-                            : 'Setor não informado'}
+                          {getSetorLabel(risco.setor_detalhes) || 'Setor não informado'}
                         </span>
                       </div>
                       <div className="priority-cell">
@@ -399,7 +396,7 @@ const MapaRisco = () => {
                         </span>
                       </div>
                       <div className="priority-cell priority-owner">
-                        {planoAcao?.responsavel || risco.setor_detalhes?.sigla || 'Não definido'}
+                        {planoAcao?.responsavel || risco.setor_detalhes?.sigla_centro || risco.setor_detalhes?.sigla || 'Não definido'}
                       </div>
                       <div className="priority-cell">
                         <span className="priority-action-tag">

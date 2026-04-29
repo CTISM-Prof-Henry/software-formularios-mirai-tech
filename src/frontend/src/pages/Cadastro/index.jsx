@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const Cadastro = () => {
@@ -66,7 +67,7 @@ const Cadastro = () => {
     if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando setores...';
     if (currentIds.length === 1) {
       const setor = setoresDisponiveis.find((item) => item.id === currentIds[0]);
-      return setor ? setor.sigla : '1 setor selecionado';
+      return setor ? getSetorLabel(setor) : '1 setor selecionado';
     }
     return `${currentIds.length} setores selecionados`;
   };
@@ -74,9 +75,11 @@ const Cadastro = () => {
   const setoresFiltrados = setoresDisponiveis.filter((setor) => {
     const termo = buscaSetor.trim().toLowerCase();
     if (!termo) return true;
+    const label = getSetorLabel(setor).toLowerCase();
     return (
-      setor.sigla.toLowerCase().includes(termo) ||
-      setor.nome.toLowerCase().includes(termo)
+      label.includes(termo) ||
+      (setor.nome_centro || '').toLowerCase().includes(termo) ||
+      (setor.tipo_unidade || '').toLowerCase().includes(termo)
     );
   });
 
@@ -187,7 +190,7 @@ const Cadastro = () => {
                     type="text"
                     value={buscaSetor}
                     onChange={(e) => setBuscaSetor(e.target.value)}
-                    placeholder="Buscar setor por sigla ou nome"
+                    placeholder="Buscar unidade por sigla, nome ou centro"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -204,7 +207,7 @@ const Cadastro = () => {
                         checked={formData.id_setores.includes(setor.id)}
                         readOnly
                       />
-                      <span>{setor.sigla} - {setor.nome}</span>
+                      <span>{getSetorLabel(setor)}</span>
                     </div>
                   ))}
 

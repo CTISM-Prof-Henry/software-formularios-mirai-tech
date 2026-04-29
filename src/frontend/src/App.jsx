@@ -11,6 +11,7 @@ import NovoPlano from './pages/NovoPlano'
 import EditarPlano from './pages/EditarPlano'
 import VisualizarPlano from './pages/VisualizarPlano'
 import MapaRisco from './pages/MapaRisco'
+import UnidadesAdmin from './pages/UnidadesAdmin'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/mapa" element={<MapaRisco />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/equipe" element={<GestaoEquipe />} />
+        <Route path="/unidades" element={<UnidadesAdmin />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

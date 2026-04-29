@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import '../NovoPlano/styles.css';
 
 const EditarPlano = () => {
@@ -275,7 +276,7 @@ const EditarPlano = () => {
                   <label>Setor/Departamento:</label>
                   <select name="setor" value={riscoData.setor} onChange={handleRiscoChange}>
                     {user.setores?.map(s => (
-                      <option key={s.id} value={s.id}>{s.sigla} - {s.nome}</option>
+                      <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
                     ))}
                   </select>
                 </div>

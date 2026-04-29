@@ -32,6 +32,9 @@ Os testes estão concentrados nos apps `usuarios` e `riscos`:
 Arquivos atualmente presentes:
 
 - `src/usuarios/tests/test_models.py`
+- `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_normalizar_setores_legados.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/usuarios/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_models.py`
@@ -46,17 +49,25 @@ Os testes unitários validam comportamentos isolados de classes, métodos e regr
 
 - `src/usuarios/tests/test_models.py`
 - `src/riscos/tests/test_models.py`
+- `src/usuarios/tests/test_normalizar_setores_legados.py`
 
 ### O que está coberto como teste unitário
 
 #### `src/usuarios/tests/test_models.py`
 
 - criação de `Setor`;
+- geração de `label_curto` e `label_completo` para unidades oficiais;
 - criação de usuário comum;
 - validação de erro ao criar usuário sem SIAPE;
 - validação de erro ao criar superusuário com flags inconsistentes;
 - criação válida de superusuário;
 - comportamento básico de `__str__`, `is_active` e `is_staff`.
+
+#### `src/usuarios/tests/test_normalizar_setores_legados.py`
+
+- localização da unidade oficial equivalente para um setor legado;
+- remapeamento de vínculos antigos de usuário para unidade oficial;
+- remapeamento de riscos antigos para unidades oficiais equivalentes.
 
 #### `src/riscos/tests/test_models.py`
 
@@ -82,6 +93,8 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 ### Arquivos classificados como testes de componente
 
 - `src/usuarios/tests/test_views.py`
+- `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -96,9 +109,26 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 - atualização de perfil;
 - envio, validação e redefinição de senha;
 - listagem pública de setores;
+- listagem administrativa de unidades da UFSM exclusiva para superusuário;
 - listagem de membros por setor;
 - adição e remoção de membros da equipe;
 - comportamento auxiliar do admin para exibição de setores.
+
+#### `src/usuarios/tests/test_importar_unidades_ufsm.py`
+
+- execução do comando `importar_unidades_ufsm`;
+- importação de unidades oficiais com os metadados da UFSM;
+- geração correta de labels curto e completo;
+- idempotência da importação;
+- desativação opcional de setores legados.
+
+#### `src/usuarios/tests/test_seed_base_demo.py`
+
+- execução do comando `seed_base_demo`;
+- criação de usuários comuns adicionais para demonstração;
+- criação de riscos, planos de ação e monitoramentos de exemplo;
+- idempotência da base demo;
+- garantia de que o seed não cria novos superusuários.
 
 #### `src/riscos/tests/test_views.py`
 
@@ -153,6 +183,9 @@ Atualmente, o projeto **não possui um diretório separado apenas para integraç
 Os principais exemplos são:
 
 - `src/usuarios/tests/test_views.py`
+- `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_normalizar_setores_legados.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -165,6 +198,10 @@ Os principais exemplos são:
 - registro persistindo usuário e vínculo com setor;
 - fluxo de recuperação de senha usando banco e regras temporais;
 - gestão de equipe adicionando e removendo vínculos entre usuário e setor.
+- proteção de rota administrativa para visualização completa das unidades da UFSM;
+- importação de unidades oficiais a partir de CSV institucional;
+- normalização de vínculos legados de usuários e riscos para unidades oficiais.
+- população de uma base demo com usuários comuns, riscos, planos e monitoramentos.
 
 #### Integração no módulo de riscos
 
@@ -184,11 +221,14 @@ Os principais exemplos são:
 ### Testes unitários
 
 - `src/usuarios/tests/test_models.py`
+- `src/usuarios/tests/test_normalizar_setores_legados.py`
 - `src/riscos/tests/test_models.py`
 
 ### Testes de componente
 
 - `src/usuarios/tests/test_views.py`
+- `src/usuarios/tests/test_importar_unidades_ufsm.py`
+- `src/usuarios/tests/test_seed_base_demo.py`
 - `src/riscos/tests/test_views.py`
 - `src/usuarios/tests/test_seed_usuarios_teste.py`
 - `src/riscos/tests/test_seed_data.py`
@@ -196,6 +236,9 @@ Os principais exemplos são:
 ### Testes de integração
 
 - parte dos testes de `test_views.py`;
+- `test_importar_unidades_ufsm.py`;
+- `test_normalizar_setores_legados.py`;
+- `test_seed_base_demo.py`;
 - `test_seed_usuarios_teste.py`;
 - `test_seed_data.py`.
 

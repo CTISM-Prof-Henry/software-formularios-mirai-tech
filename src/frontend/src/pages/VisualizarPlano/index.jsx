@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const VisualizarPlano = () => {
@@ -107,7 +108,7 @@ const VisualizarPlano = () => {
           <div className="header-title">
             <div className="title-line"></div>
             <h1>Plano de Risco #{plano.id}</h1>
-            <span className="setor-tag">{plano.setor_detalhes?.sigla} - {plano.setor_detalhes?.nome}</span>
+            <span className="setor-tag">{getSetorLabel(plano.setor_detalhes)}</span>
           </div>
           
           <div className="header-actions">

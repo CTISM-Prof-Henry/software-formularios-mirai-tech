@@ -32,7 +32,7 @@ class TestRiscoModel:
         assert risco.nivel_risco == 20
         # 2 * 3 = 6 (Nível Residual)
         assert risco.nivel_residual == 6
-        assert str(risco) == f"Risco {risco.id} - ST"
+        assert str(risco) == f"Risco {risco.id} - ST - Setor Teste"
         assert str(infra_pdi['desafio']) == "999 - Desafio Teste"
         assert str(infra_pdi['macro']) == "Processo Teste Exclusivo"
         assert str(infra_pdi['objetivo']) == "OBJ-TESTE-999 - Objetivo Teste"

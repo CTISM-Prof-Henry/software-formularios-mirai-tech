@@ -22,6 +22,17 @@ def usuario(db, setor):
     u.setores.add(setor)
     return u
 
+@pytest.fixture
+def admin_usuario(db, setor):
+    u = Usuario.objects.create_superuser(
+        siape="7777777",
+        password="senha_admin",
+        nome="Admin Sistema",
+        email="admin@ufsm.br"
+    )
+    u.setores.add(setor)
+    return u
+
 @pytest.mark.django_db
 class TestUsuarioViews:
     def test_listar_setores_publico(self, api_client, setor):
@@ -64,6 +75,7 @@ class TestUsuarioViews:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data["siape"] == usuario.siape
+        assert response.data["setores"][0]["label_curto"] == "SA - Setor A"
 
     def test_atualizar_perfil(self, api_client, usuario):
         api_client.force_authenticate(user=usuario)
@@ -173,6 +185,19 @@ class TestUsuarioViews:
         assert len(response.data) == 1
         assert response.data[0]["siape"] == usuario.siape
 
+    def test_listar_unidades_admin_exige_superusuario(self, api_client, usuario):
+        api_client.force_authenticate(user=usuario)
+        response = api_client.get("/api/usuarios/setores/admin/")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.data["erro"] == "Apenas administradores do sistema podem visualizar esta tela."
+
+    def test_listar_unidades_admin_sucesso(self, api_client, admin_usuario, setor):
+        api_client.force_authenticate(user=admin_usuario)
+        response = api_client.get("/api/usuarios/setores/admin/")
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+        assert response.data[0]["label_completo"]
+
     def test_remover_membro_setor_sucesso(self, api_client, usuario, setor):
         api_client.force_authenticate(user=usuario)
         url = f"/api/usuarios/setores/{setor.id}/remover_membro/"
@@ -229,4 +254,4 @@ class TestUsuarioViews:
         
         ua = UsuarioAdmin(Usuario, AdminSite())
         display = ua.exibir_setores(usuario)
-        assert setor.sigla in display
+        assert setor.label_curto in display

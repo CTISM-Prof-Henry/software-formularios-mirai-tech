@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
+import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const Dashboard = () => {
@@ -177,7 +178,7 @@ const Dashboard = () => {
               <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                 <option value="">Todos</option>
                 {user.setores?.map((setor) => (
-                  <option key={setor.id} value={setor.id}>{setor.sigla} - {setor.nome}</option>
+                  <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
                 ))}
               </select>
             </div>
@@ -217,7 +218,7 @@ const Dashboard = () => {
                   <div className="plan-details">
                     <h3>{plano.evento}</h3>
                     <p className="plan-meta">
-                      Setor: {plano.setor_detalhes?.nome || 'Não informado'} • ID: #{plano.id}
+                      Setor: {getSetorLabel(plano.setor_detalhes) || 'Não informado'} • ID: #{plano.id}
                     </p>
                     <p className="plan-date">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

@@ -1,0 +1,134 @@
+.unidades-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.unidades-summary-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 52, 112, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 18px 40px rgba(15, 33, 63, 0.06);
+}
+
+.unidades-summary-card .summary-kicker {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #6d7f99;
+  text-transform: uppercase;
+}
+
+.unidades-summary-card strong {
+  font-size: 2rem;
+  color: #003470;
+}
+
+.unidades-summary-card span:last-child {
+  color: #53657f;
+}
+
+.unidades-panel {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 18px 40px rgba(15, 33, 63, 0.06);
+}
+
+.unidades-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.unidades-panel-header h2 {
+  margin: 0 0 6px;
+  color: #102a43;
+}
+
+.unidades-panel-header p {
+  margin: 0;
+  color: #62748a;
+}
+
+.unidades-search {
+  min-width: 320px;
+}
+
+.unidades-search input {
+  width: 100%;
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.unidades-search input:focus {
+  border-color: #003470;
+  box-shadow: 0 0 0 3px rgba(0, 52, 112, 0.08);
+}
+
+.unidades-error,
+.unidades-empty {
+  border-radius: 16px;
+  padding: 18px 20px;
+  background: #f8fafc;
+  color: #4a5d75;
+}
+
+.unidades-error {
+  background: #fff1f1;
+  color: #c53030;
+  margin-bottom: 16px;
+}
+
+.unidades-table-wrapper {
+  overflow: auto;
+}
+
+.unidades-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.unidades-table th,
+.unidades-table td {
+  text-align: left;
+  padding: 16px 14px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: top;
+}
+
+.unidades-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6d7f99;
+}
+
+.unidades-table td {
+  color: #243b53;
+}
+
+@media (max-width: 960px) {
+  .unidades-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .unidades-panel-header {
+    flex-direction: column;
+  }
+
+  .unidades-search {
+    min-width: 100%;
+    width: 100%;
+  }
+}

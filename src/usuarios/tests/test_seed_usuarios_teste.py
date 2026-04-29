@@ -13,13 +13,19 @@ class TestSeedUsuariosTeste:
 
         for dados_usuario in USUARIOS_TESTE:
             usuario = Usuario.objects.get(siape=dados_usuario["siape"])
-            siglas = set(usuario.setores.values_list("sigla", flat=True))
+            unidades = set(
+                usuario.setores.values_list("sigla_centro", "nome")
+            )
+            unidades_esperadas = {
+                (setor["sigla_centro"], setor["nome"])
+                for setor in dados_usuario["setores"]
+            }
 
             assert usuario.nome == dados_usuario["nome"]
             assert usuario.email == dados_usuario["email"]
             assert usuario.ativo is True
             assert usuario.equipe == dados_usuario["equipe"]
-            assert siglas == set(dados_usuario["setores"])
+            assert unidades == unidades_esperadas
             assert usuario.check_password("Teste@12345")
             assert Token.objects.filter(user=usuario).exists()
 
