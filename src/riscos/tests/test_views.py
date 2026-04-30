@@ -225,6 +225,12 @@ class TestRiscoViewsPermissions:
             "data_inicio": "2026-03-01",
             "data_fim": "2026-03-31",
         }
+        assert response.data["riscos_sem_acao"] == 0
+        assert response.data["riscos_monitorados"] == 0
+        assert response.data["taxa_mitigacao"] == 100.0
+        assert "distribuicao_categorias" in response.data
+        assert "unidades_maior_exposicao" in response.data
+        assert "riscos_por_nivel" in response.data
 
     def test_dashboard_retorna_vazio_quando_periodo_nao_contem_acoes(self, api_client, infra_risco):
         api_client.force_authenticate(user=infra_risco["u1"])
@@ -247,3 +253,51 @@ class TestRiscoViewsPermissions:
         assert response.data["total_planos"] == 0
         assert response.data["tratamentos_ativos"] == 0
         assert response.data["planos"] == []
+
+    def test_dashboard_e_mapa_retorna_analytics_gerenciais(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        risco_critico = Risco.objects.create(
+            setor=infra_risco["s1"],
+            objetivo=infra_risco["risco"].objetivo,
+            macroprocesso=infra_risco["risco"].macroprocesso,
+            categoria="Estratégico",
+            evento="Risco crítico",
+            causa="Causa crítica",
+            consequencia="Consequência crítica",
+            controles_atuais="Controle",
+            eficacia_controle="Satisfatório",
+            probabilidade=5,
+            impacto=5,
+            prob_residual=4,
+            imp_residual=5,
+        )
+        PlanoAcao.objects.create(
+            risco=risco_critico,
+            tipo_resposta="Mitigar",
+            descricao_acao="Mitigar risco crítico.",
+            responsavel="Gestor estratégico",
+            data_inicio="2026-02-01",
+            data_fim="2026-02-28",
+            status="Em andamento",
+        )
+
+        dashboard_response = api_client.get("/api/riscos/planos/dashboard/")
+        mapa_response = api_client.get("/api/riscos/planos/mapa-analytics/")
+
+        assert dashboard_response.status_code == status.HTTP_200_OK
+        assert dashboard_response.data["total_planos"] == 2
+        assert dashboard_response.data["riscos_criticos"] == 1
+        assert dashboard_response.data["status_tratamentos"]["em_andamento"] == 1
+        assert dashboard_response.data["unidades_maior_exposicao"][0]["pontos"] >= 20
+        assert any(
+            item["nome"] == "Estratégico" and item["quantidade"] == 1
+            for item in dashboard_response.data["distribuicao_categorias"]
+        )
+
+        assert mapa_response.status_code == status.HTTP_200_OK
+        assert mapa_response.data["total_riscos"] == 2
+        assert mapa_response.data["resumo_niveis"]["extremo"] == 1
+        assert mapa_response.data["status_tratamentos"]["em_andamento"] == 1
+        assert len(mapa_response.data["matriz_residual"]) == 25
+        assert mapa_response.data["riscos_prioritarios"][0]["id"] == risco_critico.id

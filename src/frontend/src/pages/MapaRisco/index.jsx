@@ -1,96 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import api from '../../services/api';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
+const CATEGORY_ORDER = ['Operacional', 'Estratégico', 'Integridade', 'Imagem', 'Financeiro'];
+
 const MapaRisco = () => {
   const navigate = useNavigate();
-  const [riscos, setRiscos] = useState([]);
-  const [acoes, setAcoes] = useState([]);
+  const [analytics, setAnalytics] = useState({
+    total_riscos: 0,
+    distribuicao_categorias: [],
+    unidades_maior_pontuacao: [],
+    taxa_mitigacao: 0,
+    riscos_melhorados: 0,
+    riscos_sem_acao: 0,
+    riscos_monitorados: 0,
+    cobertura_monitoramento: 0,
+    objetivos_cobertos: 0,
+    desafios_cobertos: 0,
+    acoes_atrasadas: 0,
+    resumo_niveis: {
+      extremo: 0,
+      alto: 0,
+      moderado: 0,
+      baixo: 0,
+    },
+    matriz_residual: [],
+    riscos_prioritarios: [],
+    status_tratamentos: {
+      em_andamento: 0,
+      concluidas: 0,
+      atrasadas: 0,
+      nao_iniciadas: 0,
+    },
+  });
   const [filterSetor, setFilterSetor] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
-  
+
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
 
   useEffect(() => {
-    carregarRiscos();
+    carregarAnalytics();
   }, [filterSetor, filterCategoria]);
 
-  async function carregarRiscos() {
+  async function carregarAnalytics() {
     try {
-      let url = '/riscos/planos/?limit=1000'; // Pega todos para o mapa
-      if (filterSetor) url += `&setor=${filterSetor}`;
-      if (filterCategoria) url += `&categoria=${filterCategoria}`;
+      const params = new URLSearchParams();
+      if (filterSetor) params.append('setor', filterSetor);
+      if (filterCategoria) params.append('categoria', filterCategoria);
 
-      const [riscosResponse, acoesResponse] = await Promise.all([
-        api.get(url),
-        api.get('/riscos/acoes/?limit=1000'),
-      ]);
-
-      setRiscos(riscosResponse.data.results || riscosResponse.data);
-      setAcoes(acoesResponse.data.results || acoesResponse.data);
+      const response = await api.get(`/riscos/planos/mapa-analytics/?${params.toString()}`);
+      setAnalytics({
+        total_riscos: response.data.total_riscos || 0,
+        distribuicao_categorias: response.data.distribuicao_categorias || [],
+        unidades_maior_pontuacao: response.data.unidades_maior_pontuacao || [],
+        taxa_mitigacao: response.data.taxa_mitigacao || 0,
+        riscos_melhorados: response.data.riscos_melhorados || 0,
+        riscos_sem_acao: response.data.riscos_sem_acao || 0,
+        riscos_monitorados: response.data.riscos_monitorados || 0,
+        cobertura_monitoramento: response.data.cobertura_monitoramento || 0,
+        objetivos_cobertos: response.data.objetivos_cobertos || 0,
+        desafios_cobertos: response.data.desafios_cobertos || 0,
+        acoes_atrasadas: response.data.acoes_atrasadas || 0,
+        resumo_niveis: response.data.resumo_niveis || {
+          extremo: 0,
+          alto: 0,
+          moderado: 0,
+          baixo: 0,
+        },
+        matriz_residual: response.data.matriz_residual || [],
+        riscos_prioritarios: response.data.riscos_prioritarios || [],
+        status_tratamentos: response.data.status_tratamentos || {
+          em_andamento: 0,
+          concluidas: 0,
+          atrasadas: 0,
+          nao_iniciadas: 0,
+        },
+      });
     } catch (err) {
       console.error('Erro ao carregar riscos para o mapa:', err);
     }
   }
 
-  const getStatsByCategory = () => {
-    const categories = ['Operacional', 'Estratégico', 'Integridade', 'Imagem', 'Financeiro'];
-    return categories.map(cat => ({
-      name: cat,
-      count: riscos.filter(r => r.categoria === cat).length
+  const categoryStats = useMemo(() => {
+    const known = new Map(
+      analytics.distribuicao_categorias.map((item) => [item.nome, item.quantidade]),
+    );
+    return CATEGORY_ORDER.map((categoria) => ({
+      name: categoria,
+      count: known.get(categoria) || 0,
     }));
-  };
+  }, [analytics.distribuicao_categorias]);
 
-  const getTopSetoresByScore = () => {
-    const ranking = riscos.reduce((acc, risco) => {
-      const setorId = risco.setor_detalhes?.id || risco.setor;
-      const setorNome = getSetorLabel(risco.setor_detalhes) || 'Unidade não informada';
-
-      if (!acc[setorId]) {
-        acc[setorId] = {
-          id: setorId,
-          nome: setorNome,
-          pontos: 0,
-        };
-      }
-
-      acc[setorId].pontos += Number(risco.nivel_residual || 0);
-      return acc;
-    }, {});
-
-    return Object.values(ranking)
-      .sort((a, b) => b.pontos - a.pontos || a.nome.localeCompare(b.nome))
-      .slice(0, 5);
-  };
+  const matrixCountMap = useMemo(() => {
+    const map = new Map();
+    analytics.matriz_residual.forEach((item) => {
+      map.set(`${item.probabilidade}-${item.impacto}`, item.quantidade);
+    });
+    return map;
+  }, [analytics.matriz_residual]);
 
   const getRankingLabel = (index) => `${index + 1}º`;
-
-  const getMitigationRate = () => {
-    if (!riscos.length) return 0;
-    const mitigados = riscos.filter(r => Number(r.nivel_residual) < Number(r.nivel_risco)).length;
-    return ((mitigados / riscos.length) * 100).toFixed(1);
-  };
-
-  const getImprovedRiskCount = () =>
-    riscos.filter(r => Number(r.nivel_residual) < Number(r.nivel_risco)).length;
-
-  const getPlanoAcaoPorRisco = (riscoId) =>
-    acoes.find(acao => String(acao.risco) === String(riscoId));
-
-  const getTopPriorityRisks = () => {
-    return [...riscos]
-      .sort((a, b) => {
-        const diffResidual = Number(b.nivel_residual) - Number(a.nivel_residual);
-        if (diffResidual !== 0) return diffResidual;
-        const diffInerente = Number(b.nivel_risco) - Number(a.nivel_risco);
-        if (diffInerente !== 0) return diffInerente;
-        return Number(a.id) - Number(b.id);
-      })
-      .slice(0, 5);
-  };
 
   const getRiskPriorityLabel = (score) => {
     if (score >= 20) return 'EXTREMO';
@@ -116,7 +128,7 @@ const MapaRisco = () => {
   };
 
   const renderCell = (prob, imp) => {
-    const count = riscos.filter(r => r.prob_residual === prob && r.imp_residual === imp).length;
+    const count = matrixCountMap.get(`${prob}-${imp}`) || 0;
     const score = prob * imp;
     const { label, class: className } = getRiskLevelInfo(score);
 
@@ -130,7 +142,7 @@ const MapaRisco = () => {
   return (
     <div className="dashboard-container">
       <Sidebar />
-      
+
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-title">
@@ -156,8 +168,8 @@ const MapaRisco = () => {
                   <label>Unidade/Departamento:</label>
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                     <option value="">Todas as Unidades</option>
-                    {user.setores?.map(s => (
-                      <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
+                    {user.setores?.map((setor) => (
+                      <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
                     ))}
                   </select>
                 </div>
@@ -165,11 +177,9 @@ const MapaRisco = () => {
                   <label>Categoria:</label>
                   <select value={filterCategoria} onChange={(e) => setFilterCategoria(e.target.value)}>
                     <option value="">Todas as Categorias</option>
-                    <option value="Operacional">Operacional</option>
-                    <option value="Estratégico">Estratégico</option>
-                    <option value="Integridade">Integridade</option>
-                    <option value="Imagem">Imagem</option>
-                    <option value="Financeiro">Financeiro</option>
+                    {CATEGORY_ORDER.map((categoria) => (
+                      <option key={categoria} value={categoria}>{categoria}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -180,12 +190,11 @@ const MapaRisco = () => {
                 <h2 className="map-title">Matriz de Probabilidade x Impacto</h2>
                 <div className="map-active-indicator">
                   <span className="map-active-dot"></span>
-                  <span>Riscos Ativos</span>
+                  <span>{analytics.total_riscos} riscos ativos</span>
                 </div>
               </div>
-              
+
               <div className="map-container">
-                {/* Eixo Y: Probabilidade */}
                 <div className="axis-y">
                   <div className="axis-label-vertical">PROBABILIDADE</div>
                   <div className="axis-values-y">
@@ -197,11 +206,10 @@ const MapaRisco = () => {
                   </div>
                 </div>
 
-                {/* Matrix */}
                 <div className="matrix-grid">
-                  {[5, 4, 3, 2, 1].map(imp => (
+                  {[5, 4, 3, 2, 1].map((imp) => (
                     <div key={imp} className="matrix-row">
-                      {[1, 2, 3, 4, 5].map(prob => (
+                      {[1, 2, 3, 4, 5].map((prob) => (
                         <React.Fragment key={`${imp}-${prob}`}>
                           {renderCell(prob, imp)}
                         </React.Fragment>
@@ -210,10 +218,8 @@ const MapaRisco = () => {
                   ))}
                 </div>
 
-                {/* Espaçador para o canto inferior esquerdo */}
                 <div className="axis-spacer"></div>
 
-                {/* Eixo X: Impacto */}
                 <div className="axis-x">
                   <div className="axis-values-x">
                     <span>1 - Insignificante</span>
@@ -233,21 +239,21 @@ const MapaRisco = () => {
                     <div className="legend-color cell-extremo"></div>
                     <div className="legend-info">
                       <span className="legend-label">Extremo (RE)</span>
-                      <span className="legend-rule">20 ≤ Risco ≤ 25</span>
+                      <span className="legend-rule">20 ≤ risco ≤ 25</span>
                     </div>
                   </div>
                   <div className="legend-item">
                     <div className="legend-color cell-alto"></div>
                     <div className="legend-info">
                       <span className="legend-label">Alto (RA)</span>
-                      <span className="legend-rule">12 ≤ Risco &lt; 20</span>
+                      <span className="legend-rule">12 ≤ risco &lt; 20</span>
                     </div>
                   </div>
                   <div className="legend-item">
                     <div className="legend-color cell-moderado"></div>
                     <div className="legend-info">
                       <span className="legend-label">Moderado (RM)</span>
-                      <span className="legend-rule">4 ≤ Risco &lt; 12</span>
+                      <span className="legend-rule">4 ≤ risco &lt; 12</span>
                     </div>
                   </div>
                   <div className="legend-item">
@@ -265,18 +271,18 @@ const MapaRisco = () => {
           <div className="mapa-column-side">
             <div className="dashboard-card distribution-card">
               <h3>Distribuição por Categoria</h3>
-              
+
               <div className="chart-container">
                 <div className="donut-chart-placeholder">
                   <div className="donut-center">
-                    <span className="donut-total">{riscos.length}</span>
+                    <span className="donut-total">{analytics.total_riscos}</span>
                     <span className="donut-label">TOTAL</span>
                   </div>
                 </div>
               </div>
 
               <div className="distribution-legend">
-                {getStatsByCategory().map((stat, idx) => (
+                {categoryStats.map((stat, idx) => (
                   <div key={stat.name} className="dist-item">
                     <div className="dist-info">
                       <span className={`dist-dot color-${idx}`}></span>
@@ -291,14 +297,12 @@ const MapaRisco = () => {
             <div className="dashboard-card ranking-card">
               <h3>Unidades com Maior Pontuação</h3>
               <div className="ranking-list">
-                {getTopSetoresByScore().length > 0 ? (
-                  getTopSetoresByScore().map((setor, index) => (
+                {analytics.unidades_maior_pontuacao.length > 0 ? (
+                  analytics.unidades_maior_pontuacao.map((setor, index) => (
                     <div key={setor.id} className="ranking-item">
                       <div className="ranking-position">{getRankingLabel(index)}</div>
                       <div className="ranking-info">
-                        <span className="ranking-name">
-                          {setor.nome}
-                        </span>
+                        <span className="ranking-name">{setor.nome}</span>
                       </div>
                       <div className={`ranking-score ${index < 3 ? 'highlight' : ''}`}>
                         {setor.pontos} pontos
@@ -313,23 +317,23 @@ const MapaRisco = () => {
 
             <div className="dashboard-card strategic-card">
               <h3>Gestão Estratégica</h3>
-              <div className="strategic-metric-label">Taxa de Mitigação</div>
+              <div className="strategic-metric-label">Taxa de mitigação</div>
               <div className="strategic-metric-row">
-                <span className="strategic-metric-value">{getMitigationRate()}%</span>
-                <span className="strategic-metric-trend">↗ +{getImprovedRiskCount()}</span>
+                <span className="strategic-metric-value">{analytics.taxa_mitigacao.toFixed(1)}%</span>
+                <span className="strategic-metric-trend">↗ +{analytics.riscos_melhorados}</span>
               </div>
 
               <div className="strategic-stats">
                 <div className="strategic-stat-box">
                   <span className="strategic-stat-label">Riscos críticos</span>
                   <span className="strategic-stat-value">
-                    {riscos.filter(r => Number(r.nivel_residual) >= 20).length}
+                    {analytics.resumo_niveis.extremo + analytics.resumo_niveis.alto}
                   </span>
                 </div>
                 <div className="strategic-stat-box">
                   <span className="strategic-stat-label">Em revisão</span>
                   <span className="strategic-stat-value">
-                    {acoes.filter(acao => acao.status === 'Em andamento').length}
+                    {analytics.status_tratamentos.em_andamento}
                   </span>
                 </div>
               </div>
@@ -339,15 +343,20 @@ const MapaRisco = () => {
               <h3>Resumo do Mapa</h3>
               <div className="summary-list">
                 <div className="summary-item">
-                  <span>Riscos Críticos (RE)</span>
-                  <span className="summary-badge count-re">{riscos.filter(r => (r.prob_residual * r.imp_residual) >= 20).length}</span>
+                  <span>Riscos extremos</span>
+                  <span className="summary-badge count-re">{analytics.resumo_niveis.extremo}</span>
                 </div>
                 <div className="summary-item">
-                  <span>Riscos em Atenção (RA)</span>
-                  <span className="summary-badge count-ra">{riscos.filter(r => {
-                    const s = r.prob_residual * r.imp_residual;
-                    return s >= 12 && s < 20;
-                  }).length}</span>
+                  <span>Riscos altos</span>
+                  <span className="summary-badge count-ra">{analytics.resumo_niveis.alto}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Riscos sem ação</span>
+                  <span className="summary-badge count-ra">{analytics.riscos_sem_acao}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Monitorados</span>
+                  <span className="summary-badge count-ra">{analytics.riscos_monitorados}</span>
                 </div>
               </div>
             </div>
@@ -358,7 +367,7 @@ const MapaRisco = () => {
           <div className="priority-footer-header">
             <h3>Riscos de Maior Prioridade</h3>
             <button className="priority-footer-link" onClick={() => navigate('/planos')}>
-              Ver Inventário Completo →
+              Ver inventário completo →
             </button>
           </div>
 
@@ -372,15 +381,15 @@ const MapaRisco = () => {
             </div>
 
             <div className="priority-table-body">
-              {getTopPriorityRisks().length > 0 ? (
-                getTopPriorityRisks().map((risco) => {
-                  const planoAcao = getPlanoAcaoPorRisco(risco.id);
-                  const suggestedAction = planoAcao?.tipo_resposta || 'Plano de Mitigação';
+              {analytics.riscos_prioritarios.length > 0 ? (
+                analytics.riscos_prioritarios.map((risco) => {
+                  const suggestedAction = risco.tipo_resposta || 'Plano de Mitigação';
                   const owner =
-                    planoAcao?.responsavel ||
+                    risco.responsavel ||
                     risco.setor_detalhes?.sigla_centro ||
                     risco.setor_detalhes?.sigla ||
                     'Não definido';
+
                   return (
                     <div key={risco.id} className="priority-row">
                       <div className="priority-cell priority-id">
@@ -397,14 +406,11 @@ const MapaRisco = () => {
                           {getRiskPriorityLabel(Number(risco.nivel_residual))}
                         </span>
                       </div>
-                      <div className="priority-cell priority-owner">
-                        {owner}
-                      </div>
+                      <div className="priority-cell priority-owner">{owner}</div>
                       <div className="priority-cell">
-                        <span className="priority-action-tag">
-                          {suggestedAction}
-                        </span>
+                        <span className="priority-action-tag">{suggestedAction}</span>
                       </div>
+
                       <div className="priority-mobile-card">
                         <div className="priority-mobile-top">
                           <span className="priority-id">{formatRiskIdentifier(risco.id)}</span>

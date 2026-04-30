@@ -1,3 +1,6 @@
+from collections import defaultdict
+from datetime import date
+
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -39,6 +42,8 @@ class RiscoViewSet(viewsets.ModelViewSet):
     queryset = Risco.objects.all()
     serializer_class = RiscoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
+
+    CATEGORY_ORDER = ["Operacional", "Estratégico", "Integridade", "Imagem", "Financeiro"]
 
     def get_queryset(self):
         queryset = Risco.objects.select_related(
@@ -82,6 +87,174 @@ class RiscoViewSet(viewsets.ModelViewSet):
         
         return queryset.distinct()
 
+    def _normalize_status(self, status_label):
+        normalized = (status_label or "").lower()
+        if "conclu" in normalized:
+            return "concluidas"
+        if "andamento" in normalized:
+            return "em_andamento"
+        if "atras" in normalized:
+            return "atrasadas"
+        if "nao" in normalized or "não" in normalized:
+            return "nao_iniciadas"
+        return "outros"
+
+    def _serialize_planos(self, planos, primeira_acao_por_risco, monitoramentos_por_risco):
+        planos_data = RiscoSerializer(planos, many=True).data
+        for plano_data in planos_data:
+            acao = primeira_acao_por_risco.get(plano_data["id"])
+            monitoramento = monitoramentos_por_risco.get(plano_data["id"])
+            plano_data["periodo_acao"] = {
+                "data_inicio": acao.data_inicio.isoformat() if acao else None,
+                "data_fim": acao.data_fim.isoformat() if acao else None,
+            }
+            plano_data["possui_monitoramento"] = monitoramento is not None
+        return planos_data
+
+    def _build_analytics(self, queryset):
+        planos = list(queryset)
+        planos_ids = [plano.id for plano in planos]
+
+        acoes = list(
+            PlanoAcao.objects.filter(risco_id__in=planos_ids)
+            .select_related("risco")
+            .order_by("risco_id", "data_inicio", "id")
+        )
+        monitoramentos = list(
+            Monitoramento.objects.filter(risco_id__in=planos_ids)
+            .select_related("risco")
+            .order_by("risco_id", "-data_verificacao", "-id")
+        )
+
+        primeira_acao_por_risco = {}
+        monitoramentos_por_risco = {}
+        for acao in acoes:
+            primeira_acao_por_risco.setdefault(acao.risco_id, acao)
+        for monitoramento in monitoramentos:
+            monitoramentos_por_risco.setdefault(monitoramento.risco_id, monitoramento)
+
+        categorias = {categoria: 0 for categoria in self.CATEGORY_ORDER}
+        riscos_por_nivel = {
+            "extremo": 0,
+            "alto": 0,
+            "moderado": 0,
+            "baixo": 0,
+        }
+        matriz_residual = defaultdict(int)
+        ranking_unidades = {}
+        planos_melhorados = 0
+
+        for plano in planos:
+            categorias.setdefault(plano.categoria, 0)
+            categorias[plano.categoria] += 1
+
+            if plano.nivel_residual >= 20:
+                riscos_por_nivel["extremo"] += 1
+            elif plano.nivel_residual >= 12:
+                riscos_por_nivel["alto"] += 1
+            elif plano.nivel_residual >= 4:
+                riscos_por_nivel["moderado"] += 1
+            else:
+                riscos_por_nivel["baixo"] += 1
+
+            if plano.nivel_residual < plano.nivel_risco:
+                planos_melhorados += 1
+
+            matriz_residual[(plano.prob_residual, plano.imp_residual)] += 1
+
+            unidade_nome = getattr(plano.setor, "label_curto", None) or plano.setor.nome
+            ranking = ranking_unidades.setdefault(
+                plano.setor_id,
+                {
+                    "id": plano.setor_id,
+                    "nome": unidade_nome,
+                    "pontos": 0,
+                    "quantidade_riscos": 0,
+                    "criticos": 0,
+                },
+            )
+            ranking["pontos"] += int(plano.nivel_residual or 0)
+            ranking["quantidade_riscos"] += 1
+            if plano.nivel_residual >= 12:
+                ranking["criticos"] += 1
+
+        status_tratamentos = {
+            "em_andamento": 0,
+            "concluidas": 0,
+            "atrasadas": 0,
+            "nao_iniciadas": 0,
+        }
+        today = date.today()
+        acoes_atrasadas = 0
+        for acao in acoes:
+            status_chave = self._normalize_status(acao.status)
+            if status_chave in status_tratamentos:
+                status_tratamentos[status_chave] += 1
+            if status_chave != "concluidas" and acao.data_fim < today:
+                acoes_atrasadas += 1
+
+        unidades_maior_exposicao = sorted(
+            ranking_unidades.values(),
+            key=lambda item: (-item["pontos"], -item["quantidade_riscos"], item["nome"]),
+        )[:5]
+
+        total_planos = len(planos)
+        riscos_monitorados = len(monitoramentos_por_risco)
+        cobertura_monitoramento = round((riscos_monitorados / total_planos) * 100, 1) if total_planos else 0
+        taxa_mitigacao = round((planos_melhorados / total_planos) * 100, 1) if total_planos else 0
+
+        planos_ordenados = sorted(
+            planos,
+            key=lambda plano: (-plano.nivel_residual, -plano.nivel_risco, plano.id),
+        )
+        riscos_prioritarios = []
+        for plano in planos_ordenados[:5]:
+            acao = primeira_acao_por_risco.get(plano.id)
+            monitoramento = monitoramentos_por_risco.get(plano.id)
+            plano_data = RiscoSerializer(plano).data
+            plano_data["responsavel"] = acao.responsavel if acao else None
+            plano_data["tipo_resposta"] = acao.tipo_resposta if acao else None
+            plano_data["status_tratamento"] = acao.status if acao else None
+            plano_data["possui_monitoramento"] = monitoramento is not None
+            riscos_prioritarios.append(plano_data)
+
+        return {
+            "planos": self._serialize_planos(planos, primeira_acao_por_risco, monitoramentos_por_risco),
+            "total_planos": total_planos,
+            "riscos_criticos": riscos_por_nivel["alto"] + riscos_por_nivel["extremo"],
+            "riscos_por_nivel": riscos_por_nivel,
+            "tratamentos_ativos": status_tratamentos["em_andamento"],
+            "tratamentos_concluidos": status_tratamentos["concluidas"],
+            "tratamentos_atrasados": status_tratamentos["atrasadas"],
+            "tratamentos_nao_iniciados": status_tratamentos["nao_iniciadas"],
+            "acoes_atrasadas": acoes_atrasadas,
+            "setores_filtrados": len({plano.setor_id for plano in planos}),
+            "riscos_sem_acao": max(total_planos - len(primeira_acao_por_risco), 0),
+            "riscos_monitorados": riscos_monitorados,
+            "cobertura_monitoramento": cobertura_monitoramento,
+            "objetivos_cobertos": len({plano.objetivo_id for plano in planos}),
+            "desafios_cobertos": len({plano.objetivo.desafio_id for plano in planos}),
+            "taxa_mitigacao": taxa_mitigacao,
+            "riscos_melhorados": planos_melhorados,
+            "status_tratamentos": status_tratamentos,
+            "distribuicao_categorias": [
+                {"nome": categoria, "quantidade": categorias.get(categoria, 0)}
+                for categoria in self.CATEGORY_ORDER
+            ],
+            "unidades_maior_exposicao": unidades_maior_exposicao,
+            "matriz_residual": [
+                {
+                    "probabilidade": probabilidade,
+                    "impacto": impacto,
+                    "quantidade": matriz_residual.get((probabilidade, impacto), 0),
+                    "score": probabilidade * impacto,
+                }
+                for impacto in [5, 4, 3, 2, 1]
+                for probabilidade in [1, 2, 3, 4, 5]
+            ],
+            "riscos_prioritarios": riscos_prioritarios,
+        }
+
     @action(detail=False, methods=['get'])
     def estatisticas(self, request):
         """Retorna estatísticas globais para os cards do dashboard."""
@@ -102,29 +275,28 @@ class RiscoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         """Retorna os dados consolidados da dashboard respeitando filtros."""
-        queryset = self.get_queryset()
-        planos = list(queryset)
-        planos_ids = [plano.id for plano in planos]
-        acoes_filtradas = PlanoAcao.objects.filter(risco_id__in=planos_ids)
-        setores_filtrados = {plano.setor_id for plano in planos}
-        primeira_acao_por_risco = {}
-        for acao in acoes_filtradas.order_by("risco_id", "data_inicio", "id"):
-            primeira_acao_por_risco.setdefault(acao.risco_id, acao)
+        return Response(self._build_analytics(self.get_queryset()))
 
-        planos_data = RiscoSerializer(planos, many=True).data
-        for plano_data in planos_data:
-            acao = primeira_acao_por_risco.get(plano_data["id"])
-            plano_data["periodo_acao"] = {
-                "data_inicio": acao.data_inicio.isoformat() if acao else None,
-                "data_fim": acao.data_fim.isoformat() if acao else None,
-            }
-
+    @action(detail=False, methods=['get'], url_path='mapa-analytics')
+    def mapa_analytics(self, request):
+        """Retorna os dados analíticos do mapa de riscos respeitando filtros."""
+        analytics = self._build_analytics(self.get_queryset())
         return Response({
-            "total_planos": len(planos),
-            "riscos_criticos": sum(1 for plano in planos if plano.nivel_residual >= 15),
-            "tratamentos_ativos": acoes_filtradas.filter(status='Em andamento').count(),
-            "setores_filtrados": len(setores_filtrados),
-            "planos": planos_data,
+            "total_riscos": analytics["total_planos"],
+            "distribuicao_categorias": analytics["distribuicao_categorias"],
+            "unidades_maior_pontuacao": analytics["unidades_maior_exposicao"],
+            "taxa_mitigacao": analytics["taxa_mitigacao"],
+            "riscos_melhorados": analytics["riscos_melhorados"],
+            "riscos_sem_acao": analytics["riscos_sem_acao"],
+            "riscos_monitorados": analytics["riscos_monitorados"],
+            "cobertura_monitoramento": analytics["cobertura_monitoramento"],
+            "objetivos_cobertos": analytics["objetivos_cobertos"],
+            "desafios_cobertos": analytics["desafios_cobertos"],
+            "acoes_atrasadas": analytics["acoes_atrasadas"],
+            "resumo_niveis": analytics["riscos_por_nivel"],
+            "matriz_residual": analytics["matriz_residual"],
+            "riscos_prioritarios": analytics["riscos_prioritarios"],
+            "status_tratamentos": analytics["status_tratamentos"],
         })
 
     def create(self, request, *args, **kwargs):
