@@ -22,30 +22,37 @@
 }
 
 .logo-icon {
-  background-color: #003470;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 72px;
+  height: 52px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.logo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .logo-text h2 {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
   color: #003470;
   margin: 0;
+  line-height: 1.05;
 }
 
 .logo-text p {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #888;
   margin: 0;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .sidebar-nav {
@@ -241,5 +248,18 @@
 
   .sidebar-logo {
     margin-bottom: 28px;
+  }
+
+  .logo-icon {
+    width: 64px;
+    height: 46px;
+  }
+
+  .logo-text h2 {
+    font-size: 19px;
+  }
+
+  .logo-text p {
+    font-size: 10px;
   }
 }

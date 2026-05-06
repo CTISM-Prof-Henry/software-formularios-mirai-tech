@@ -267,12 +267,13 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  color: white;
+  color: #ffffff !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
 }
 
-.risk-alto { background: #e74c3c; }
-.risk-moderado { background: #f39c12; }
-.risk-baixo { background: #27ae60; }
+.risk-alto { background: #e74c3c; color: #ffffff !important; }
+.risk-moderado { background: #f39c12; color: #ffffff !important; }
+.risk-baixo { background: #27ae60; color: #ffffff !important; }
 
 .col-acoes {
   display: flex;

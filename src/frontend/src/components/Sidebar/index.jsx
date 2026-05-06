@@ -162,15 +162,11 @@ const Sidebar = () => {
       <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 21h18"></path>
-              <path d="M3 7v1a3 3 0 0 0 6 0V7m0 0V5a3 3 0 0 0-6 0v2m6 0V7a3 3 0 0 1 6 0v0m0 0V7a3 3 0 0 1 6 0v1a3 3 0 0 1-6 0V7m0 0V5a3 3 0 0 1 6 0v2"></path>
-              <path d="M9 21V11h6v10"></path>
-            </svg>
+            <img src="/logo.png" alt="Logo Gestao de Riscos" />
           </div>
           <div className="logo-text">
-            <h2>SIGR</h2>
-            <p>UFSM GESTAO DE RISCOS</p>
+            <h2>Gestão de Riscos</h2>
+            <p>MIRAI TECH</p>
           </div>
         </div>
 
