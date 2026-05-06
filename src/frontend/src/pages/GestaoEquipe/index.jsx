@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
 import api from '../../services/api';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';

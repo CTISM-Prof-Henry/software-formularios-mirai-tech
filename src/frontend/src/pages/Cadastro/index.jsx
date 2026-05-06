@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
+import ThemeToggle from '../../components/ThemeToggle';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -119,6 +120,9 @@ const Cadastro = () => {
 
   return (
     <div className="cadastro-container">
+      <div className="public-theme-toggle">
+        <ThemeToggle />
+      </div>
       <main className="cadastro-card">
         <header className="cadastro-header">
           <p className="cadastro-title-small">Crie sua conta para acessar o sistema</p>

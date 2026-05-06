@@ -1,3 +1,11 @@
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .equipe-content {
   margin-top: 32px;
 }
@@ -260,6 +268,11 @@
 }
 
 @media (max-width: 1200px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .list-header-row {
     flex-direction: column;
     align-items: stretch;
@@ -281,6 +294,14 @@
 }
 
 @media (max-width: 760px) {
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .theme-toggle.compact {
+    align-self: flex-end;
+  }
+
   .equipe-content {
     margin-top: 24px;
   }

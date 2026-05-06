@@ -739,6 +739,16 @@
 }
 
 @media (max-width: 760px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .header-actions .theme-toggle.compact {
+    align-self: flex-end;
+  }
+
   .mapa-dashboard-grid {
     gap: 18px;
   }

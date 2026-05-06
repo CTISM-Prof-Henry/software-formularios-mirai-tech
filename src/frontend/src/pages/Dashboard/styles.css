@@ -20,6 +20,14 @@
   margin-bottom: 32px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .header-title {
   display: flex;
   align-items: center;
@@ -374,6 +382,11 @@
     align-items: flex-start;
   }
 
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .filter-bar {
     grid-template-columns: 1fr 1fr;
   }
@@ -425,5 +438,14 @@
   .filter-button,
   .clear-filter-button {
     width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .header-actions .theme-toggle.compact {
+    align-self: flex-end;
   }
 }

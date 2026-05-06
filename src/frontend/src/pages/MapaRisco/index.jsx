@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
 import api from '../../services/api';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
@@ -157,6 +158,7 @@ const MapaRisco = () => {
               </svg>
               Novo Plano
             </button>
+            <ThemeToggle compact />
           </div>
         </header>
 
