@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
 import { getSetorLabel } from '../../utils/unidades';
@@ -55,6 +56,20 @@ const VisualizarPlano = () => {
     if (nivel >= 12) return 'ALTO';
     if (nivel >= 4) return 'MODERADO';
     return 'BAIXO';
+  };
+
+  const getStatusClass = (status) => {
+    const normalizado = (status || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+
+    if (normalizado === 'concluida') return 'concluida';
+    if (normalizado === 'em-andamento') return 'em-andamento';
+    if (normalizado === 'nao-iniciada') return 'nao-iniciada';
+    if (normalizado === 'atrasada') return 'atrasada';
+    return 'status-default';
   };
 
   async function baixarArquivo(tipo) {
@@ -112,6 +127,7 @@ const VisualizarPlano = () => {
           </div>
           
           <div className="header-actions">
+            <ThemeToggle compact />
             <button
               className="btn-export-file pdf"
               onClick={() => baixarArquivo('pdf')}
@@ -237,7 +253,7 @@ const VisualizarPlano = () => {
                   </div>
                   <div className="info-item">
                     <label>STATUS</label>
-                    <span className={`tag-status ${planoAcao.status.toLowerCase().replace(' ', '-')}`}>{planoAcao.status}</span>
+                    <span className={`tag-status ${getStatusClass(planoAcao.status)}`}>{planoAcao.status}</span>
                   </div>
                   <div className="info-item">
                     <label>RESPONSÁVEL</label>

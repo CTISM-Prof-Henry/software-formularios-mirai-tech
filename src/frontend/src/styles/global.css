@@ -452,6 +452,33 @@ a {
   color: #ffffff;
 }
 
+:root[data-theme='dark'] .tag-status.concluida,
+:root[data-theme='dark'] .tag-status.concluída {
+  background: #c6f6d5;
+  color: #22543d !important;
+}
+
+:root[data-theme='dark'] .tag-status.em-andamento {
+  background: #feebc8;
+  color: #744210 !important;
+}
+
+:root[data-theme='dark'] .tag-status.nao-iniciada,
+:root[data-theme='dark'] .tag-status.não-iniciada {
+  background: #edf2f7;
+  color: #2d3748 !important;
+}
+
+:root[data-theme='dark'] .tag-status.atrasada {
+  background: #fed7d7;
+  color: #822727 !important;
+}
+
+:root[data-theme='dark'] .tag-status.status-default {
+  background: #e2e8f0;
+  color: #334155 !important;
+}
+
 :root[data-theme='dark'] .login-title-large,
 :root[data-theme='dark'] .cadastro-title-large,
 :root[data-theme='dark'] .recuperar-title-main,
