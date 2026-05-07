@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
 import api from '../../services/api';
 import './styles.css';
 
@@ -86,6 +87,9 @@ const UnidadesAdmin = () => {
           <div className="header-title">
             <div className="title-line"></div>
             <h1>Unidades UFSM</h1>
+          </div>
+          <div className="header-actions">
+            <ThemeToggle compact />
           </div>
         </header>
 

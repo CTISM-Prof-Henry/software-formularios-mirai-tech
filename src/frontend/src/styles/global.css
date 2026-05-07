@@ -217,6 +217,7 @@ a {
 :root[data-theme='dark'] .dashboard-filter-group select,
 :root[data-theme='dark'] .dashboard-filter-group input,
 :root[data-theme='dark'] .form-group input,
+:root[data-theme='dark'] .form-group .custom-select-trigger,
 :root[data-theme='dark'] .form-group select,
 :root[data-theme='dark'] .form-group textarea,
 :root[data-theme='dark'] .input-group input,

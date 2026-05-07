@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
 import api from '../../services/api';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
@@ -144,7 +145,12 @@ const Perfil = () => {
       <Sidebar />
       <main className="perfil-main">
         <header className="perfil-header">
-          <h1>Editar Perfil</h1>
+          <div className="perfil-header-top">
+            <h1>Editar Perfil</h1>
+            <div className="header-actions">
+              <ThemeToggle compact />
+            </div>
+          </div>
           <p>Gerencie suas informações pessoais e configurações de segurança da conta.</p>
         </header>
 
@@ -189,7 +195,7 @@ const Perfil = () => {
                 <div 
                   className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  style={{ cursor: 'pointer', background: 'white' }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <span style={{ 
                     whiteSpace: 'nowrap', 
