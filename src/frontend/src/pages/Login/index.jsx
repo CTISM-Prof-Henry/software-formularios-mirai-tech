@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
+import ThemeToggle from '../../components/ThemeToggle';
 import './styles.css';
 
 const Login = () => {
@@ -32,6 +33,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      <div className="public-theme-toggle">
+        <ThemeToggle />
+      </div>
       <main className="login-card">
         <header className="login-header">
           <p className="login-title-small">Acesso institucional</p>

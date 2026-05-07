@@ -188,6 +188,9 @@
   padding: 4px 12px;
   border-radius: 6px;
   font-weight: 700;
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
 }
 
 .tag-status {
@@ -196,12 +199,18 @@
   font-weight: 700;
   text-transform: uppercase;
   font-size: 12px;
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
 }
 
 .tag-status.concluída { background: #c6f6d5; color: #22543d; }
 .tag-status.em-andamento { background: #feebc8; color: #744210; }
 .tag-status.não-iniciada { background: #edf2f7; color: #2d3748; }
 .tag-status.atrasada { background: #fed7d7; color: #822727; }
+.tag-status.concluida { background: #c6f6d5; color: #22543d; }
+.tag-status.nao-iniciada { background: #edf2f7; color: #2d3748; }
+.tag-status.status-default { background: #e2e8f0; color: #334155; }
 
 .empty-action-plan {
   text-align: center;
@@ -343,6 +352,10 @@
 
   .header-actions {
     gap: 10px;
+  }
+
+  .header-actions .theme-toggle.compact {
+    align-self: flex-end;
   }
 
   .setor-tag {

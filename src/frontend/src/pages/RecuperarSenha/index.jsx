@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ThemeToggle from '../../components/ThemeToggle';
 import './styles.css';
 
 const RecuperarSenha = () => {
@@ -128,6 +129,9 @@ const RecuperarSenha = () => {
 
   return (
     <div className="recuperar-container">
+      <div className="public-theme-toggle">
+        <ThemeToggle />
+      </div>
       <main className={`recuperar-card ${etapa === 3 ? 'redefinir-layout' : ''}`}>
         <div className="recuperar-form-section">
           <header className="recuperar-header">
