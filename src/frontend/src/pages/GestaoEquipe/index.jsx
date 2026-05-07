@@ -133,6 +133,10 @@ const GestaoEquipe = () => {
             <div className="title-line"></div>
             <h1>Gestão de Equipe</h1>
           </div>
+
+          <div className="header-actions">
+            <ThemeToggle compact />
+          </div>
         </header>
 
         <section className="equipe-content">
