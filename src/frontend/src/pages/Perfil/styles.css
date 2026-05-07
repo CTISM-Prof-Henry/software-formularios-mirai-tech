@@ -152,6 +152,31 @@
   margin-top: -2px;
 }
 
+.custom-select-search {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.custom-select-search input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d3dde6;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.custom-select-search input:focus {
+  outline: none;
+  border-color: #003470;
+}
+
+.custom-select-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
 .custom-option {
   padding: 10px 16px;
   display: flex;
@@ -178,6 +203,13 @@
 .custom-option span {
   font-size: 14px;
   color: #444;
+}
+
+.custom-option-loading {
+  padding: 12px;
+  font-size: 13px;
+  color: #718096;
+  text-align: center;
 }
 
 .form-group input:disabled {

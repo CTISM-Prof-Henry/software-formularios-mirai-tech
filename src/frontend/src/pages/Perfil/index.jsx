@@ -22,6 +22,7 @@ const Perfil = () => {
 
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [buscaSetor, setBuscaSetor] = useState('');
 
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -64,6 +65,7 @@ const Perfil = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+        setBuscaSetor('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -97,6 +99,30 @@ const Perfil = () => {
       .map(s => getSetorLabel(s));
       
     return selecionados.length > 0 ? selecionados.join(', ') : 'Selecione seus setores';
+  };
+
+  const setoresFiltrados = setoresDisponiveis.filter((setor) => {
+    const termo = buscaSetor.trim().toLowerCase();
+    if (!termo) return true;
+
+    const label = getSetorLabel(setor, { completo: user.is_superuser }).toLowerCase();
+    return (
+      label.includes(termo) ||
+      (setor.sigla_centro || '').toLowerCase().includes(termo) ||
+      (setor.nome || '').toLowerCase().includes(termo) ||
+      (setor.nome_centro || '').toLowerCase().includes(termo) ||
+      (setor.tipo_unidade || '').toLowerCase().includes(termo)
+    );
+  });
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => {
+      const nextValue = !prev;
+      if (!nextValue) {
+        setBuscaSetor('');
+      }
+      return nextValue;
+    });
   };
 
   const handleSalvar = async (e) => {
@@ -194,7 +220,7 @@ const Perfil = () => {
                 <label>Departamento/Setor</label>
                 <div 
                   className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={toggleDropdown}
                   style={{ cursor: 'pointer' }}
                 >
                   <span style={{ 
@@ -210,7 +236,18 @@ const Perfil = () => {
                 
                 {isDropdownOpen && (
                   <div className="custom-select-options" style={{ borderTop: '1.5px solid #003470' }}>
-                    {setoresDisponiveis.map(setor => (
+                    <div className="custom-select-search">
+                      <input
+                        type="text"
+                        value={buscaSetor}
+                        onChange={(e) => setBuscaSetor(e.target.value)}
+                        placeholder="Buscar unidade por sigla, nome ou centro"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+
+                    <div className="custom-select-list">
+                    {setoresFiltrados.map(setor => (
                       <div 
                         key={setor.id} 
                         className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
@@ -224,6 +261,10 @@ const Perfil = () => {
                         <span>{getSetorLabel(setor, { completo: user.is_superuser })}</span>
                       </div>
                     ))}
+                    {setoresFiltrados.length === 0 && (
+                      <div className="custom-option-loading">Nenhuma unidade encontrada.</div>
+                    )}
+                    </div>
                   </div>
                 )}
               </div>
