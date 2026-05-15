@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O projeto possui uma suíte de testes automatizados focada principalmente no backend. Para facilitar a avaliação e o entendimento da cobertura atual, os testes estão organizados nesta documentação por **tipo de teste**:
+O projeto possui uma base de testes automatizados focada principalmente no backend. Para facilitar a avaliação e o entendimento da cobertura atual, os testes estão organizados nesta documentação por **tipo de teste**:
 
 - **testes unitários**;
 - **testes de componente**;
@@ -77,15 +77,6 @@ Os testes unitários validam comportamentos isolados de classes, métodos e regr
 - criação de `Monitoramento`;
 - comportamento básico das representações textuais dos modelos relacionados.
 
-### Interpretação
-
-Esses testes são os mais próximos da ideia clássica de unidade, porque exercitam principalmente:
-
-- models;
-- managers;
-- regras de cálculo;
-- validações específicas de criação.
-
 ## Testes de componente
 
 Nesta documentação, estamos tratando como **testes de componente** aqueles que validam um módulo funcional do sistema em uma camada específica, normalmente um endpoint, view ou comando, sem necessariamente percorrer um fluxo completo de ponta a ponta.
@@ -157,16 +148,6 @@ Nesta documentação, estamos tratando como **testes de componente** aqueles que
 - presença dos macroprocessos iniciais;
 - presença dos objetivos PDI iniciais;
 - relação esperada entre objetivo e desafio.
-
-### Interpretação
-
-Esses testes já passam por uma parte maior da aplicação do que os unitários. Em geral, eles exercitam:
-
-- viewsets;
-- serializers de entrada e saída;
-- autenticação via APIClient;
-- comandos de management;
-- migrations e dados iniciais no banco.
 
 ## Testes de integração
 
@@ -245,7 +226,7 @@ Os principais exemplos são:
 Observação importante:
 
 - hoje a suíte está mais madura no backend;
-- a separação física entre componente e integração ainda não é rígida;
+- a separação física entre componente e integração deve ser melhorada;
 - a classificação nesta documentação é conceitual, para ajudar na leitura/avalicao do projeto.
 
 ## Como executar os testes
@@ -282,6 +263,5 @@ Essa automação:
 ## Observações finais
 
 - a documentação atual descreve a suíte automatizada do backend;
-- ainda há espaço para ampliar a cobertura com testes de frontend;
+- devemosampliar a cobertura com testes de frontend;
 - também é possível separar no futuro diretórios específicos para integração.
-- manter esta página atualizada ajuda a mostrar com clareza o estágio real de testes do sistema.

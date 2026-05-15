@@ -80,16 +80,13 @@ Suba o PostgreSQL com Docker Compose:
 docker compose up -d
 ```
 
-Se sua instalação ainda estiver no formato antigo:
-
-```bash
-docker-compose up -d
-```
-
 Depois, aplique as migrations:
 
 ```bash
 python manage.py migrate
+```
+```bash
+python manage.py makemigrations
 ```
 
 ## 7. Usuários de teste opcionais

@@ -298,19 +298,3 @@ O comando principal é:
 ```bash
 python -m pytest
 ```
-
-## Como pensar em uma nova funcionalidade
-
-Ao implementar uma nova funcionalidade, normalmente o caminho é:
-
-1. Criar ou ajustar models, se houver nova estrutura de dados.
-2. Criar migration quando o banco mudar.
-3. Criar ou ajustar serializers.
-4. Criar endpoint em views/viewsets.
-5. Registrar rota no `urls.py`, se necessário.
-6. Consumir a API no frontend usando `services/api.js`.
-7. Atualizar ou criar tela/componente.
-8. Criar testes automatizados.
-9. Atualizar documentação quando a mudança alterar arquitetura, fluxo ou uso.
-
-Esse fluxo mantém o projeto previsível e ajuda a evitar regras duplicadas entre frontend e backend.
