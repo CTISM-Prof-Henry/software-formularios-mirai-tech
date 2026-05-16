@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../../services/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
+import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -11,72 +13,83 @@ const Cadastro = () => {
     senha: '',
     nome: '',
     email: '',
-    id_setores: []
+    id_setores: [],
   });
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingSetores, setLoadingSetores] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [buscaSetor, setBuscaSetor] = useState('');
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { showFeedback } = useFeedback();
 
   useEffect(() => {
     async function loadSetores() {
       try {
         const response = await api.get('/usuarios/setores/');
         setSetoresDisponiveis(Array.isArray(response.data) ? response.data : []);
-      } catch (err) {
-        console.error('Erro ao carregar setores:', err);
+      } catch (error) {
+        console.error('Erro ao carregar setores:', error);
         setSetoresDisponiveis([]);
+        showFeedback({
+          type: 'warning',
+          title: 'Unidades indisponiveis',
+          message: 'Nao foi possivel carregar as unidades agora. Atualize a pagina para tentar novamente.',
+        });
       } finally {
         setLoadingSetores(false);
       }
     }
-    loadSetores();
 
-    const handleClickOutside = (event) => {
+    function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
         setBuscaSetor('');
       }
-    };
+    }
+
+    loadSetores();
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showFeedback]);
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  const handleChange = (event) => {
+    const { id, value } = event.target;
+    setFormData((previous) => ({ ...previous, [id]: value }));
   };
 
   const toggleSetor = (setorId) => {
-    setFormData((prev) => {
-      const currentIds = Array.isArray(prev.id_setores) ? prev.id_setores : [];
+    setFormData((previous) => {
+      const currentIds = Array.isArray(previous.id_setores) ? previous.id_setores : [];
       const jaSelecionado = currentIds.includes(setorId);
+
       if (jaSelecionado) {
-        return { ...prev, id_setores: currentIds.filter((id) => id !== setorId) };
+        return { ...previous, id_setores: currentIds.filter((id) => id !== setorId) };
       }
-      return { ...prev, id_setores: [...currentIds, setorId] };
+
+      return { ...previous, id_setores: [...currentIds, setorId] };
     });
   };
 
   const getSetoresSelecionadosTexto = () => {
     const currentIds = Array.isArray(formData.id_setores) ? formData.id_setores : [];
-    if (currentIds.length === 0) return 'Selecione um ou mais setores';
-    if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando setores...';
+
+    if (currentIds.length === 0) return 'Selecione uma ou mais unidades';
+    if (!Array.isArray(setoresDisponiveis) || setoresDisponiveis.length === 0) return 'Carregando unidades...';
+
     if (currentIds.length === 1) {
       const setor = setoresDisponiveis.find((item) => item.id === currentIds[0]);
-      return setor ? getSetorLabel(setor) : '1 setor selecionado';
+      return setor ? getSetorLabel(setor) : '1 unidade selecionada';
     }
-    return `${currentIds.length} setores selecionados`;
+
+    return `${currentIds.length} unidades selecionadas`;
   };
 
   const setoresFiltrados = setoresDisponiveis.filter((setor) => {
     const termo = buscaSetor.trim().toLowerCase();
     if (!termo) return true;
+
     const label = getSetorLabel(setor).toLowerCase();
     return (
       label.includes(termo) ||
@@ -86,8 +99,8 @@ const Cadastro = () => {
   });
 
   const toggleDropdown = () => {
-    setIsDropdownOpen((prev) => {
-      const nextValue = !prev;
+    setIsDropdownOpen((previous) => {
+      const nextValue = !previous;
       if (!nextValue) {
         setBuscaSetor('');
       }
@@ -95,13 +108,15 @@ const Cadastro = () => {
     });
   };
 
-  const handleCadastro = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const handleCadastro = async (event) => {
+    event.preventDefault();
 
     if (formData.id_setores.length === 0) {
-      setError('Selecione pelo menos um setor.');
+      showFeedback({
+        type: 'warning',
+        title: 'Selecao obrigatoria',
+        message: 'Selecione pelo menos uma unidade para concluir o cadastro.',
+      });
       return;
     }
 
@@ -109,10 +124,18 @@ const Cadastro = () => {
 
     try {
       await api.post('/usuarios/registro/', formData);
-      setSuccess('Cadastro realizado com sucesso! Redirecionando para o login...');
+      showFeedback({
+        type: 'success',
+        title: 'Cadastro concluido',
+        message: 'Sua conta foi criada com sucesso. Voce sera redirecionado para o login.',
+      });
       setTimeout(() => navigate('/login'), 1200);
-    } catch (err) {
-      setError(err.response?.data?.erro || 'Erro ao realizar cadastro. Tente novamente.');
+    } catch (error) {
+      showFeedback({
+        type: 'error',
+        title: 'Cadastro nao concluido',
+        message: getApiErrorMessage(error, 'cadastro'),
+      });
     } finally {
       setLoading(false);
     }
@@ -123,10 +146,11 @@ const Cadastro = () => {
       <div className="public-theme-toggle">
         <ThemeToggle />
       </div>
+
       <main className="cadastro-card">
         <header className="cadastro-header">
           <p className="cadastro-title-small">Crie sua conta para acessar o sistema</p>
-          <h1 className="cadastro-title-large">Sistema de Gestão de Riscos</h1>
+          <h1 className="cadastro-title-large">Sistema de Gestao de Riscos</h1>
         </header>
 
         <form onSubmit={handleCadastro}>
@@ -137,7 +161,7 @@ const Cadastro = () => {
               id="nome"
               value={formData.nome}
               onChange={handleChange}
-              placeholder="Como você gostaria de ser chamado"
+              placeholder="Como voce gostaria de ser chamado"
               required
             />
           </div>
@@ -162,7 +186,7 @@ const Cadastro = () => {
                 id="siape"
                 value={formData.siape}
                 onChange={handleChange}
-                placeholder="Matrícula"
+                placeholder="Matricula"
                 required
               />
             </div>
@@ -173,18 +197,15 @@ const Cadastro = () => {
                 id="senha"
                 value={formData.senha}
                 onChange={handleChange}
-                placeholder="Mín. 8 caracteres"
+                placeholder="Min. 8 caracteres"
                 required
               />
             </div>
           </div>
 
           <div className="input-group" ref={dropdownRef}>
-            <label>Setores Vinculados</label>
-            <div
-              className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
-              onClick={toggleDropdown}
-            >
+            <label>Unidades Vinculadas</label>
+            <div className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`} onClick={toggleDropdown}>
               <span>{getSetoresSelecionadosTexto()}</span>
               <i className="arrow-icon"></i>
             </div>
@@ -195,9 +216,9 @@ const Cadastro = () => {
                   <input
                     type="text"
                     value={buscaSetor}
-                    onChange={(e) => setBuscaSetor(e.target.value)}
+                    onChange={(event) => setBuscaSetor(event.target.value)}
                     placeholder="Buscar unidade por sigla, nome ou centro"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
                   />
                 </div>
 
@@ -208,31 +229,22 @@ const Cadastro = () => {
                       className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
                       onClick={() => toggleSetor(setor.id)}
                     >
-                      <input
-                        type="checkbox"
-                        checked={formData.id_setores.includes(setor.id)}
-                        readOnly
-                      />
+                      <input type="checkbox" checked={formData.id_setores.includes(setor.id)} readOnly />
                       <span>{getSetorLabel(setor)}</span>
                     </div>
                   ))}
 
-                  {loadingSetores && (
-                    <div className="custom-option-loading">Carregando setores...</div>
-                  )}
+                  {loadingSetores && <div className="custom-option-loading">Carregando unidades...</div>}
                   {!loadingSetores && setoresDisponiveis.length === 0 && (
-                    <div className="custom-option-loading">Nenhum setor cadastrado.</div>
+                    <div className="custom-option-loading">Nenhuma unidade cadastrada.</div>
                   )}
                   {!loadingSetores && setoresDisponiveis.length > 0 && setoresFiltrados.length === 0 && (
-                    <div className="custom-option-loading">Nenhum setor encontrado.</div>
+                    <div className="custom-option-loading">Nenhuma unidade encontrada.</div>
                   )}
                 </div>
               </div>
             )}
           </div>
-
-          {success && <div className="feedback-banner success">{success}</div>}
-          {error && <div className="feedback-banner error">{error}</div>}
 
           <button type="submit" className="cadastro-button" disabled={loading}>
             {loading ? 'Processando...' : 'Concluir Cadastro'}
@@ -240,7 +252,12 @@ const Cadastro = () => {
         </form>
 
         <footer className="cadastro-footer">
-          <p>Já possui uma conta? <Link to="/login" className="login-link">Fazer Login</Link></p>
+          <p>
+            Ja possui uma conta?{' '}
+            <Link to="/login" className="login-link">
+              Fazer Login
+            </Link>
+          </p>
         </footer>
       </main>
     </div>

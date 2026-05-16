@@ -1,5 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import FeedbackToast from './components/FeedbackToast'
+import { FeedbackProvider } from './context/FeedbackContext'
 import { ThemeProvider } from './context/ThemeContext'
 import Login from './pages/Login'
 import Cadastro from './pages/Cadastro'
@@ -17,23 +19,26 @@ import UnidadesAdmin from './pages/UnidadesAdmin'
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/planos" element={<PlanosRisco />} />
-          <Route path="/planos/:id" element={<VisualizarPlano />} />
-          <Route path="/novo-plano" element={<NovoPlano />} />
-          <Route path="/editar-plano/:id" element={<EditarPlano />} />
-          <Route path="/mapa" element={<MapaRisco />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/equipe" element={<GestaoEquipe />} />
-          <Route path="/unidades" element={<UnidadesAdmin />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
+      <FeedbackProvider>
+        <Router>
+          <FeedbackToast />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/planos" element={<PlanosRisco />} />
+            <Route path="/planos/:id" element={<VisualizarPlano />} />
+            <Route path="/novo-plano" element={<NovoPlano />} />
+            <Route path="/editar-plano/:id" element={<EditarPlano />} />
+            <Route path="/mapa" element={<MapaRisco />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/equipe" element={<GestaoEquipe />} />
+            <Route path="/unidades" element={<UnidadesAdmin />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </FeedbackProvider>
     </ThemeProvider>
   )
 }

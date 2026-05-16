@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
+import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import './styles.css';
 
 const Login = () => {
   const [siape, setSiape] = useState('');
   const [senha, setSenha] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { showFeedback } = useFeedback();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
+  const handleLogin = async (event) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -23,9 +24,19 @@ const Login = () => {
       localStorage.setItem('@SIGR:token', token);
       localStorage.setItem('@SIGR:user', JSON.stringify(usuario));
 
+      showFeedback({
+        type: 'success',
+        title: 'Acesso liberado',
+        message: 'Login realizado com sucesso. Voce sera redirecionado para a dashboard.',
+      });
+
       navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.erro || 'Erro ao realizar login. Verifique seus dados.');
+    } catch (error) {
+      showFeedback({
+        type: 'error',
+        title: 'Falha no login',
+        message: getApiErrorMessage(error, 'login'),
+      });
     } finally {
       setLoading(false);
     }
@@ -36,10 +47,11 @@ const Login = () => {
       <div className="public-theme-toggle">
         <ThemeToggle />
       </div>
+
       <main className="login-card">
         <header className="login-header">
           <p className="login-title-small">Acesso institucional</p>
-          <h1 className="login-title-large">Sistema de Gestão de Riscos</h1>
+          <h1 className="login-title-large">Sistema de Gestao de Riscos</h1>
         </header>
 
         <form onSubmit={handleLogin}>
@@ -49,7 +61,7 @@ const Login = () => {
               type="text"
               id="siape"
               value={siape}
-              onChange={(e) => setSiape(e.target.value)}
+              onChange={(event) => setSiape(event.target.value)}
               placeholder="Ex: 1234567"
               required
             />
@@ -61,13 +73,11 @@ const Login = () => {
               type="password"
               id="senha"
               value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              onChange={(event) => setSenha(event.target.value)}
               placeholder="Sua senha de acesso"
               required
             />
           </div>
-
-          {error && <div className="feedback-banner error">{error}</div>}
 
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar no Sistema'}
@@ -75,8 +85,15 @@ const Login = () => {
         </form>
 
         <footer className="login-footer">
-          <p>Ainda não tem acesso? <Link to="/cadastro" className="register-link">Cadastrar Gestor</Link></p>
-          <Link to="/recuperar-senha" className="forgot-password">Esqueceu a senha?</Link>
+          <p>
+            Ainda nao tem acesso?{' '}
+            <Link to="/cadastro" className="register-link">
+              Cadastrar Gestor
+            </Link>
+          </p>
+          <Link to="/recuperar-senha" className="forgot-password">
+            Esqueceu a senha?
+          </Link>
         </footer>
       </main>
     </div>
