@@ -10,8 +10,10 @@ from src.usuarios.models import Usuario
 @pytest.mark.django_db
 class TestSeedBaseDemo:
     def test_cria_base_demo_com_usuarios_riscos_planos_e_monitoramentos(self):
+        # o comando popula uma base completa de demonstracao
         call_command("seed_base_demo")
 
+        # este bloco valida os usuarios criados e os vinculos com unidades
         for dados_usuario in USUARIOS_DEMO:
             usuario = Usuario.objects.get(siape=dados_usuario["siape"])
             unidades = set(usuario.setores.values_list("sigla_centro", "nome"))
@@ -26,18 +28,21 @@ class TestSeedBaseDemo:
             assert unidades == unidades_esperadas
             assert Token.objects.filter(user=usuario).exists()
 
+        # estas validacoes cobrem os objetos principais da base demo
         assert Risco.objects.count() == len(RISCOS_DEMO)
         assert PlanoAcao.objects.count() == len(RISCOS_DEMO)
         assert Monitoramento.objects.count() == sum(
             1 for dados_risco in RISCOS_DEMO if "monitoramento" in dados_risco
         )
 
+        # por fim o teste confere um exemplo concreto de plano associado ao risco
         risco_ti = Risco.objects.get(evento=RISCOS_DEMO[0]["evento"])
         plano_ti = risco_ti.planos_acao.get()
         assert plano_ti.responsavel == RISCOS_DEMO[0]["plano"]["responsavel"]
         assert plano_ti.status == RISCOS_DEMO[0]["plano"]["status"]
 
     def test_seed_e_idempotente(self):
+        # este teste executa o seed duas vezes para garantir estabilidade
         call_command("seed_base_demo")
         call_command("seed_base_demo")
 
@@ -51,6 +56,7 @@ class TestSeedBaseDemo:
         )
 
     def test_seed_mantem_apenas_superusuario_existente(self):
+        # a preparacao cria um admin local antes da execucao do seed
         admin = Usuario.objects.create_superuser(
             siape="202512603",
             password="12345678",
@@ -58,6 +64,7 @@ class TestSeedBaseDemo:
             email="admin.local@ufsm.br",
         )
 
+        # o seed nao deve criar administradores extras
         call_command("seed_base_demo")
 
         admin.refresh_from_db()

@@ -9,8 +9,10 @@ from src.usuarios.models import Usuario
 @pytest.mark.django_db
 class TestSeedUsuariosTeste:
     def test_cria_usuarios_de_teste_com_multiplos_setores(self):
+        # o comando cria usuarios de apoio para testes manuais do sistema
         call_command("seed_usuarios_teste")
 
+        # este bloco valida os dados de cada usuario previsto no seed
         for dados_usuario in USUARIOS_TESTE:
             usuario = Usuario.objects.get(siape=dados_usuario["siape"])
             unidades = set(
@@ -30,6 +32,7 @@ class TestSeedUsuariosTeste:
             assert Token.objects.filter(user=usuario).exists()
 
     def test_seed_e_idempotente_e_nao_duplica_usuarios(self):
+        # executar duas vezes nao deve gerar duplicidade
         call_command("seed_usuarios_teste")
         call_command("seed_usuarios_teste")
 
@@ -38,11 +41,13 @@ class TestSeedUsuariosTeste:
         ).count() == len(USUARIOS_TESTE)
 
     def test_reset_password_atualiza_senha_de_usuario_existente(self):
+        # o primeiro passo cria os usuarios e altera manualmente a senha de um deles
         call_command("seed_usuarios_teste")
         usuario = Usuario.objects.get(siape=USUARIOS_TESTE[0]["siape"])
         usuario.set_password("SenhaAntiga@123")
         usuario.save()
 
+        # depois o comando e executado com reset para sobrescrever a senha
         call_command("seed_usuarios_teste", password="NovaSenha@123", reset_password=True)
         usuario.refresh_from_db()
 

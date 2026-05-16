@@ -12,6 +12,7 @@ from src.usuarios.normalizacao_legado import (
 @pytest.mark.django_db
 class TestNormalizacaoSetoresLegados:
     def test_encontra_unidade_oficial_de_ensino_por_sigla_legada(self):
+        # o teste cria uma unidade legada e uma unidade oficial equivalente
         legado = Setor.objects.create(
             nome="TTT",
             sigla="TTT",
@@ -31,11 +32,13 @@ class TestNormalizacaoSetoresLegados:
             ativo=True,
         )
 
+        # a funcao deve localizar a unidade oficial a partir da legada
         encontrado = encontrar_setor_oficial_equivalente(legado, Setor)
 
         assert encontrado == oficial
 
     def test_normaliza_vinculos_de_usuario_trocando_legado_por_oficial(self):
+        # este cenario prepara uma unidade legada, uma oficial e um usuario vinculado ao legado
         legado = Setor.objects.create(
             nome="LEGX",
             sigla="LEGX",
@@ -62,6 +65,7 @@ class TestNormalizacaoSetoresLegados:
         )
         usuario.setores.add(legado)
 
+        # a rotina deve substituir o vinculo antigo pelo registro oficial
         resultado = normalizar_vinculos_legados(Usuario, Setor)
         usuario.refresh_from_db()
 
@@ -70,6 +74,7 @@ class TestNormalizacaoSetoresLegados:
         assert oficial in usuario.setores.all()
 
     def test_normaliza_risco_legado(self):
+        # aqui o teste repete a mesma ideia, mas agora com um risco salvo no banco
         legado = Setor.objects.create(
             nome="LEGY",
             sigla="LEGY",
@@ -107,6 +112,7 @@ class TestNormalizacaoSetoresLegados:
             imp_residual=2,
         )
 
+        # a rotina de normalizacao deve atualizar o setor do risco
         resultado = normalizar_riscos_legados(Setor)
         risco.refresh_from_db()
 
