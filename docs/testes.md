@@ -38,8 +38,12 @@ Arquivos atualmente presentes:
 ### Unitarios
 
 - `tests/unit/usuarios/test_models.py`
+- `tests/unit/usuarios/test_serializers.py`
+- `tests/unit/usuarios/test_importacao_unidades.py`
 - `tests/unit/riscos/test_models.py`
 - `tests/unit/riscos/test_seed_data.py`
+- `tests/unit/riscos/test_serializers.py`
+- `tests/unit/riscos/test_exporters.py`
 
 ### Componentes
 
@@ -52,7 +56,31 @@ Arquivos atualmente presentes:
 
 ### Integracao
 
-- a pasta `tests/integration/` ja existe e esta reservada para fluxos completos futuros
+- `tests/integration/test_dashboard_fluxo_risco.py`
+- `tests/integration/test_mapa_fluxo_risco.py`
+- `tests/integration/test_exportacoes_fluxo.py`
+- `tests/integration/test_recuperacao_senha_fluxo.py`
+
+## Fixtures compartilhadas
+
+Para reduzir repeticao e facilitar a manutencao, a suite agora possui fixtures compartilhadas em:
+
+- `tests/conftest.py`
+
+As fixtures principais hoje sao:
+
+- `api_client`
+- `setor_oficial`
+- `setor_secundario`
+- `usuario_gestor`
+- `usuario_superuser`
+- `usuario_outro_setor`
+- `desafio_padrao`
+- `objetivo_padrao`
+- `macroprocesso_padrao`
+- `risco_basico`
+- `risco_com_plano`
+- `risco_com_monitoramento`
 
 ## Testes unitarios
 
@@ -75,6 +103,22 @@ Os testes unitarios validam comportamentos isolados de classes, metodos e regras
 - validacao de erro ao criar superusuario com flags inconsistentes
 - criacao valida de superusuario
 
+#### `tests/unit/usuarios/test_serializers.py`
+
+- criacao de usuario por serializer com vinculo de unidade
+- atualizacao parcial de perfil
+- validacao da senha atual
+- validacao da confirmacao de senha
+- aplicacao correta de nova senha
+
+#### `tests/unit/usuarios/test_importacao_unidades.py`
+
+- retorno do caminho padrao do csv oficial
+- falha quando o arquivo nao existe
+- falha quando faltam campos obrigatorios
+- ignorar linhas incompletas
+- atualizacao de unidade oficial ja existente
+
 #### `tests/unit/riscos/test_models.py`
 
 - calculo automatico de `nivel_risco`
@@ -89,6 +133,20 @@ Os testes unitarios validam comportamentos isolados de classes, metodos e regras
 - presenca dos macroprocessos iniciais
 - presenca dos objetivos PDI iniciais
 - relacao esperada entre objetivo e desafio
+
+#### `tests/unit/riscos/test_serializers.py`
+
+- serializacao dos detalhes relacionados do risco
+- criacao de risco com payload valido
+- rejeicao de categoria invalida
+- rejeicao de campo obrigatorio ausente
+
+#### `tests/unit/riscos/test_exporters.py`
+
+- comportamento dos helpers internos de exportacao
+- exportacao da lista em Excel
+- exportacao do plano individual em Excel
+- exportacao do plano individual em PDF
 
 ## Testes de componente
 
@@ -169,9 +227,25 @@ Os testes de integracao verificam a comunicacao entre mais de uma camada do sist
 - comando de management -> model -> banco
 - regra de negocio + autenticacao + permissao + persistencia
 
-### Estrutura preparada para o futuro
+### Arquivos atuais de integracao
 
-A pasta `tests/integration/` foi criada para receber fluxos completos futuros, como:
+Hoje a pasta de integracao ja possui arquivos reais:
+
+- `tests/integration/test_dashboard_fluxo_risco.py`
+- `tests/integration/test_mapa_fluxo_risco.py`
+- `tests/integration/test_exportacoes_fluxo.py`
+- `tests/integration/test_recuperacao_senha_fluxo.py`
+
+### O que estes testes cobrem
+
+- criacao de risco e reflexo na dashboard
+- criacao de risco e reflexo no mapa de riscos
+- exportacao de plano individual em PDF e Excel
+- fluxo completo de recuperacao de senha
+
+### Evolucao futura esperada
+
+A pasta `tests/integration/` foi criada para receber mais fluxos completos, como:
 
 - criacao de risco + reflexo na dashboard
 - criacao de risco + reflexo no mapa de riscos
@@ -179,9 +253,9 @@ A pasta `tests/integration/` foi criada para receber fluxos completos futuros, c
 - fluxos completos de recuperacao de senha
 - fluxos gerenciais que cruzem usuarios, riscos, planos e monitoramentos
 
-### Situacao atual
+### Relacao com os testes de componente
 
-Hoje, ainda nao existem arquivos fisicos dentro de `tests/integration/`, mas parte dos testes de componente ja cobre integracao de fato, especialmente:
+Mesmo com a nova pasta de integracao, parte dos testes de componente ainda cobre integracao de fato, especialmente:
 
 - `tests/component/usuarios/test_views.py`
 - `tests/component/usuarios/test_importar_unidades_ufsm.py`
@@ -227,4 +301,4 @@ Essa automacao:
 
 - a documentacao atual descreve a suite automatizada do backend
 - devemos ampliar a cobertura com testes de frontend
-- a estrutura fisica ja esta preparada para separar, no futuro, fluxos completos dentro de `tests/integration/`
+- a estrutura fisica agora possui testes reais em `tests/integration/` e esta pronta para crescer por fluxo
