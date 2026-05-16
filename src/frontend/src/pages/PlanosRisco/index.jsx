@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -35,6 +37,7 @@ const PlanosRisco = () => {
   const [filterDataInicio, setFilterDataInicio] = useState('');
   const [filterDataFim, setFilterDataFim] = useState('');
   const [ordenacao, setOrdenacao] = useState('desc');
+  const { showFeedback } = useFeedback();
 
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
   const userSetoresIds = user.setores?.map(s => s.id) || [];
@@ -60,6 +63,11 @@ const PlanosRisco = () => {
       setStats(response.data);
     } catch (err) {
       console.error('Erro ao carregar estatísticas:', err);
+      showFeedback({
+        type: 'warning',
+        title: 'Indicadores indisponiveis',
+        message: 'Nao foi possivel atualizar os indicadores de planos agora. Tente novamente em instantes.',
+      });
     }
   }
 
@@ -78,6 +86,11 @@ const PlanosRisco = () => {
       setCount(response.data.count);
     } catch (err) {
       console.error('Erro ao carregar planos:', err);
+      showFeedback({
+        type: 'error',
+        title: 'Listagem indisponivel',
+        message: getApiErrorMessage(err, 'planos_risco'),
+      });
     } finally {
       setLoading(false);
     }
@@ -103,8 +116,18 @@ const PlanosRisco = () => {
         responseType: 'blob',
       });
       downloadBlob(response.data, 'planos-risco.xlsx');
+      showFeedback({
+        type: 'success',
+        title: 'Excel gerado',
+        message: 'O arquivo com os planos filtrados foi preparado e o download foi iniciado.',
+      });
     } catch (err) {
       console.error('Erro ao exportar Excel:', err);
+      showFeedback({
+        type: 'error',
+        title: 'Exportacao nao concluida',
+        message: getApiErrorMessage(err, 'exportacao'),
+      });
     } finally {
       setExportingExcel(false);
     }

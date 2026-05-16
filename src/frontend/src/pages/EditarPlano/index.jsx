@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import '../NovoPlano/styles.css';
 
@@ -17,7 +20,7 @@ const EditarPlano = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { showFeedback } = useFeedback();
   
   // Dados auxiliares
   const [desafios, setDesafios] = useState([]);
@@ -184,13 +187,20 @@ const EditarPlano = () => {
   const handleSubmitRisco = async () => {
     setSaving(true);
     setError('');
-    setSuccess('');
     try {
       await api.patch(`/riscos/planos/${id}/`, riscoData);
-      setSuccess('Etapa salva com sucesso.');
+      showFeedback({
+        type: 'success',
+        title: 'Etapa atualizada',
+        message: 'A identificacao e a avaliacao do plano foram atualizadas com sucesso.',
+      });
       setEtapa(3);
     } catch (err) {
-      setError(err.response?.data?.erro || 'Erro ao atualizar identificação e análise.');
+      showFeedback({
+        type: 'error',
+        title: 'Atualizacao nao concluida',
+        message: getApiErrorMessage(err, 'editar_plano'),
+      });
     } finally {
       setSaving(false);
     }
@@ -200,7 +210,6 @@ const EditarPlano = () => {
     e.preventDefault();
     setSaving(true);
     setError('');
-    setSuccess('');
     try {
       if (planoAcaoData.id) {
         await api.patch(`/riscos/acoes/${planoAcaoData.id}/`, {
@@ -213,10 +222,18 @@ const EditarPlano = () => {
           risco: id
         });
       }
-      setSuccess('Plano de risco atualizado com sucesso! Redirecionando para a listagem...');
+      showFeedback({
+        type: 'success',
+        title: 'Plano atualizado',
+        message: 'As alteracoes do plano de risco foram salvas com sucesso. Redirecionando para a listagem.',
+      });
       setTimeout(() => navigate('/planos'), 1200);
-    } catch {
-      setError('Erro ao salvar o tratamento.');
+    } catch (err) {
+      showFeedback({
+        type: 'error',
+        title: 'Tratamento nao atualizado',
+        message: getApiErrorMessage(err, 'tratamento'),
+      });
     } finally {
       setSaving(false);
     }
@@ -250,6 +267,9 @@ const EditarPlano = () => {
             <div className="title-line"></div>
             <h1>Editar Plano de Risco #{id}</h1>
           </div>
+          <div className="header-actions">
+            <ThemeToggle compact />
+          </div>
         </header>
 
         <section className="stepper-container">
@@ -270,7 +290,6 @@ const EditarPlano = () => {
         </section>
 
         <div className="form-container">
-          {success && <div className="feedback-banner success">{success}</div>}
           {error && <div className="error-message">{error}</div>}
 
           {etapa === 1 && (

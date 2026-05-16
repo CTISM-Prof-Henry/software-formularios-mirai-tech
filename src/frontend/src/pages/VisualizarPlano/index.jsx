@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -15,6 +17,7 @@ const VisualizarPlano = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState('');
+  const { showFeedback } = useFeedback();
 
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
   const userSetoresIds = user.setores?.map(s => s.id) || [];
@@ -80,9 +83,18 @@ const VisualizarPlano = () => {
         responseType: 'blob',
       });
       downloadBlob(response.data, `plano-risco-${id}.${extension}`);
+      showFeedback({
+        type: 'success',
+        title: 'Arquivo gerado',
+        message: `O arquivo em ${tipo.toUpperCase()} foi preparado e o download foi iniciado.`,
+      });
     } catch (err) {
       console.error(`Erro ao exportar ${tipo}:`, err);
-      window.alert('Nao foi possivel baixar o arquivo solicitado.');
+      showFeedback({
+        type: 'error',
+        title: 'Download nao concluido',
+        message: getApiErrorMessage(err, 'exportacao'),
+      });
     } finally {
       setExporting('');
     }

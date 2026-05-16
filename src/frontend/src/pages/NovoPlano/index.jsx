@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -11,7 +13,7 @@ const NovoPlano = () => {
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
   const [etapa, setEtapa] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { showFeedback } = useFeedback();
   
   // Dados auxiliares
   const [desafios, setDesafios] = useState([]);
@@ -63,10 +65,15 @@ const NovoPlano = () => {
         setMacroprocessos(macroRes.data.results || macroRes.data);
       } catch (err) {
         console.error('Erro ao carregar dados auxiliares:', err);
+        showFeedback({
+          type: 'warning',
+          title: 'Dados auxiliares indisponiveis',
+          message: 'Nao foi possivel carregar desafios, objetivos e macroprocessos agora. Atualize a pagina para tentar novamente.',
+        });
       }
     }
     loadData();
-  }, []);
+  }, [showFeedback]);
 
   const handleRiscoChange = (e) => {
     const { name, value } = e.target;
@@ -135,13 +142,21 @@ const NovoPlano = () => {
 
   const handleSubmitRisco = async () => {
     setLoading(true);
-    setError('');
     try {
       const response = await api.post('/riscos/planos/', riscoData);
       setRiscoCriadoId(response.data.id);
+      showFeedback({
+        type: 'success',
+        title: 'Analise registrada',
+        message: 'A identificacao e a avaliacao do risco foram salvas. Agora voce ja pode definir o tratamento.',
+      });
       setEtapa(3);
     } catch (err) {
-      setError(err.response?.data?.erro || 'Erro ao salvar identificação e análise.');
+      showFeedback({
+        type: 'error',
+        title: 'Nao foi possivel salvar o risco',
+        message: getApiErrorMessage(err, 'novo_plano'),
+      });
     } finally {
       setLoading(false);
     }
@@ -150,17 +165,23 @@ const NovoPlano = () => {
   const handleSubmitFinal = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
-      // Salva o Plano de Ação vinculado ao risco recém criado
       await api.post('/riscos/acoes/', {
         ...planoAcaoData,
         risco: riscoCriadoId
       });
-      alert('Plano de Risco completo salvo com sucesso!');
+      showFeedback({
+        type: 'success',
+        title: 'Plano concluido',
+        message: 'O plano de risco completo foi salvo com sucesso. Voce sera redirecionado para a listagem.',
+      });
       navigate('/planos');
-    } catch {
-      setError('Erro ao salvar o tratamento. O risco foi salvo, mas o plano de ação não.');
+    } catch (err) {
+      showFeedback({
+        type: 'error',
+        title: 'Tratamento nao concluido',
+        message: getApiErrorMessage(err, 'tratamento'),
+      });
     } finally {
       setLoading(false);
     }
@@ -203,8 +224,6 @@ const NovoPlano = () => {
         </section>
 
         <div className="form-container">
-          {error && <div className="error-message">{error}</div>}
-
           {etapa === 1 && (
             <div className="step-content">
               <div className="input-row">
