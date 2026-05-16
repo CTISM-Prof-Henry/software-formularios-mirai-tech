@@ -1,7 +1,14 @@
 import pytest
 from rest_framework.test import APIClient
 
-from src.riscos.models import DesafioPDI, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+from src.riscos.models import (
+    DesafioPDI,
+    Macroprocesso,
+    Monitoramento,
+    ObjetivoPDI,
+    PlanoAcao,
+    Risco,
+)
 from src.usuarios.models import Setor, Usuario
 
 

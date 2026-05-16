@@ -5,7 +5,6 @@ import pytest
 from src.usuarios.importacao_unidades import caminho_padrao_unidades, importar_unidades_csv
 from src.usuarios.models import Setor
 
-
 CSV_VALIDO = """COD_ESTRUTURADO,NOME_UNIDADE,NOME_CENTRO,SIGLA_CENTRO,TIPO_UNIDADE,SITUACAO
 01,Departamento de Teste,Centro de Testes,CT,Departamento Didatico,Formal
 """
