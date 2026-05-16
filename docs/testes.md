@@ -1,237 +1,198 @@
 # Testes
 
-## Visão geral
+## Visao geral
 
-O projeto possui uma base de testes automatizados focada principalmente no backend. Para facilitar a avaliação e o entendimento da cobertura atual, os testes estão organizados nesta documentação por **tipo de teste**:
+O projeto possui uma base de testes automatizados focada principalmente no backend. Para deixar a organizacao mais clara, a suite agora esta separada por **tipo de teste**:
 
-- **testes unitários**;
-- **testes de componente**;
-- **testes de integração**.
+- **testes unitarios**
+- **testes de componente**
+- **testes de integracao**
 
-Essa divisão ajuda a responder com mais clareza:
-
-- quais regras de negócio já são verificadas isoladamente;
-- quais partes do sistema são testadas em nível de módulo ou endpoint;
-- quais fluxos exercitam a integração entre camadas, banco e API.
+Essa divisao facilita a leitura tecnica, a documentacao academica e a futura evolucao da pipeline.
 
 ## Ferramentas utilizadas
 
-- **Pytest**: execução e organização da suíte;
-- **Pytest-Django**: integração com o ambiente Django;
-- **Pytest-Cov**: geração de cobertura;
-- **Django REST Framework APIClient**: validação dos endpoints REST;
-- **call_command** do Django: execução de comandos de management em testes de seed.
+- **Pytest**: execucao e organizacao da suite
+- **Pytest-Django**: integracao com o ambiente Django
+- **Pytest-Cov**: geracao de cobertura
+- **Django REST Framework APIClient**: validacao dos endpoints REST
+- **call_command** do Django: execucao de comandos de management em testes de seed
 
 ## Estrutura atual
 
-Os testes estão concentrados nos apps `usuarios` e `riscos`:
+Os testes agora ficam centralizados na pasta raiz `tests/`:
 
-- `src/usuarios/tests/`
-- `src/riscos/tests/`
+```text
+tests/
+  unit/
+    usuarios/
+    riscos/
+  component/
+    usuarios/
+    riscos/
+  integration/
+```
 
 Arquivos atualmente presentes:
 
-- `src/usuarios/tests/test_models.py`
-- `src/usuarios/tests/test_importar_unidades_ufsm.py`
-- `src/usuarios/tests/test_normalizar_setores_legados.py`
-- `src/usuarios/tests/test_seed_base_demo.py`
-- `src/usuarios/tests/test_views.py`
-- `src/usuarios/tests/test_seed_usuarios_teste.py`
-- `src/riscos/tests/test_models.py`
-- `src/riscos/tests/test_views.py`
-- `src/riscos/tests/test_seed_data.py`
+### Unitarios
 
-## Testes unitários
+- `tests/unit/usuarios/test_models.py`
+- `tests/unit/riscos/test_models.py`
+- `tests/unit/riscos/test_seed_data.py`
 
-Os testes unitários validam comportamentos isolados de classes, métodos e regras pequenas de domínio, com foco em uma unidade específica de código.
+### Componentes
 
-### Arquivos classificados como unitários
+- `tests/component/usuarios/test_importar_unidades_ufsm.py`
+- `tests/component/usuarios/test_normalizar_setores_legados.py`
+- `tests/component/usuarios/test_seed_base_demo.py`
+- `tests/component/usuarios/test_seed_usuarios_teste.py`
+- `tests/component/usuarios/test_views.py`
+- `tests/component/riscos/test_views.py`
 
-- `src/usuarios/tests/test_models.py`
-- `src/riscos/tests/test_models.py`
-- `src/usuarios/tests/test_normalizar_setores_legados.py`
+### Integracao
 
-### O que está coberto como teste unitário
+- a pasta `tests/integration/` ja existe e esta reservada para fluxos completos futuros
 
-#### `src/usuarios/tests/test_models.py`
+## Testes unitarios
 
-- criação de `Setor`;
-- geração de `label_curto` e `label_completo` para unidades oficiais;
-- criação de usuário comum;
-- validação de erro ao criar usuário sem SIAPE;
-- validação de erro ao criar superusuário com flags inconsistentes;
-- criação válida de superusuário;
-- comportamento básico de `__str__`, `is_active` e `is_staff`.
+Os testes unitarios validam comportamentos isolados de classes, metodos e regras pequenas de dominio.
 
-#### `src/usuarios/tests/test_normalizar_setores_legados.py`
+### Arquivos classificados como unitarios
 
-- localização da unidade oficial equivalente para um setor legado;
-- remapeamento de vínculos antigos de usuário para unidade oficial;
-- remapeamento de riscos antigos para unidades oficiais equivalentes.
+- `tests/unit/usuarios/test_models.py`
+- `tests/unit/riscos/test_models.py`
+- `tests/unit/riscos/test_seed_data.py`
 
-#### `src/riscos/tests/test_models.py`
+### O que esta coberto como teste unitario
 
-- cálculo automático de `nivel_risco`;
-- cálculo automático de `nivel_residual`;
-- criação de `PlanoAcao`;
-- criação de `Monitoramento`;
-- comportamento básico das representações textuais dos modelos relacionados.
+#### `tests/unit/usuarios/test_models.py`
+
+- criacao de `Setor`
+- geracao de `label_curto` e `label_completo`
+- criacao de usuario comum
+- validacao de erro ao criar usuario sem SIAPE
+- validacao de erro ao criar superusuario com flags inconsistentes
+- criacao valida de superusuario
+
+#### `tests/unit/riscos/test_models.py`
+
+- calculo automatico de `nivel_risco`
+- calculo automatico de `nivel_residual`
+- criacao de `PlanoAcao`
+- criacao de `Monitoramento`
+- representacoes textuais basicas dos modelos relacionados
+
+#### `tests/unit/riscos/test_seed_data.py`
+
+- presenca dos desafios PDI iniciais
+- presenca dos macroprocessos iniciais
+- presenca dos objetivos PDI iniciais
+- relacao esperada entre objetivo e desafio
 
 ## Testes de componente
 
-Nesta documentação, estamos tratando como **testes de componente** aqueles que validam um módulo funcional do sistema em uma camada específica, normalmente um endpoint, view ou comando, sem necessariamente percorrer um fluxo completo de ponta a ponta.
+Nesta documentacao, estamos tratando como **testes de componente** aqueles que validam um modulo funcional do sistema em uma camada especifica, normalmente um endpoint, view ou comando.
 
 ### Arquivos classificados como testes de componente
 
-- `src/usuarios/tests/test_views.py`
-- `src/usuarios/tests/test_importar_unidades_ufsm.py`
-- `src/usuarios/tests/test_seed_base_demo.py`
-- `src/riscos/tests/test_views.py`
-- `src/usuarios/tests/test_seed_usuarios_teste.py`
-- `src/riscos/tests/test_seed_data.py`
+- `tests/component/usuarios/test_importar_unidades_ufsm.py`
+- `tests/component/usuarios/test_normalizar_setores_legados.py`
+- `tests/component/usuarios/test_seed_base_demo.py`
+- `tests/component/usuarios/test_seed_usuarios_teste.py`
+- `tests/component/usuarios/test_views.py`
+- `tests/component/riscos/test_views.py`
 
-### O que está coberto como teste de componente
+### O que esta coberto como teste de componente
 
-#### `src/usuarios/tests/test_views.py`
+#### `tests/component/usuarios/test_importar_unidades_ufsm.py`
 
-- login;
-- registro de novo usuário;
-- leitura de perfil autenticado;
-- atualização de perfil;
-- envio, validação e redefinição de senha;
-- listagem pública de setores;
-- listagem administrativa de unidades da UFSM exclusiva para superusuário;
-- listagem de membros por setor;
-- adição e remoção de membros da equipe;
-- comportamento auxiliar do admin para exibição de setores.
+- execucao do comando `importar_unidades_ufsm`
+- importacao de unidades oficiais com os metadados da UFSM
+- geracao correta de labels curto e completo
+- idempotencia da importacao
+- desativacao opcional de setores legados
 
-#### `src/usuarios/tests/test_importar_unidades_ufsm.py`
+#### `tests/component/usuarios/test_normalizar_setores_legados.py`
 
-- execução do comando `importar_unidades_ufsm`;
-- importação de unidades oficiais com os metadados da UFSM;
-- geração correta de labels curto e completo;
-- idempotência da importação;
-- desativação opcional de setores legados.
+- localizacao da unidade oficial equivalente para um setor legado
+- remapeamento de vinculos antigos de usuario para unidade oficial
+- remapeamento de riscos antigos para unidades oficiais equivalentes
 
-#### `src/usuarios/tests/test_seed_base_demo.py`
+#### `tests/component/usuarios/test_seed_base_demo.py`
 
-- execução do comando `seed_base_demo`;
-- criação de usuários comuns adicionais para demonstração;
-- criação de riscos, planos de ação e monitoramentos de exemplo;
-- idempotência da base demo;
-- garantia de que o seed não cria novos superusuários.
+- execucao do comando `seed_base_demo`
+- criacao de usuarios comuns adicionais para demonstracao
+- criacao de riscos, planos de acao e monitoramentos de exemplo
+- idempotencia da base demo
+- garantia de que o seed nao cria novos superusuarios
 
-#### `src/riscos/tests/test_views.py`
+#### `tests/component/usuarios/test_seed_usuarios_teste.py`
 
-- leitura de riscos por gestores de setores diferentes;
-- bloqueio de edição indevida;
-- bloqueio de criação em setor não vinculado;
-- verificação da permissão `PertenceAoSetorDoRisco`;
-- paginação da listagem de planos;
-- filtros por setor;
-- busca textual;
-- ordenação estável de objetivos e macroprocessos;
-- exportação para Excel;
-- exportação para PDF;
-- dados consolidados da dashboard com filtros por setor e período.
+- execucao do comando `seed_usuarios_teste`
+- criacao de usuarios em multiplos setores
+- idempotencia do comando
+- atualizacao de senha com `--reset-password`
 
-#### `src/usuarios/tests/test_seed_usuarios_teste.py`
+#### `tests/component/usuarios/test_views.py`
 
-- execução do comando `seed_usuarios_teste`;
-- criação de usuários em múltiplos setores;
-- idempotência do comando;
-- atualização de senha com `--reset-password`.
+- login
+- registro de novo usuario
+- leitura de perfil autenticado
+- atualizacao de perfil
+- envio, validacao e redefinicao de senha
+- listagem publica de setores
+- listagem administrativa de unidades da UFSM exclusiva para superusuario
+- listagem de membros por setor
+- adicao e remocao de membros da equipe
 
-#### `src/riscos/tests/test_seed_data.py`
+#### `tests/component/riscos/test_views.py`
 
-- presença dos desafios PDI iniciais;
-- presença dos macroprocessos iniciais;
-- presença dos objetivos PDI iniciais;
-- relação esperada entre objetivo e desafio.
+- leitura de riscos por gestores de setores diferentes
+- bloqueio de edicao indevida
+- bloqueio de criacao em setor nao vinculado
+- verificacao da permissao `PertenceAoSetorDoRisco`
+- paginacao da listagem de planos
+- filtros por setor
+- busca textual
+- ordenacao estavel de objetivos e macroprocessos
+- exportacao para Excel
+- exportacao para PDF
+- dados consolidados da dashboard com filtros por setor e periodo
+- dados analiticos da dashboard e do mapa de riscos
 
-## Testes de integração
+## Testes de integracao
 
-Nesta documentação, estamos tratando como **testes de integração** aqueles que verificam a comunicação entre mais de uma camada do sistema, por exemplo:
+Os testes de integracao verificam a comunicacao entre mais de uma camada do sistema, por exemplo:
 
-- requisição HTTP -> view -> serializer -> model -> banco;
-- comando de management -> model -> banco;
-- regra de negócio + autenticação + permissão + persistência.
+- requisicao HTTP -> view -> serializer -> model -> banco
+- comando de management -> model -> banco
+- regra de negocio + autenticacao + permissao + persistencia
 
-### Onde os testes de integração aparecem hoje
+### Estrutura preparada para o futuro
 
-Atualmente, o projeto **não possui um diretório separado apenas para integração**. Em vez disso, parte dos testes de componente também cumpre papel de integração.
+A pasta `tests/integration/` foi criada para receber fluxos completos futuros, como:
 
-Os principais exemplos são:
+- criacao de risco + reflexo na dashboard
+- criacao de risco + reflexo no mapa de riscos
+- exportacao de plano individual em PDF e Excel
+- fluxos completos de recuperacao de senha
+- fluxos gerenciais que cruzem usuarios, riscos, planos e monitoramentos
 
-- `src/usuarios/tests/test_views.py`
-- `src/usuarios/tests/test_importar_unidades_ufsm.py`
-- `src/usuarios/tests/test_normalizar_setores_legados.py`
-- `src/usuarios/tests/test_seed_base_demo.py`
-- `src/riscos/tests/test_views.py`
-- `src/usuarios/tests/test_seed_usuarios_teste.py`
-- `src/riscos/tests/test_seed_data.py`
+### Situacao atual
 
-### Exemplos claros de integração já existentes
+Hoje, ainda nao existem arquivos fisicos dentro de `tests/integration/`, mas parte dos testes de componente ja cobre integracao de fato, especialmente:
 
-#### Integração no módulo de usuários
-
-- login autenticando usuário real no banco e retornando token;
-- registro persistindo usuário e vínculo com setor;
-- fluxo de recuperação de senha usando banco e regras temporais;
-- gestão de equipe adicionando e removendo vínculos entre usuário e setor.
-- proteção de rota administrativa para visualização completa das unidades da UFSM;
-- importação de unidades oficiais a partir de CSV institucional;
-- normalização de vínculos legados de usuários e riscos para unidades oficiais.
-- população de uma base demo com usuários comuns, riscos, planos e monitoramentos.
-
-#### Integração no módulo de riscos
-
-- criação e edição de riscos respeitando autenticação e vínculo com setor;
-- paginação e filtros da API de riscos;
-- dashboard calculando dados com base em riscos e planos de ação relacionados;
-- exportações em PDF e Excel a partir de dados persistidos;
-- leitura de objetivos e macroprocessos vindos do banco com ordenação estável.
-
-#### Integração em seeds e comandos
-
-- verificação dos dados PDI carregados via migration;
-- verificação dos usuários de teste criados por comando de management.
-
-## Resumo por classificação
-
-### Testes unitários
-
-- `src/usuarios/tests/test_models.py`
-- `src/usuarios/tests/test_normalizar_setores_legados.py`
-- `src/riscos/tests/test_models.py`
-
-### Testes de componente
-
-- `src/usuarios/tests/test_views.py`
-- `src/usuarios/tests/test_importar_unidades_ufsm.py`
-- `src/usuarios/tests/test_seed_base_demo.py`
-- `src/riscos/tests/test_views.py`
-- `src/usuarios/tests/test_seed_usuarios_teste.py`
-- `src/riscos/tests/test_seed_data.py`
-
-### Testes de integração
-
-- parte dos testes de `test_views.py`;
-- `test_importar_unidades_ufsm.py`;
-- `test_normalizar_setores_legados.py`;
-- `test_seed_base_demo.py`;
-- `test_seed_usuarios_teste.py`;
-- `test_seed_data.py`.
-
-Observação importante:
-
-- hoje a suíte está mais madura no backend;
-- a separação física entre componente e integração deve ser melhorada;
-- a classificação nesta documentação é conceitual, para ajudar na leitura/avalicao do projeto.
+- `tests/component/usuarios/test_views.py`
+- `tests/component/usuarios/test_importar_unidades_ufsm.py`
+- `tests/component/usuarios/test_normalizar_setores_legados.py`
+- `tests/component/usuarios/test_seed_base_demo.py`
+- `tests/component/usuarios/test_seed_usuarios_teste.py`
+- `tests/component/riscos/test_views.py`
 
 ## Como executar os testes
 
-Com o ambiente virtual ativo e as dependências instaladas:
+Com o ambiente virtual ativo e as dependencias instaladas:
 
 ```bash
 python -m pytest
@@ -243,25 +204,27 @@ Para cobertura:
 python -m pytest --cov=src --cov-report=term-missing
 ```
 
-## Automação no GitHub Actions
+Como a suite agora esta centralizada em `tests/`, o `pytest` usa essa pasta como ponto principal de descoberta.
 
-Os testes também são executados pela workflow:
+## Automacao no GitHub Actions
+
+Os testes tambem sao executados pela workflow:
 
 ```text
 .github/workflows/tests.yml
 ```
 
-Essa automação:
+Essa automacao:
 
-- executa em `push` para `main` e branches `feat/*`;
-- executa em `pull_request`;
-- sobe um PostgreSQL para testes;
-- instala dependências;
-- aplica migrations;
-- executa `pytest`.
+- executa em `push`
+- executa em `pull_request`
+- sobe um PostgreSQL para testes
+- instala dependencias
+- aplica migrations
+- executa `pytest`
 
-## Observações finais
+## Observacoes finais
 
-- a documentação atual descreve a suíte automatizada do backend;
-- devemosampliar a cobertura com testes de frontend;
-- também é possível separar no futuro diretórios específicos para integração.
+- a documentacao atual descreve a suite automatizada do backend
+- devemos ampliar a cobertura com testes de frontend
+- a estrutura fisica ja esta preparada para separar, no futuro, fluxos completos dentro de `tests/integration/`
