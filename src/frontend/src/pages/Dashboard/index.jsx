@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -23,6 +25,7 @@ const Dashboard = () => {
   const [filterDataInicio, setFilterDataInicio] = useState('');
   const [filterDataFim, setFilterDataFim] = useState('');
   const [loading, setLoading] = useState(true);
+  const { showFeedback } = useFeedback();
 
   useEffect(() => {
     carregarDashboard();
@@ -47,6 +50,11 @@ const Dashboard = () => {
       });
     } catch (err) {
       console.error('Erro ao carregar dados do dashboard:', err);
+      showFeedback({
+        type: 'error',
+        title: 'Dashboard indisponivel',
+        message: getApiErrorMessage(err, 'dashboard'),
+      });
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -33,8 +35,8 @@ const Perfil = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const { showFeedback } = useFeedback();
 
   useEffect(() => {
     async function loadInitialData() {
@@ -58,6 +60,11 @@ const Perfil = () => {
         }));
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
+        showFeedback({
+          type: 'error',
+          title: 'Perfil indisponivel',
+          message: 'Nao foi possivel carregar seus dados agora. Atualize a pagina para tentar novamente.',
+        });
       }
     }
     loadInitialData();
@@ -128,7 +135,6 @@ const Perfil = () => {
   const handleSalvar = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess('');
     setError('');
 
     // Prepara payload apenas com campos preenchidos
@@ -145,7 +151,11 @@ const Perfil = () => {
 
     try {
       const response = await api.patch('/usuarios/me/', payload);
-      setSuccess('Perfil atualizado com sucesso!');
+      showFeedback({
+        type: 'success',
+        title: 'Perfil atualizado',
+        message: 'Suas informacoes foram salvas com sucesso.',
+      });
       setUser(response.data.usuario);
       localStorage.setItem('@SIGR:user', JSON.stringify(response.data.usuario));
       
@@ -157,9 +167,9 @@ const Perfil = () => {
         confirmacao_senha: ''
       }));
     } catch (err) {
-      const msg = err.response?.data?.erro || 
-                  Object.values(err.response?.data || {})[0] || 
-                  'Erro ao atualizar perfil.';
+      const msg = err.response?.data?.erro ||
+                  Object.values(err.response?.data || {})[0] ||
+                  getApiErrorMessage(err, 'perfil');
       setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
@@ -186,7 +196,6 @@ const Perfil = () => {
           </div>
 
           <form className="perfil-content" onSubmit={handleSalvar}>
-            {success && <div className="success-message">{success}</div>}
             {error && <div className="error-message-perfil">{error}</div>}
 
             <div className="perfil-section-title">

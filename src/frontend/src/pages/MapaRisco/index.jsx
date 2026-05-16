@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -39,6 +41,7 @@ const MapaRisco = () => {
   });
   const [filterSetor, setFilterSetor] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
+  const { showFeedback } = useFeedback();
 
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
 
@@ -82,6 +85,11 @@ const MapaRisco = () => {
       });
     } catch (err) {
       console.error('Erro ao carregar riscos para o mapa:', err);
+      showFeedback({
+        type: 'error',
+        title: 'Mapa indisponivel',
+        message: getApiErrorMessage(err, 'mapa_risco'),
+      });
     }
   }
 

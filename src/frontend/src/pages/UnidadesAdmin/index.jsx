@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import './styles.css';
 
 const UnidadesAdmin = () => {
@@ -10,7 +12,6 @@ const UnidadesAdmin = () => {
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
   const [unidades, setUnidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [busca, setBusca] = useState('');
   const [centroSelecionado, setCentroSelecionado] = useState('');
   const [tipoSelecionado, setTipoSelecionado] = useState('');
@@ -20,6 +21,7 @@ const UnidadesAdmin = () => {
   const [centrosDisponiveis, setCentrosDisponiveis] = useState([]);
   const [tiposDisponiveis, setTiposDisponiveis] = useState([]);
   const pageSize = 20;
+  const { showFeedback } = useFeedback();
 
   useEffect(() => {
     if (!user.is_superuser) {
@@ -35,7 +37,6 @@ const UnidadesAdmin = () => {
 
     async function carregarUnidades() {
       setLoading(true);
-      setError('');
       try {
         const response = await api.get('/usuarios/setores/admin/', {
           params: {
@@ -52,7 +53,12 @@ const UnidadesAdmin = () => {
         setCentrosDisponiveis(Array.isArray(response.data.centros) ? response.data.centros : []);
         setTiposDisponiveis(Array.isArray(response.data.tipos) ? response.data.tipos : []);
       } catch (err) {
-        setError(err.response?.data?.erro || 'Nao foi possivel carregar as unidades da UFSM.');
+        const message = getApiErrorMessage(err, 'unidades_admin');
+        showFeedback({
+          type: 'error',
+          title: 'Unidades indisponiveis',
+          message,
+        });
       } finally {
         setLoading(false);
       }
@@ -159,8 +165,6 @@ const UnidadesAdmin = () => {
           </div>
 
           <p className="unidades-filter-description">{descricaoFiltros}</p>
-
-          {error && <div className="feedback-banner error">{error}</div>}
 
           <div className="unidades-table-wrapper">
             {loading ? (

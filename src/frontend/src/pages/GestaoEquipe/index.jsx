@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
@@ -13,8 +15,7 @@ const GestaoEquipe = () => {
   const [siapeNovoMembro, setSiapeNovoMembro] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingMembros, setLoadingMembros] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { showFeedback } = useFeedback();
 
   const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
 
@@ -35,17 +36,16 @@ const GestaoEquipe = () => {
 
   async function carregarMembros(setorId) {
     setLoadingMembros(true);
-    setError('');
     try {
       const response = await api.get(`/usuarios/setores/${setorId}/membros/`);
       setMembros(response.data);
     } catch (err) {
       console.error('Erro ao carregar membros:', err);
-      if (err.response?.status === 401) {
-        setError('Sessao expirada. Faca login novamente para carregar os membros da equipe.');
-      } else {
-        setError('Nao foi possivel carregar os membros da equipe.');
-      }
+      showFeedback({
+        type: 'error',
+        title: 'Equipe indisponivel',
+        message: getApiErrorMessage(err, 'gestao_equipe'),
+      });
     } finally {
       setLoadingMembros(false);
     }
@@ -55,9 +55,6 @@ const GestaoEquipe = () => {
     e.preventDefault();
     if (!siapeNovoMembro) return;
 
-    setError('');
-    setSuccess('');
-
     try {
       const response = await api.post(`/usuarios/setores/${setorSelecionado.id}/adicionar_membro/`, {
         siape: siapeNovoMembro
@@ -65,21 +62,22 @@ const GestaoEquipe = () => {
       
       setMembros([...membros, response.data.usuario]);
       setSiapeNovoMembro('');
-      setSuccess('Membro adicionado com sucesso!');
-      
-      // Limpa mensagem de sucesso após 3 segundos
-      setTimeout(() => setSuccess(''), 3000);
+      showFeedback({
+        type: 'success',
+        title: 'Membro adicionado',
+        message: 'O novo integrante foi vinculado a esta unidade com sucesso.',
+      });
     } catch (err) {
-      const msg = err.response?.data?.erro || 'Erro ao adicionar membro.';
-      setError(msg);
+      showFeedback({
+        type: 'error',
+        title: 'Inclusao nao concluida',
+        message: getApiErrorMessage(err, 'gestao_equipe'),
+      });
     }
   }
 
   async function handleRemoverMembro(usuarioId) {
     if (!window.confirm('Tem certeza que deseja remover este membro da equipe?')) return;
-
-    setError('');
-    setSuccess('');
 
     try {
       await api.post(`/usuarios/setores/${setorSelecionado.id}/remover_membro/`, {
@@ -87,12 +85,17 @@ const GestaoEquipe = () => {
       });
       
       setMembros(membros.filter(m => m.id !== usuarioId));
-      setSuccess('Membro removido com sucesso!');
-      
-      setTimeout(() => setSuccess(''), 3000);
+      showFeedback({
+        type: 'success',
+        title: 'Membro removido',
+        message: 'O integrante foi removido da unidade selecionada com sucesso.',
+      });
     } catch (err) {
-      const msg = err.response?.data?.erro || 'Erro ao remover membro.';
-      setError(msg);
+      showFeedback({
+        type: 'error',
+        title: 'Remocao nao concluida',
+        message: getApiErrorMessage(err, 'gestao_equipe'),
+      });
     }
   }
 
@@ -173,9 +176,6 @@ const GestaoEquipe = () => {
                 </button>
               </div>
             </form>
-
-            {error && <div className="feedback-banner error">{error}</div>}
-            {success && <div className="feedback-banner success">{success}</div>}
           </div>
 
           <div className="membros-list-container">
