@@ -161,9 +161,9 @@ const Sidebar = () => {
 
       <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="logo-icon">
+          {/* <div className="logo-icon">
             <img src="/logo.png" alt="Logo Gestao de Riscos" />
-          </div>
+          </div> */}
           <div className="logo-text">
             <h2>Gestão de Riscos</h2>
             <p>MIRAI TECH</p>
