@@ -1,3 +1,5 @@
+![Preview do Sistema](images/preview.gif)
+
 # Gestão de Risco UFSM - Mirai Tech
 
 Sistema web para gestão e monitoramento de riscos institucionais da UFSM, com backend em Django REST Framework, frontend em React e banco de dados PostgreSQL executado via Docker.
@@ -37,7 +39,7 @@ O projeto pode ser executado tanto em **Windows 11** quanto em **Ubuntu/Linux**,
 
 ```bash
 git clone <url-do-repositorio>
-cd gestao-risco-ufsm-main
+cd software-formularios-mirai-tech
 ```
 
 ### 2. Criar o ambiente virtual
@@ -99,17 +101,14 @@ Use preferencialmente:
 ```bash
 docker compose up -d
 ```
-
-Se sua instalação ainda usar o binário legado, também funciona:
-
-```bash
-docker-compose up -d
-```
-
 ### 7. Aplicar migrations
 
 ```bash
 python manage.py migrate
+```
+
+```bash
+python manage.py makemigrations
 ```
 
 ### 8. Criar usuários de teste para gestão de equipes (opcional)
