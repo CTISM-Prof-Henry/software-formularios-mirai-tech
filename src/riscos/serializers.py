@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from src.usuarios.serializers import UnidadeOrganizacionalSerializer
 
@@ -32,12 +33,23 @@ class RiscoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risco
         fields = [
-            'id', 'setor', 'setor_detalhes', 'objetivo', 'objetivo_detalhes', 
-            'macroprocesso', 'macroprocesso_detalhes', 'categoria', 'evento', 
-            'causa', 'consequencia', 'controles_atuais', 'eficacia_controle', 
-            'probabilidade', 'impacto', 'nivel_risco', 'prob_residual', 
+            'id', 'setor', 'setor_detalhes', 'objetivo', 'objetivo_detalhes',
+            'macroprocesso', 'macroprocesso_detalhes', 'categoria', 'evento',
+            'causa', 'consequencia', 'controles_atuais', 'eficacia_controle',
+            'probabilidade', 'impacto', 'nivel_risco', 'prob_residual',
             'imp_residual', 'nivel_residual'
         ]
+
+    def validate(self, data):
+        campos_escala = ['probabilidade', 'impacto', 'prob_residual', 'imp_residual']
+        erros = {}
+        for campo in campos_escala:
+            valor = data.get(campo)
+            if valor is not None and not (1 <= valor <= 5):
+                erros[campo] = "O valor deve estar entre 1 e 5."
+        if erros:
+            raise ValidationError(erros)
+        return data
 
 class PlanoAcaoSerializer(serializers.ModelSerializer):
     class Meta:

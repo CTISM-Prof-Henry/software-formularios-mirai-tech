@@ -67,6 +67,36 @@ class TestRiscoSerializer:
         assert serializer.is_valid() is False
         assert "categoria" in serializer.errors
 
+    def test_rejeita_probabilidade_fora_do_intervalo(self, setor_oficial, objetivo_padrao, macroprocesso_padrao):
+        # valores acima de 5 ou abaixo de 1 devem ser bloqueados pelo serializer
+        for campo, valor_invalido in [
+            ("probabilidade", 0),
+            ("probabilidade", 6),
+            ("impacto", -1),
+            ("impacto", 10),
+            ("prob_residual", 0),
+            ("imp_residual", 99),
+        ]:
+            serializer = RiscoSerializer(
+                data={
+                    "setor": setor_oficial.id,
+                    "objetivo": objetivo_padrao.id,
+                    "macroprocesso": macroprocesso_padrao.id,
+                    "categoria": "Operacional",
+                    "evento": "Evento range",
+                    "causa": "Causa",
+                    "consequencia": "Consequencia",
+                    "controles_atuais": "Controle",
+                    "eficacia_controle": "Fraco",
+                    "probabilidade": valor_invalido if campo == "probabilidade" else 3,
+                    "impacto": valor_invalido if campo == "impacto" else 3,
+                    "prob_residual": valor_invalido if campo == "prob_residual" else 2,
+                    "imp_residual": valor_invalido if campo == "imp_residual" else 2,
+                }
+            )
+            assert serializer.is_valid() is False, f"Deveria rejeitar {campo}={valor_invalido}"
+            assert campo in serializer.errors, f"Erro esperado em '{campo}', obtido: {serializer.errors}"
+
     def test_rejeita_campo_obrigatorio_ausente(self, setor_oficial, objetivo_padrao):
         # aqui o payload deixa de fora o macroprocesso para validar erro de obrigatoriedade
         serializer = RiscoSerializer(

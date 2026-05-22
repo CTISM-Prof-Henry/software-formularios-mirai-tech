@@ -34,7 +34,7 @@ class TestRiscoModel:
             causa="Causa Y",
             consequencia="Consequência Z",
             controles_atuais="Controle A",
-            eficacia_controle="Médio",
+            eficacia_controle="Satisfatório",
             probabilidade=4,
             impacto=5,
             prob_residual=2,
@@ -61,7 +61,7 @@ class TestPlanoAcaoModel:
             objetivo=infra_pdi['objetivo'],
             macroprocesso=infra_pdi['macro'],
             categoria="Operacional",
-            evento="E", causa="C", consequencia="C", controles_atuais="C", eficacia_controle="Médio",
+            evento="E", causa="C", consequencia="C", controles_atuais="C", eficacia_controle="Satisfatório",
             probabilidade=1, impacto=1, prob_residual=1, imp_residual=1
         )
 
@@ -92,7 +92,7 @@ class TestMonitoramentoModel:
             objetivo=infra_pdi['objetivo'],
             macroprocesso=infra_pdi['macro'],
             categoria="Operacional",
-            evento="E", causa="C", consequencia="C", controles_atuais="C", eficacia_controle="Médio",
+            evento="E", causa="C", consequencia="C", controles_atuais="C", eficacia_controle="Satisfatório",
             probabilidade=1, impacto=1, prob_residual=1, imp_residual=1
         )
 

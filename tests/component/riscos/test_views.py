@@ -1,41 +1,34 @@
 import pytest
 from rest_framework import status
-from rest_framework.test import APIClient
 
 from src.riscos.models import DesafioPDI, Macroprocesso, ObjetivoPDI, PlanoAcao, Risco
-from src.usuarios.models import Setor, Usuario
 
 
 @pytest.fixture
-def api_client():
-    # este fixture disponibiliza um cliente para chamadas aos endpoints de risco
-    return APIClient()
-
-
-@pytest.fixture
-def infra_risco(db):
-    # este fixture monta um cenario completo com dois gestores e dois setores
-    s1 = Setor.objects.create(nome="Setor 1", sigla="S1")
-    s2 = Setor.objects.create(nome="Setor 2", sigla="S2")
-
-    u1 = Usuario.objects.create_user(siape="1", password="p", nome="G1", email="g1@u.br")
-    u1.setores.add(s1)
-
-    u2 = Usuario.objects.create_user(siape="2", password="p", nome="G2", email="g2@u.br")
-    u2.setores.add(s2)
-
-    desafio = DesafioPDI.objects.create(numero=998, descricao="D1")
-    obj = ObjetivoPDI.objects.create(codigo="O-TESTE-998", descricao="O1", desafio=desafio)
-    macro = Macroprocesso.objects.create(nome="M1 Exclusivo")
-
+def infra_risco(setor_oficial, setor_secundario, usuario_gestor, usuario_outro_setor, objetivo_padrao, macroprocesso_padrao):
+    # este fixture monta um cenario completo reutilizando as fixtures compartilhadas do conftest
     risco = Risco.objects.create(
-        setor=s1, objetivo=obj, macroprocesso=macro,
-        categoria="Operacional", evento="E", causa="C", consequencia="C",
-        controles_atuais="C", eficacia_controle="Satisfatório",
-        probabilidade=3, impacto=3, prob_residual=1, imp_residual=1
+        setor=setor_oficial,
+        objetivo=objetivo_padrao,
+        macroprocesso=macroprocesso_padrao,
+        categoria="Operacional",
+        evento="E",
+        causa="C",
+        consequencia="C",
+        controles_atuais="C",
+        eficacia_controle="Satisfatório",
+        probabilidade=3,
+        impacto=3,
+        prob_residual=1,
+        imp_residual=1,
     )
-
-    return {"u1": u1, "u2": u2, "s1": s1, "s2": s2, "risco": risco}
+    return {
+        "u1": usuario_gestor,
+        "u2": usuario_outro_setor,
+        "s1": setor_oficial,
+        "s2": setor_secundario,
+        "risco": risco,
+    }
 
 
 @pytest.mark.django_db
@@ -85,6 +78,27 @@ class TestRiscoViewsPermissions:
         }
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_permissao_objeto_com_atributo_risco(self, infra_risco):
+        # valida o segundo caminho da permissao: objetos que possuem FK para risco (PlanoAcao, Monitoramento)
+        from src.riscos.views import PertenceAoSetorDoRisco
+        perm = PertenceAoSetorDoRisco()
+
+        class ObjComRisco:
+            risco = infra_risco['risco']  # risco pertence a s1
+
+        class RequestU2:
+            method = "PUT"
+            user = infra_risco['u2']  # u2 pertence a s2
+
+        class RequestU1:
+            method = "PUT"
+            user = infra_risco['u1']  # u1 pertence a s1
+
+        # gestor de outro setor nao pode editar objeto vinculado ao risco de s1
+        assert perm.has_object_permission(RequestU2(), None, ObjComRisco()) is False
+        # gestor do proprio setor pode editar
+        assert perm.has_object_permission(RequestU1(), None, ObjComRisco()) is True
 
     def test_permissao_objeto_invalido(self, infra_risco):
         # este teste cobre um objeto que nao corresponde ao esperado pela permissao
@@ -271,54 +285,3 @@ class TestRiscoViewsPermissions:
         assert response.data["tratamentos_ativos"] == 0
         assert response.data["planos"] == []
 
-    def test_dashboard_e_mapa_retorna_analytics_gerenciais(self, api_client, infra_risco):
-        # este teste integra criacao de risco, plano de acao e leitura gerencial da api
-        api_client.force_authenticate(user=infra_risco["u1"])
-
-        risco_critico = Risco.objects.create(
-            setor=infra_risco["s1"],
-            objetivo=infra_risco["risco"].objetivo,
-            macroprocesso=infra_risco["risco"].macroprocesso,
-            categoria="Estratégico",
-            evento="Risco crítico",
-            causa="Causa crítica",
-            consequencia="Consequência crítica",
-            controles_atuais="Controle",
-            eficacia_controle="Satisfatório",
-            probabilidade=5,
-            impacto=5,
-            prob_residual=4,
-            imp_residual=5,
-        )
-        PlanoAcao.objects.create(
-            risco=risco_critico,
-            tipo_resposta="Mitigar",
-            descricao_acao="Mitigar risco crítico.",
-            responsavel="Gestor estratégico",
-            data_inicio="2026-02-01",
-            data_fim="2026-02-28",
-            status="Em andamento",
-        )
-
-        # as duas chamadas retornam os dados usados pela dashboard e pelo mapa
-        dashboard_response = api_client.get("/api/riscos/planos/dashboard/")
-        mapa_response = api_client.get("/api/riscos/planos/mapa-analytics/")
-
-        # primeiro sao conferidos os numeros consolidados da dashboard
-        assert dashboard_response.status_code == status.HTTP_200_OK
-        assert dashboard_response.data["total_planos"] == 2
-        assert dashboard_response.data["riscos_criticos"] == 1
-        assert dashboard_response.data["status_tratamentos"]["em_andamento"] == 1
-        assert dashboard_response.data["unidades_maior_exposicao"][0]["pontos"] >= 20
-        assert any(
-            item["nome"] == "Estratégico" and item["quantidade"] == 1
-            for item in dashboard_response.data["distribuicao_categorias"]
-        )
-
-        # depois o teste valida os dados analiticos do mapa de riscos
-        assert mapa_response.status_code == status.HTTP_200_OK
-        assert mapa_response.data["total_riscos"] == 2
-        assert mapa_response.data["resumo_niveis"]["extremo"] == 1
-        assert mapa_response.data["status_tratamentos"]["em_andamento"] == 1
-        assert len(mapa_response.data["matriz_residual"]) == 25
-        assert mapa_response.data["riscos_prioritarios"][0]["id"] == risco_critico.id

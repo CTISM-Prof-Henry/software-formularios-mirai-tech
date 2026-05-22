@@ -37,6 +37,33 @@ class TestNormalizacaoSetoresLegados:
 
         assert encontrado == oficial
 
+    def test_encontra_setor_oficial_pelo_fallback_qualquer_tipo(self):
+        # este cenario nao possui unidade do tipo "Unidade de Ensino", forcando o fallback
+        # para qualquer unidade oficial com a mesma sigla_centro
+        legado = Setor.objects.create(
+            nome="XPTO",
+            sigla="XPTO",
+            sigla_centro="XPTO",
+            nome_centro="XPTO",
+            tipo_unidade="Legado",
+            fonte_oficial=False,
+            ativo=False,
+        )
+        oficial = Setor.objects.create(
+            nome="Orgao XPTO",
+            sigla="XPTO",
+            sigla_centro="XPTO",
+            nome_centro="Orgao XPTO",
+            tipo_unidade="Orgao Suplementar",  # nao e "Unidade de Ensino"
+            fonte_oficial=True,
+            ativo=True,
+        )
+
+        # sem unidade de ensino disponivel, o fallback deve retornar a unica unidade oficial
+        encontrado = encontrar_setor_oficial_equivalente(legado, Setor)
+
+        assert encontrado == oficial
+
     def test_normaliza_vinculos_de_usuario_trocando_legado_por_oficial(self):
         # este cenario prepara uma unidade legada, uma oficial e um usuario vinculado ao legado
         legado = Setor.objects.create(
