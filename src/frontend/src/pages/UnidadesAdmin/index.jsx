@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -9,7 +10,8 @@ import './styles.css';
 
 const UnidadesAdmin = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user } = useAuth();
+  const safeUser = user || {};
   const [unidades, setUnidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
@@ -24,14 +26,14 @@ const UnidadesAdmin = () => {
   const { showFeedback } = useFeedback();
 
   useEffect(() => {
-    if (!user.is_superuser) {
+    if (!safeUser.is_superuser) {
       navigate('/dashboard', { replace: true });
       return;
     }
-  }, [navigate, user.is_superuser]);
+  }, [navigate, safeUser.is_superuser]);
 
   useEffect(() => {
-    if (!user.is_superuser) {
+    if (!safeUser.is_superuser) {
       return;
     }
 
@@ -65,7 +67,7 @@ const UnidadesAdmin = () => {
     }
 
     carregarUnidades();
-  }, [busca, centroSelecionado, navigate, paginaAtual, tipoSelecionado, user.is_superuser]);
+  }, [busca, centroSelecionado, navigate, paginaAtual, tipoSelecionado, safeUser.is_superuser]);
 
   useEffect(() => {
     setPaginaAtual(1);

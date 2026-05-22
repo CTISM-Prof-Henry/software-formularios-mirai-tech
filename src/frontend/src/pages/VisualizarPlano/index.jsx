@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
@@ -19,8 +20,9 @@ const VisualizarPlano = () => {
   const [exporting, setExporting] = useState('');
   const { showFeedback } = useFeedback();
 
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
-  const userSetoresIds = user.setores?.map(s => s.id) || [];
+  const { user } = useAuth();
+  const safeUser = user || {};
+  const userSetoresIds = safeUser.setores?.map(s => s.id) || [];
 
   useEffect(() => {
     async function loadData() {

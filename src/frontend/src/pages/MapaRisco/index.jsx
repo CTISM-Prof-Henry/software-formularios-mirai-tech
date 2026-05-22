@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -43,7 +44,8 @@ const MapaRisco = () => {
   const [filterCategoria, setFilterCategoria] = useState('');
   const { showFeedback } = useFeedback();
 
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user } = useAuth();
+  const safeUser = user || {};
 
   useEffect(() => {
     carregarAnalytics();
@@ -178,7 +180,7 @@ const MapaRisco = () => {
                   <label>Unidade/Departamento:</label>
                   <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                     <option value="">Todas as Unidades</option>
-                    {user.setores?.map((setor) => (
+                    {safeUser.setores?.map((setor) => (
                       <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
                     ))}
                   </select>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './styles.css';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user, logout } = useAuth();
+  const safeUser = user || {};
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -41,8 +43,7 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('@SIGR:token');
-    localStorage.removeItem('@SIGR:user');
+    logout();
     navigate('/login');
   };
 
@@ -115,7 +116,7 @@ const Sidebar = () => {
     },
   ];
 
-  if (user.is_superuser) {
+  if (safeUser.is_superuser) {
     navItems.push({
       label: 'Unidades UFSM',
       path: '/unidades',
@@ -185,10 +186,10 @@ const Sidebar = () => {
 
         <div className="sidebar-footer">
           <div className="user-info">
-            <div className="user-avatar">{getInitials(user.nome)}</div>
+            <div className="user-avatar">{getInitials(safeUser.nome)}</div>
             <div className="user-details">
-              <p className="user-name" title={user.nome}>{user.nome || 'Gestor'}</p>
-              <p className="user-siape">SIAPE: {user.siape || '-------'}</p>
+              <p className="user-name" title={safeUser.nome}>{safeUser.nome || 'Gestor'}</p>
+              <p className="user-siape">SIAPE: {safeUser.siape || '-------'}</p>
             </div>
           </div>
 

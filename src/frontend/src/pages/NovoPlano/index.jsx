@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -10,7 +11,8 @@ import './styles.css';
 
 const NovoPlano = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user } = useAuth();
+  const safeUser = user || {};
   const [etapa, setEtapa] = useState(1);
   const [loading, setLoading] = useState(false);
   const { showFeedback } = useFeedback();
@@ -23,7 +25,7 @@ const NovoPlano = () => {
   
   // Step 1 & 2: Risco
   const [riscoData, setRiscoData] = useState({
-    setor: user.setores?.[0]?.id || '',
+    setor: safeUser.setores?.[0]?.id || '',
     objetivo: '',
     macroprocesso: '',
     categoria: 'Operacional',
@@ -42,7 +44,7 @@ const NovoPlano = () => {
   const [planoAcaoData, setPlanoAcaoData] = useState({
     tipo_resposta: 'Mitigar',
     descricao_acao: '',
-    responsavel: user.nome || '',
+    responsavel: safeUser.nome || '',
     parceiros: '',
     data_inicio: new Date().toISOString().split('T')[0],
     data_fim: '',
@@ -230,7 +232,7 @@ const NovoPlano = () => {
                 <div className="form-group">
                   <label>Unidade/Departamento:</label>
                   <select name="setor" value={riscoData.setor} onChange={handleRiscoChange}>
-                    {user.setores?.map(s => (
+                    {safeUser.setores?.map(s => (
                       <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
                     ))}
                   </select>

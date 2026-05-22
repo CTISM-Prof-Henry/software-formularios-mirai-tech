@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -12,23 +13,16 @@ const Perfil = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
-  // Inicialização segura do estado do usuário
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('@SIGR:user');
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
-    }
-  });
+  const { user, updateUser } = useAuth();
+  const safeUser = user || {};
 
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [buscaSetor, setBuscaSetor] = useState('');
 
   const [formData, setFormData] = useState({
-    email: user?.email || '',
-    id_setores: Array.isArray(user?.setores) ? user.setores.map(s => s.id) : [],
+    email: safeUser.email || '',
+    id_setores: Array.isArray(safeUser.setores) ? safeUser.setores.map(s => s.id) : [],
     senha_atual: '',
     nova_senha: '',
     confirmacao_senha: ''
@@ -50,8 +44,7 @@ const Perfil = () => {
         // Ajuste para lidar com paginação do DRF
         const setoresData = setoresRes.data.results || setoresRes.data;
         setSetoresDisponiveis(Array.isArray(setoresData) ? setoresData : []);
-        setUser(userData);
-        localStorage.setItem('@SIGR:user', JSON.stringify(userData));
+        updateUser(userData);
         
         setFormData(prev => ({
           ...prev,
@@ -112,7 +105,7 @@ const Perfil = () => {
     const termo = buscaSetor.trim().toLowerCase();
     if (!termo) return true;
 
-    const label = getSetorLabel(setor, { completo: user.is_superuser }).toLowerCase();
+    const label = getSetorLabel(setor, { completo: safeUser.is_superuser }).toLowerCase();
     return (
       label.includes(termo) ||
       (setor.sigla_centro || '').toLowerCase().includes(termo) ||
@@ -156,8 +149,7 @@ const Perfil = () => {
         title: 'Perfil atualizado',
         message: 'Suas informacoes foram salvas com sucesso.',
       });
-      setUser(response.data.usuario);
-      localStorage.setItem('@SIGR:user', JSON.stringify(response.data.usuario));
+      updateUser(response.data.usuario);
       
       // Limpa campos de senha
       setFormData(prev => ({
@@ -205,13 +197,13 @@ const Perfil = () => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Nome Completo</label>
-                <input type="text" value={user.nome || ''} disabled />
+                <input type="text" value={safeUser.nome || ''} disabled />
                 <span className="input-caption">O nome deve ser alterado via RH central.</span>
               </div>
 
               <div className="form-group">
                 <label>SIAPE</label>
-                <input type="text" value={user.siape || ''} disabled />
+                <input type="text" value={safeUser.siape || ''} disabled />
               </div>
 
               <div className="form-group">
@@ -267,7 +259,7 @@ const Perfil = () => {
                           checked={formData.id_setores.includes(setor.id)}
                           readOnly
                         />
-                        <span>{getSetorLabel(setor, { completo: user.is_superuser })}</span>
+                        <span>{getSetorLabel(setor, { completo: safeUser.is_superuser })}</span>
                       </div>
                     ))}
                     {setoresFiltrados.length === 0 && (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -17,13 +18,14 @@ const GestaoEquipe = () => {
   const [loadingMembros, setLoadingMembros] = useState(false);
   const { showFeedback } = useFeedback();
 
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user } = useAuth();
+  const safeUser = user || {};
 
   useEffect(() => {
     // Carrega os setores do usuário logado
-    if (user.setores && user.setores.length > 0) {
-      setSetores(user.setores);
-      setSetorSelecionado(user.setores[0]);
+    if (safeUser.setores && safeUser.setores.length > 0) {
+      setSetores(safeUser.setores);
+      setSetorSelecionado(safeUser.setores[0]);
     }
     setLoading(false);
   }, []);

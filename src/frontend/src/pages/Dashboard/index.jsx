@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -10,7 +11,8 @@ import './styles.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('@SIGR:user') || '{}');
+  const { user } = useAuth();
+  const safeUser = user || {};
 
   const [planos, setPlanos] = useState([]);
   const [stats, setStats] = useState({
@@ -101,7 +103,7 @@ const Dashboard = () => {
     return 'Sem período definido';
   };
 
-  const setoresResumo = filterSetor ? stats.setores_filtrados : (user.setores?.length || 0);
+  const setoresResumo = filterSetor ? stats.setores_filtrados : (safeUser.setores?.length || 0);
 
   return (
     <div className="dashboard-container">
@@ -189,7 +191,7 @@ const Dashboard = () => {
               <label>Unidade/Departamento</label>
               <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
                 <option value="">Todos</option>
-                {user.setores?.map((setor) => (
+                {safeUser.setores?.map((setor) => (
                   <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
                 ))}
               </select>
