@@ -1,12 +1,15 @@
 import random
 from datetime import timedelta
 
+from django.conf import settings as django_settings
 from django.contrib.auth import authenticate
-from django.core.paginator import Paginator
+from django.core.mail import send_mail
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import generics, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -53,8 +56,24 @@ class EnviarCodigoRecuperacaoView(APIView):
         CodigoRecuperacao.objects.filter(email=email).delete()
         CodigoRecuperacao.objects.create(email=email, codigo=codigo)
 
-        # TODO: Integrar com serviço de e-mail real
-        print(f"DEBUG: Código de recuperação para {email}: {codigo}")
+        try:
+            send_mail(
+                subject='Código de Recuperação de Senha — SIGR UFSM',
+                message=(
+                    f'Olá!\n\n'
+                    f'Seu código de recuperação de senha é: {codigo}\n\n'
+                    f'Este código é válido por 1 minuto. Caso não tenha solicitado a recuperação, ignore este e-mail.\n\n'
+                    f'— Equipe SIGR UFSM'
+                ),
+                from_email=django_settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+        except Exception:
+            return Response(
+                {'erro': 'Não foi possível enviar o e-mail. Tente novamente em instantes.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response({'mensagem': 'Código enviado com sucesso!'})
 
@@ -151,55 +170,42 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        queryset = self.get_queryset().order_by("sigla_centro", "tipo_unidade", "nome")
+        base_qs = self.get_queryset()
+        queryset = base_qs.order_by("sigla_centro", "tipo_unidade", "nome")
         termo = request.query_params.get("search", "").strip()
         centro = request.query_params.get("centro", "").strip()
         tipo = request.query_params.get("tipo", "").strip()
-        page_number = max(_query_int(request, "page", 1), 1)
         page_size = max(_query_int(request, "page_size", 20), 1)
 
         if termo:
-            termo_lower = termo.lower()
-            queryset = [
-                unidade for unidade in queryset
-                if any(
-                    termo_lower in (valor or "").lower()
-                    for valor in [
-                        unidade.label_curto,
-                        unidade.label_completo,
-                        unidade.nome,
-                        unidade.sigla_centro,
-                        unidade.nome_centro,
-                        unidade.tipo_unidade,
-                    ]
-                )
-            ]
-        else:
-            queryset = list(queryset)
-
+            queryset = queryset.filter(
+                Q(nome__icontains=termo)
+                | Q(sigla_centro__icontains=termo)
+                | Q(nome_centro__icontains=termo)
+                | Q(tipo_unidade__icontains=termo)
+            )
         if centro:
-            queryset = [unidade for unidade in queryset if unidade.sigla_centro == centro]
+            queryset = queryset.filter(sigla_centro=centro)
         if tipo:
-            queryset = [unidade for unidade in queryset if unidade.tipo_unidade == tipo]
+            queryset = queryset.filter(tipo_unidade=tipo)
 
-        paginator = Paginator(queryset, page_size)
-        page_obj = paginator.get_page(page_number)
-        serializador = self.get_serializer(page_obj.object_list, many=True)
+        paginador = PageNumberPagination()
+        paginador.page_size = page_size
+        pagina = paginador.paginate_queryset(queryset, request, view=self)
+        serializador = self.get_serializer(pagina, many=True)
         return Response({
-            "count": paginator.count,
-            "page": page_obj.number,
+            "count": paginador.page.paginator.count,
+            "page": paginador.page.number,
             "page_size": page_size,
-            "total_pages": paginator.num_pages,
+            "total_pages": paginador.page.paginator.num_pages,
             "centros": list(
-                self.get_queryset()
-                .exclude(sigla_centro="")
+                base_qs.exclude(sigla_centro="")
                 .values_list("sigla_centro", flat=True)
                 .distinct()
                 .order_by("sigla_centro")
             ),
             "tipos": list(
-                self.get_queryset()
-                .exclude(tipo_unidade="")
+                base_qs.exclude(tipo_unidade="")
                 .values_list("tipo_unidade", flat=True)
                 .distinct()
                 .order_by("tipo_unidade")

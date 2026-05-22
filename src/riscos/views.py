@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import date
 
+from django.db.models import Q
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -68,7 +69,6 @@ class RiscoViewSet(viewsets.ModelViewSet):
         if categoria:
             queryset = queryset.filter(categoria=categoria)
         if search:
-            from django.db.models import Q
             queryset = queryset.filter(
                 Q(evento__icontains=search) | 
                 Q(causa__icontains=search) | 
@@ -259,7 +259,7 @@ class RiscoViewSet(viewsets.ModelViewSet):
     def estatisticas(self, request):
         """Retorna estatísticas globais para os cards do dashboard."""
         total = Risco.objects.count()
-        riscos_altos = Risco.objects.filter(nivel_residual__gte=15).count()
+        riscos_altos = Risco.objects.filter(nivel_residual__gte=12).count()
         
         # Estatísticas baseadas nos Planos de Ação
         concluidos = PlanoAcao.objects.filter(status='Concluída').count()

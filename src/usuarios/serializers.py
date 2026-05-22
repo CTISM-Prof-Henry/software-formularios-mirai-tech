@@ -43,10 +43,8 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
         senha = dados_validados.pop('password')
         setores = dados_validados.pop('setores', [])
         
-        usuario = Usuario.objects.create_user(**dados_validados)
-        usuario.set_password(senha)
-        usuario.save()
-        
+        usuario = Usuario.objects.create_user(password=senha, **dados_validados)
+
         if setores:
             usuario.setores.set(setores)
             
