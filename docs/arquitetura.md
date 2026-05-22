@@ -47,22 +47,31 @@ src/
 |   |-- views.py
 |   |-- urls.py
 |   |-- management/commands/
-|   |-- migrations/
-|   `-- tests/
+|   `-- migrations/
 |-- riscos/
 |   |-- models.py
 |   |-- serializers.py
 |   |-- views.py
 |   |-- urls.py
 |   |-- exporters.py
-|   |-- migrations/
-|   `-- tests/
+|   `-- migrations/
 `-- frontend/
     `-- src/
         |-- pages/
         |-- components/
+        |-- context/
         |-- services/
         `-- utils/
+
+tests/
+|-- conftest.py
+|-- unit/
+|   |-- usuarios/
+|   `-- riscos/
+|-- component/
+|   |-- usuarios/
+|   `-- riscos/
+`-- integration/
 ```
 
 ## Arquitetura Django
@@ -230,7 +239,11 @@ O frontend é organizado por páginas, componentes e serviços:
 flowchart TD
     App["App.jsx\nRotas React"] --> Pages["pages/"]
     App --> Sidebar["components/Sidebar"]
+    App --> ThemeCtx["context/ThemeContext\ntema claro e escuro"]
+    App --> FeedbackCtx["context/FeedbackContext\ntoast global de feedback"]
+
     Pages --> Api["services/api.js"]
+    Pages --> FeedbackCtx
     Api --> Backend["Django API"]
 
     Pages --> Dashboard["Dashboard"]
@@ -238,6 +251,8 @@ flowchart TD
     Pages --> NovoPlano["Novo/Editar Plano"]
     Pages --> Mapa["Mapa de Riscos"]
     Pages --> Equipe["Gestão de Equipe"]
+
+    FeedbackCtx --> Toast["components/FeedbackToast"]
 ```
 
 ## Integração frontend e backend
@@ -275,11 +290,18 @@ Ele cria usuários de teste vinculados a múltiplos setores para validar a gest�
 
 ## Testes automatizados
 
-Os testes ficam dentro dos próprios apps:
+Os testes ficam centralizados na pasta `tests/` na raiz do projeto, separados por tipo:
 
 ```text
-src/usuarios/tests/
-src/riscos/tests/
+tests/
+  conftest.py
+  unit/
+    usuarios/
+    riscos/
+  component/
+    usuarios/
+    riscos/
+  integration/
 ```
 
 Eles cobrem:
@@ -288,10 +310,11 @@ Eles cobrem:
 - serializers indiretamente via API;
 - endpoints;
 - permissões;
-- seeds;
-- dashboard;
-- exportações;
-- gestão de equipe.
+- seeds e comandos de management;
+- importação e normalização de unidades;
+- dashboard e mapa de riscos;
+- exportações PDF e Excel;
+- fluxo de recuperação de senha.
 
 O comando principal é:
 

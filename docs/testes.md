@@ -245,13 +245,10 @@ Hoje a pasta de integracao ja possui arquivos reais:
 
 ### Evolucao futura esperada
 
-A pasta `tests/integration/` foi criada para receber mais fluxos completos, como:
+Os quatro fluxos principais ja estao implementados (dashboard, mapa, exportacoes e recuperacao de senha). Os proximos candidatos naturais para a pasta `tests/integration/` sao:
 
-- criacao de risco + reflexo na dashboard
-- criacao de risco + reflexo no mapa de riscos
-- exportacao de plano individual em PDF e Excel
-- fluxos completos de recuperacao de senha
-- fluxos gerenciais que cruzem usuarios, riscos, planos e monitoramentos
+- fluxos gerenciais cruzando usuarios de setores distintos, riscos, planos e monitoramentos
+- fluxo de criacao de usuario + vinculo de equipe + criacao de risco no mesmo setor
 
 ### Relacao com os testes de componente
 
