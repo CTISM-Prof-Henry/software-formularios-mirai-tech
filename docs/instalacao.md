@@ -85,6 +85,9 @@ Depois, aplique as migrations:
 ```bash
 python manage.py migrate
 ```
+```bash
+python manage.py makemigrations
+```
 
 ## 7. Usuários de teste opcionais
 
