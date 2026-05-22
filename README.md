@@ -39,7 +39,7 @@ O projeto pode ser executado tanto em **Windows 11** quanto em **Ubuntu/Linux**,
 
 ```bash
 git clone <url-do-repositorio>
-cd software-formularios-mirai-tech
+cd gestao-risco-ufsm-main
 ```
 
 ### 2. Criar o ambiente virtual
@@ -105,10 +105,6 @@ docker compose up -d
 
 ```bash
 python manage.py migrate
-```
-
-```bash
-python manage.py makemigrations
 ```
 
 ### 8. Criar usuários de teste para gestão de equipes (opcional)
