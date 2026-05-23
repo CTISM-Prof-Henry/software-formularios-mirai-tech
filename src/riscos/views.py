@@ -44,6 +44,9 @@ class RiscoViewSet(viewsets.ModelViewSet):
     serializer_class = RiscoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
 
+    # Ordem canônica das categorias — fonte de verdade do backend.
+    # O frontend espelha esta lista em src/frontend/src/utils/categorias.js.
+    # Mantenha os dois sincronizados ao alterar categorias.
     CATEGORY_ORDER = ["Operacional", "Estratégico", "Integridade", "Imagem", "Financeiro"]
 
     def get_queryset(self):

@@ -7,9 +7,8 @@ import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
+import { CATEGORY_ORDER } from '../../utils/categorias';
 import './styles.css';
-
-const CATEGORY_ORDER = ['Operacional', 'Estratégico', 'Integridade', 'Imagem', 'Financeiro'];
 
 const MapaRisco = () => {
   const navigate = useNavigate();
