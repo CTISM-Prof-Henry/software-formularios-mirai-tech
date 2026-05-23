@@ -143,4 +143,10 @@ class CodigoRecuperacao(models.Model):
         verbose_name_plural = "Códigos de Recuperação"
 
 
+# Alias público para o modelo Setor.
+# Internamente (migrations, tabela DB, FKs), o modelo se chama "Setor" e a tabela
+# é "setores" — renomear exigiria uma migration de dados.
+# Conceitualmente, cada registro representa uma UnidadeOrganizacional oficial da UFSM
+# (importada de base oficial via manage.py importar_unidades_ufsm).
+# Use "UnidadeOrganizacional" no código novo; "Setor" existe apenas por compatibilidade.
 UnidadeOrganizacional = Setor

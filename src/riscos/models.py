@@ -1,5 +1,7 @@
 from django.db import models
 
+# Importa pelo nome técnico "Setor" (nome da tabela DB e das migrations).
+# O alias público é "UnidadeOrganizacional" — veja src/usuarios/models.py.
 from src.usuarios.models import Setor
 
 

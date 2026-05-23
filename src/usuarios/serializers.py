@@ -20,6 +20,9 @@ class UnidadeOrganizacionalSerializer(serializers.ModelSerializer):
         ]
 
 
+# Alias legado para UnidadeOrganizacionalSerializer.
+# Views e testes antigos importavam "SetorSerializer"; mantido para não quebrar
+# esses imports sem necessidade. Prefira "UnidadeOrganizacionalSerializer" no código novo.
 SetorSerializer = UnidadeOrganizacionalSerializer
 
 
