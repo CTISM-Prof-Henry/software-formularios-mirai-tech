@@ -28,8 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Executa linter do backend
+      - name: Executa linter do backend (Ruff)
         run: python -m ruff check .
+
+      - name: Executa linter do backend (Pylint)
+        env:
+          DJANGO_SETTINGS_MODULE: src.gestao_risco.settings
+        run: python -m pylint src/gestao_risco src/usuarios src/riscos
 
       - name: Configura o Node.js
         uses: actions/setup-node@v4
