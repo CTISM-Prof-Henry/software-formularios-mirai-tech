@@ -543,7 +543,7 @@ class Command(BaseCommand):
             else:
                 riscos_atualizados += 1
 
-            plano, plano_criado = PlanoAcao.objects.update_or_create(
+            _, plano_criado = PlanoAcao.objects.update_or_create(
                 risco=risco,
                 defaults=dados_risco["plano"],
             )

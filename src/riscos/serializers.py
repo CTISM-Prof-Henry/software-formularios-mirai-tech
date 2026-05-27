@@ -45,7 +45,7 @@ class RiscoSerializer(serializers.ModelSerializer):
         erros = {}
         for campo in campos_escala:
             valor = data.get(campo)
-            if valor is not None and not (1 <= valor <= 5):
+            if valor is not None and not 1 <= valor <= 5:
                 erros[campo] = "O valor deve estar entre 1 e 5."
         if erros:
             raise ValidationError(erros)

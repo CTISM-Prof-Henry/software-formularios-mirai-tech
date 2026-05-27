@@ -83,7 +83,7 @@ class GerenciadorUsuario(BaseUserManager):
     def create_superuser(self, siape, password=None, **campos_extras):
         campos_extras.setdefault('equipe', True)
         campos_extras.setdefault('is_superuser', True)
-        
+
         if campos_extras.get('equipe') is not True:
             raise ValueError('Superusuario deve ter equipe=True.')
         if campos_extras.get('is_superuser') is not True:
@@ -97,9 +97,13 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     Modelo customizado de usuário para gestores da UFSM.
     Focado em SIAPE, Nome Completo, E-mail e múltiplos Setores.
     """
-    siape = models.CharField(max_length=20, unique=True, verbose_name="Matrícula SIAPE", db_column="siape")
+    siape = models.CharField(
+        max_length=20, unique=True, verbose_name="Matrícula SIAPE", db_column="siape"
+    )
     nome = models.CharField(max_length=255, verbose_name="Nome Completo", db_column="nome")
-    email = models.EmailField(verbose_name="E-mail", unique=True, db_column="email", null=True, blank=True)
+    email = models.EmailField(
+        verbose_name="E-mail", unique=True, db_column="email", null=True, blank=True
+    )
     setores = models.ManyToManyField(
         Setor,
         related_name="usuarios",

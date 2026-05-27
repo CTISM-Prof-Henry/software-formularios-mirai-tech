@@ -69,7 +69,7 @@ class EnviarCodigoRecuperacaoView(APIView):
                 recipient_list=[email],
                 fail_silently=False,
             )
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             return Response(
                 {'erro': 'Não foi possível enviar o e-mail. Tente novamente em instantes.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -273,7 +273,7 @@ class RegistroUsuarioView(generics.CreateAPIView):
         usuario = serializador.save()
         
         # Criamos o token automaticamente ao registrar
-        token, criado = Token.objects.get_or_create(user=usuario)
+        token, _ = Token.objects.get_or_create(user=usuario)
         
         return Response({
             "usuario": UsuarioSerializer(usuario).data,
@@ -296,16 +296,15 @@ class LoginView(APIView):
         usuario = authenticate(request, username=siape, password=senha)
         
         if usuario is not None:
-            token, criado = Token.objects.get_or_create(user=usuario)
+            token, _ = Token.objects.get_or_create(user=usuario)
             return Response({
                 'token': token.key,
                 'usuario': UsuarioSerializer(usuario).data
             })
-        else:
-            return Response(
-                {'erro': 'SIAPE ou senha inválidos.'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            {'erro': 'SIAPE ou senha inválidos.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class UsuarioLogadoView(APIView):
