@@ -33,6 +33,12 @@ disable = [
     # pylint_django: falso positivo quando Django não está no PATH do pylint local
     # (ex.: venv não ativada); CI instala tudo no mesmo env e não sofre esse problema
     "django-not-available",
+    # Parâmetros de métodos sobrescritos do DRF foram renomeados para português
+    # (ex.: validated_data -> dados_validados, attrs -> data) — intencional no projeto
+    "arguments-renamed",
+    # Django ViewSet (ModelViewSet) herda de muitas classes por design do framework;
+    # não é algo que o projeto possa ou deva controlar
+    "too-many-ancestors",
 ]
 
 [tool.pylint.format]
