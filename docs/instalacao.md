@@ -41,9 +41,10 @@ source .venv/bin/activate
 ## 4. Instalar dependências do backend
 
 ```bash
-pip install -r requirements.txt
-pip install "psycopg[binary]"
+pip install -r requirements-dev.txt
 ```
+
+O arquivo `requirements-dev.txt` já inclui todas as dependências de produção (`requirements.txt`) e as ferramentas de desenvolvimento: pytest, pylint, ruff e mkdocs.
 
 ## 5. Variáveis de ambiente
 
@@ -80,13 +81,11 @@ Suba o PostgreSQL com Docker Compose:
 docker compose up -d
 ```
 
-Depois, aplique as migrations:
+Depois, gere e aplique as migrations:
 
 ```bash
-python manage.py migrate
-```
-```bash
 python manage.py makemigrations
+python manage.py migrate
 ```
 
 ## 7. Usuários de teste opcionais

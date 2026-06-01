@@ -228,20 +228,24 @@ O `PlanoAcao` representa o tratamento do risco. Ele também é usado em filtros 
 
 ## Arquitetura do frontend
 
-O frontend é organizado por páginas, componentes e serviços:
+O frontend é organizado por páginas, componentes, contextos e serviços:
 
 - `pages/`: telas completas da aplicação.
-- `components/`: componentes reutilizáveis, como a sidebar.
+- `components/`: componentes reutilizáveis, como a sidebar e o toast de feedback.
+- `context/`: contextos React globais — autenticação, tema e feedback.
 - `services/api.js`: cliente Axios centralizado para chamadas HTTP.
-- `utils/`: funções utilitárias, como download de arquivos.
+- `utils/`: funções utilitárias — download de arquivos, formatação de unidades e lista de categorias de risco.
+
+O controle de acesso é feito pelo `AuthContext`, que persiste o usuário no `localStorage` e expõe `updateUser` e `logout`. O componente `ProtectedRoute` envolve todas as rotas autenticadas e redireciona para `/login` caso não haja sessão ativa.
 
 ```mermaid
 flowchart TD
-    App["App.jsx\nRotas React"] --> Pages["pages/"]
-    App --> Sidebar["components/Sidebar"]
+    App["App.jsx\nRotas React"] --> Auth["context/AuthContext\nusuário e token"]
+    App --> ProtectedRoute["ProtectedRoute\nredireciona se não autenticado"]
     App --> ThemeCtx["context/ThemeContext\ntema claro e escuro"]
     App --> FeedbackCtx["context/FeedbackContext\ntoast global de feedback"]
 
+    ProtectedRoute --> Pages["pages/"]
     Pages --> Api["services/api.js"]
     Pages --> FeedbackCtx
     Api --> Backend["Django API"]

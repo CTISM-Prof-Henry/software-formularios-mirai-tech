@@ -235,6 +235,7 @@ Hoje a pasta de integracao ja possui arquivos reais:
 - `tests/integration/test_mapa_fluxo_risco.py`
 - `tests/integration/test_exportacoes_fluxo.py`
 - `tests/integration/test_recuperacao_senha_fluxo.py`
+- `tests/integration/test_gerencial_fluxo.py`
 
 ### O que estes testes cobrem
 
@@ -242,13 +243,7 @@ Hoje a pasta de integracao ja possui arquivos reais:
 - criacao de risco e reflexo no mapa de riscos
 - exportacao de plano individual em PDF e Excel
 - fluxo completo de recuperacao de senha
-
-### Evolucao futura esperada
-
-Os quatro fluxos principais ja estao implementados (dashboard, mapa, exportacoes e recuperacao de senha). Os proximos candidatos naturais para a pasta `tests/integration/` sao:
-
-- fluxos gerenciais cruzando usuarios de setores distintos, riscos, planos e monitoramentos
-- fluxo de criacao de usuario + vinculo de equipe + criacao de risco no mesmo setor
+- fluxo gerencial cruzando dashboard e mapa de riscos com filtros por setor e periodo
 
 ### Relacao com os testes de componente
 
