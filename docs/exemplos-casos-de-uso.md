@@ -1,6 +1,6 @@
 # Exemplos e Casos de Uso
 
-Esta página descreve os principais fluxos funcionais do sistema, do ponto de vista do gestor institucional que utiliza o SIGR no dia a dia.
+Esta página descreve os principais fluxos funcionais do sistema, do ponto de vista do gestor institucional que utiliza o sistema no dia a dia.
 
 ---
 
