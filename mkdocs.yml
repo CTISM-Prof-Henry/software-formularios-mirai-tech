@@ -4,7 +4,6 @@ theme:
   favicon: images/logos/favicon-32x32.png
   features:
     - navigation.tabs
-    - navigation.sections
     - navigation.expand
     - navigation.top
     - search.highlight
