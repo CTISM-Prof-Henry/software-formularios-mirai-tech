@@ -227,6 +227,38 @@ class TestRiscoViewsPermissions:
         assert f'filename="plano-risco-{infra_risco["risco"].id}.pdf"' in response["Content-Disposition"]
         assert response.content.startswith(b"%PDF")
 
+
+@pytest.mark.django_db
+class TestSoftDeleteEndpoints:
+    def test_delete_risco_retorna_204_e_desativa(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco_id = infra_risco["risco"].id
+
+        response = api_client.delete(f"/api/riscos/planos/{risco_id}/")
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Risco.objects.filter(id=risco_id).exists()
+        assert Risco.all_objects.filter(id=risco_id, ativo=False).exists()
+
+    def test_risco_desativado_retorna_404_para_gestor(self, api_client, infra_risco):
+        risco_id = infra_risco["risco"].id
+        infra_risco["risco"].delete()
+
+        api_client.force_authenticate(user=infra_risco["u1"])
+        response = api_client.get(f"/api/riscos/planos/{risco_id}/")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_superuser_ve_risco_desativado_com_parametro(self, api_client, infra_risco, usuario_superuser):
+        risco_id = infra_risco["risco"].id
+        infra_risco["risco"].delete()
+
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.get(f"/api/riscos/planos/?incluir_inativos=true")
+
+        ids = [p["id"] for p in response.data["results"]]
+        assert risco_id in ids
+
     def test_dashboard_respeita_filtros_de_setor_e_data(self, api_client, infra_risco):
         # este cenario cria uma acao dentro do periodo filtrado
         api_client.force_authenticate(user=infra_risco["u1"])

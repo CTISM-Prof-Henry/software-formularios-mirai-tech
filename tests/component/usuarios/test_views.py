@@ -270,6 +270,70 @@ class TestUsuarioViews:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["erro"] == "Este usuário já faz parte desta unidade."
 
+
+@pytest.mark.django_db
+class TestRegistroAdminOnly:
+    def test_registro_bloqueado_para_nao_autenticado(self, api_client):
+        response = api_client.post("/api/usuarios/registro/", {
+            "siape": "3333333", "nome": "Novo", "senha": "Senha@123",
+        }, format='json')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_registro_bloqueado_para_gestor_comum(self, api_client, usuario):
+        api_client.force_authenticate(user=usuario)
+        response = api_client.post("/api/usuarios/registro/", {
+            "siape": "3333333", "nome": "Novo", "senha": "Senha@123",
+        }, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_admin_cria_usuario_com_sucesso(self, api_client, setor, usuario_superuser):
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.post("/api/usuarios/registro/", {
+            "siape": "7654321",
+            "nome": "Novo Gestor",
+            "senha": "Senha@12345",
+            "id_setores": [setor.id],
+        }, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["usuario"]["siape"] == "7654321"
+        assert Usuario.objects.filter(siape="7654321").exists()
+
+
+@pytest.mark.django_db
+class TestGestaoUsuariosAdmin:
+    def test_listar_usuarios_bloqueado_para_gestor(self, api_client, usuario):
+        api_client.force_authenticate(user=usuario)
+        response = api_client.get("/api/usuarios/gestores/")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_listar_usuarios_retorna_todos_para_admin(self, api_client, usuario, usuario_superuser):
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.get("/api/usuarios/gestores/")
+        assert response.status_code == status.HTTP_200_OK
+        siapes = [u["siape"] for u in response.data["results"]]
+        assert usuario.siape in siapes
+
+    def test_admin_desativa_usuario(self, api_client, usuario, usuario_superuser):
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.delete(f"/api/usuarios/gestores/{usuario.id}/")
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        usuario.refresh_from_db()
+        assert not usuario.ativo
+
+    def test_admin_reativa_usuario(self, api_client, usuario, usuario_superuser):
+        usuario.ativo = False
+        usuario.save()
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.post(f"/api/usuarios/gestores/{usuario.id}/reativar/")
+        assert response.status_code == status.HTTP_200_OK
+        usuario.refresh_from_db()
+        assert usuario.ativo
+
+    def test_admin_nao_pode_desativar_superusuario(self, api_client, usuario_superuser):
+        api_client.force_authenticate(user=usuario_superuser)
+        response = api_client.delete(f"/api/usuarios/gestores/{usuario_superuser.id}/")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_adicionar_membro_nao_encontrado(self, api_client, usuario, setor):
         api_client.force_authenticate(user=usuario)
         url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"

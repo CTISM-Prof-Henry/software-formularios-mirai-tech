@@ -107,3 +107,49 @@ class TestMonitoramentoModel:
         # a ultima verificacao confirma o relacionamento esperado
         assert monitor.risco == risco
         assert str(monitor.risco.id) in str(monitor.risco)
+
+
+@pytest.mark.django_db
+class TestSoftDelete:
+    def _risco(self, infra_pdi):
+        return Risco.objects.create(
+            setor=infra_pdi['setor'],
+            objetivo=infra_pdi['objetivo'],
+            macroprocesso=infra_pdi['macro'],
+            categoria="Operacional",
+            evento="E", causa="C", consequencia="C",
+            controles_atuais="C", eficacia_controle="Satisfatório",
+            probabilidade=2, impacto=2, prob_residual=1, imp_residual=1,
+        )
+
+    def test_soft_delete_risco_mantem_no_banco(self, infra_pdi):
+        risco = self._risco(infra_pdi)
+        risco_id = risco.id
+        risco.delete()
+        assert Risco.all_objects.filter(id=risco_id, ativo=False).exists()
+
+    def test_soft_delete_risco_some_do_queryset_padrao(self, infra_pdi):
+        risco = self._risco(infra_pdi)
+        risco_id = risco.id
+        risco.delete()
+        assert not Risco.objects.filter(id=risco_id).exists()
+
+    def test_soft_delete_risco_cascata_plano_acao(self, infra_pdi):
+        risco = self._risco(infra_pdi)
+        PlanoAcao.objects.create(
+            risco=risco, tipo_resposta="Mitigar", descricao_acao="D",
+            responsavel="R", data_inicio="2026-01-01", data_fim="2026-06-01",
+            status="Em andamento",
+        )
+        risco.delete()
+        assert not PlanoAcao.objects.filter(risco_id=risco.id).exists()
+        assert PlanoAcao.all_objects.filter(risco_id=risco.id, ativo=False).exists()
+
+    def test_soft_delete_risco_cascata_monitoramento(self, infra_pdi):
+        risco = self._risco(infra_pdi)
+        Monitoramento.objects.create(
+            risco=risco, resultados="R", acoes_futuras="AF", analise_critica="AC",
+        )
+        risco.delete()
+        assert not Monitoramento.objects.filter(risco_id=risco.id).exists()
+        assert Monitoramento.all_objects.filter(risco_id=risco.id, ativo=False).exists()
