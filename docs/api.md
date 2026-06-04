@@ -7,7 +7,7 @@ O backend expoe uma API REST organizada em dois grandes grupos:
 - `/api/usuarios/`
 - `/api/riscos/`
 
-O projeto utiliza **Token Authentication** com Django REST Framework. Algumas rotas sao publicas, especialmente login, registro, recuperacao de senha e listagem de unidades.
+O projeto utiliza **Token Authentication** com Django REST Framework. Rotas publicas sao apenas login, recuperacao de senha e listagem simples de unidades. Todas as demais exigem token valido no header `Authorization: Token <token>`.
 
 Uma coleção Postman com todos os endpoints esta disponivel na raiz do repositorio:
 
@@ -21,65 +21,89 @@ Importe-a diretamente no Postman para testar a API com exemplos prontos de corpo
 
 ## Rotas de usuarios
 
-### Autenticacao e cadastro
+### Autenticacao
 
 - `POST /api/usuarios/login/`
   - autentica um usuario com `siape` e `senha`;
-  - retorna o token de acesso.
-
-- `POST /api/usuarios/registro/`
-  - cadastra um novo usuario com `siape`, `nome`, `email`, `senha` e lista de `setores`.
-
-- `GET /api/usuarios/setores/`
-  - lista as unidades/departamentos disponiveis para selecao no cadastro;
-  - endpoint publico, nao exige autenticacao.
+  - retorna o token de acesso e os dados do usuario.
 
 - `GET /api/usuarios/me/`
-  - retorna os dados do usuario autenticado (nome, siape, email, setores).
+  - retorna os dados do usuario autenticado (nome, siape, email, setores, cargo, ativo).
 
 - `PATCH /api/usuarios/me/`
   - atualiza e-mail, unidades e senha do usuario autenticado.
 
-Observacoes:
+---
 
-- a rota continua como `setores` por compatibilidade com o frontend e com integracoes ja existentes, mas o recurso retornado representa **unidades/departamentos da UFSM**;
-- para administradores do sistema, existe tambem `GET /api/usuarios/setores/admin/`, com busca, filtros e paginacao.
+### Cadastro de gestores (restrito a superusuario)
+
+- `POST /api/usuarios/registro/`
+  - cria um novo gestor no sistema;
+  - **requer autenticacao e perfil superusuario**;
+  - payload: `siape`, `nome`, `email`, `senha`, `id_setores`, `cargo`;
+  - campo `cargo`: `"gestor"` (padrao) ou `"gestor_adm"`;
+  - retorna os dados do usuario criado (sem token).
+
+---
+
+### Gestao administrativa de usuarios (superusuario only)
+
+- `GET /api/usuarios/gestores/`
+  - lista todos os usuarios cadastrados (ativos e inativos);
+  - suporta busca por `search` (nome, SIAPE ou e-mail) e paginacao.
+
+- `DELETE /api/usuarios/gestores/{id}/`
+  - **soft delete**: desativa o usuario (ativo=False) sem remover do banco;
+  - nao e permitido desativar superusuarios ou a propria conta.
+
+- `POST /api/usuarios/gestores/{id}/reativar/`
+  - reativa um usuario previamente desativado.
+
+---
+
+### Unidades e equipe
+
+- `GET /api/usuarios/setores/`
+  - lista as unidades/departamentos disponiveis;
+  - endpoint publico, nao exige autenticacao.
+
+- `GET /api/usuarios/setores/admin/`
+  - listagem administrativa completa com busca, filtros e paginacao;
+  - requer superusuario.
 
 #### Parametros de filtro — `GET /api/usuarios/setores/admin/`
 
-| Parametro | Tipo   | Descricao                                           |
-|-----------|--------|-----------------------------------------------------|
-| `termo`   | string | Busca por nome, sigla ou label da unidade           |
-| `centro`  | string | Filtra pelo campo `sigla_centro`                    |
-| `tipo`    | string | Filtra pelo campo `tipo_unidade`                    |
-| `page`    | int    | Numero da pagina (default: 1)                       |
-| `page_size` | int  | Itens por pagina (default: 20)                      |
+| Parametro   | Tipo   | Descricao                                 |
+|-------------|--------|-------------------------------------------|
+| `search`    | string | Busca por nome, sigla ou label da unidade |
+| `centro`    | string | Filtra pelo campo `sigla_centro`          |
+| `tipo`      | string | Filtra pelo campo `tipo_unidade`          |
+| `page`      | int    | Numero da pagina (default: 1)             |
+| `page_size` | int    | Itens por pagina (default: 20)            |
+
+- `GET /api/usuarios/setores/{id}/membros/`
+  - lista os membros vinculados ao setor.
+
+- `POST /api/usuarios/setores/{id}/adicionar_membro/`
+  - adiciona um usuario ao setor pelo `siape`;
+  - **requer cargo `gestor_adm` ou superusuario**.
+
+- `POST /api/usuarios/setores/{id}/remover_membro/`
+  - remove um usuario do setor;
+  - **requer cargo `gestor_adm` ou superusuario**.
 
 ---
 
 ### Recuperacao de senha
 
 - `POST /api/usuarios/recuperar-senha/enviar/`
-  - envia o codigo de recuperacao para o siape informado.
+  - envia o codigo de recuperacao para o e-mail informado.
 
 - `POST /api/usuarios/recuperar-senha/validar/`
-  - valida o codigo recebido.
+  - valida o codigo recebido (expira em 1 minuto).
 
 - `POST /api/usuarios/recuperar-senha/redefinir/`
   - redefine a senha com o codigo validado.
-
----
-
-### Gestao de equipe por unidade
-
-- `GET /api/usuarios/setores/{id}/membros/`
-  - lista os membros vinculados ao setor.
-
-- `POST /api/usuarios/setores/{id}/adicionar_membro/`
-  - adiciona um usuario ao setor pelo `siape`.
-
-- `POST /api/usuarios/setores/{id}/remover_membro/`
-  - remove um usuario do setor pelo `siape`.
 
 ---
 
@@ -101,10 +125,11 @@ Observacoes:
 ### Planos de risco (CRUD principal)
 
 - `GET /api/riscos/planos/`
-  - lista os planos de risco com suporte a filtros, busca e paginacao.
+  - lista os planos de risco ativos com suporte a filtros, busca e paginacao;
+  - superusuarios podem incluir registros desativados com `?incluir_inativos=true`.
 
 - `POST /api/riscos/planos/`
-  - cria um novo plano de risco.
+  - cria um novo plano de risco (apenas para setores do usuario).
 
 - `GET /api/riscos/planos/{id}/`
   - retorna um plano especifico com todos os detalhes.
@@ -113,20 +138,21 @@ Observacoes:
   - atualiza campos de um plano existente (apenas do setor do usuario).
 
 - `DELETE /api/riscos/planos/{id}/`
-  - remove um plano (apenas do setor do usuario).
+  - **soft delete**: desativa o plano (ativo=False) e propaga a desativacao para PlanoAcao e Monitoramento vinculados;
+  - o registro permanece no banco e pode ser consultado por superusuarios.
 
 #### Parametros de filtro — `GET /api/riscos/planos/`
 
-| Parametro     | Tipo   | Descricao                                                 |
-|---------------|--------|-----------------------------------------------------------|
-| `search`      | string | Busca por nome do risco, descricao ou categoria           |
-| `setor`       | int    | Filtra pelo ID da unidade/setor                           |
-| `categoria`   | string | Filtra pela categoria do risco                            |
-| `data_inicio` | date   | Filtra planos com data de inicio >= valor (formato ISO)   |
-| `data_fim`    | date   | Filtra planos com data de fim <= valor (formato ISO)      |
-| `ordenacao`   | string | Campo de ordenacao (ex: `-nivel_residual`, `nome_risco`)  |
-| `page`        | int    | Numero da pagina (default: 1)                             |
-| `page_size`   | int    | Itens por pagina (default: 10)                            |
+| Parametro          | Tipo    | Descricao                                               |
+|--------------------|---------|---------------------------------------------------------|
+| `search`           | string  | Busca por evento, causa ou consequencia                 |
+| `setor`            | int     | Filtra pelo ID da unidade/setor                         |
+| `categoria`        | string  | Filtra pela categoria do risco                          |
+| `data_inicio`      | date    | Filtra planos com data de inicio >= valor (ISO)         |
+| `data_fim`         | date    | Filtra planos com data de fim <= valor (ISO)            |
+| `ordenacao`        | string  | `asc` ou `desc` (padrao: `desc`)                        |
+| `page`             | int     | Numero da pagina                                        |
+| `incluir_inativos` | boolean | `true` para incluir desativados (somente superusuario)  |
 
 ---
 
@@ -137,24 +163,12 @@ Observacoes:
 
 #### Parametros de filtro — `GET /api/riscos/planos/dashboard/`
 
-| Parametro     | Tipo   | Descricao                                              |
-|---------------|--------|--------------------------------------------------------|
-| `setor`       | int    | Filtra dados pelo ID da unidade                        |
-| `data_inicio` | date   | Filtra planos criados a partir dessa data              |
-| `data_fim`    | date   | Filtra planos criados ate essa data                    |
-| `search`      | string | Busca textual sobre os planos                          |
-
-#### Estrutura da resposta
-
-```json
-{
-  "total_planos": 42,
-  "riscos_criticos": 7,
-  "tratamentos_ativos": 18,
-  "minhas_unidades": 2,
-  "planos": [...]
-}
-```
+| Parametro     | Tipo   | Descricao                          |
+|---------------|--------|------------------------------------|
+| `setor`       | int    | Filtra dados pelo ID da unidade    |
+| `data_inicio` | date   | Filtra planos a partir dessa data  |
+| `data_fim`    | date   | Filtra planos ate essa data        |
+| `search`      | string | Busca textual sobre os planos      |
 
 ---
 
@@ -165,29 +179,17 @@ Observacoes:
 
 #### Parametros de filtro — `GET /api/riscos/planos/mapa-analytics/`
 
-| Parametro   | Tipo   | Descricao                               |
-|-------------|--------|-----------------------------------------|
-| `setor`     | int    | Filtra pelo ID da unidade               |
-| `categoria` | string | Filtra pela categoria do risco          |
-
-#### Estrutura da resposta
-
-```json
-{
-  "matriz": [...],
-  "distribuicao_categorias": [...],
-  "ranking_unidades": [...],
-  "riscos_prioritarios": [...],
-  "resumo_gerencial": {...}
-}
-```
+| Parametro   | Tipo   | Descricao                      |
+|-------------|--------|--------------------------------|
+| `setor`     | int    | Filtra pelo ID da unidade      |
+| `categoria` | string | Filtra pela categoria do risco |
 
 ---
 
 ### Estatisticas resumidas
 
 - `GET /api/riscos/planos/estatisticas/`
-  - retorna contagens rapidas de riscos por nivel para o cabecalho do sistema.
+  - retorna contagens rapidas de riscos por nivel.
 
 ---
 
@@ -195,7 +197,6 @@ Observacoes:
 
 - `GET /api/riscos/planos/exportar-excel/`
   - exporta a lista filtrada de planos em formato Excel (`.xlsx`).
-  - aceita os mesmos parametros de filtro da listagem.
 
 - `GET /api/riscos/planos/{id}/exportar-excel/`
   - exporta o plano individual em formato Excel.
@@ -211,20 +212,21 @@ Observacoes:
   - lista e cria planos de acao vinculados a um risco.
 
 - `GET|PATCH|DELETE /api/riscos/acoes/{id}/`
-  - detalha, atualiza ou remove um plano de acao especifico.
+  - detalha, atualiza ou desativa (soft delete) um plano de acao.
 
 - `GET|POST /api/riscos/monitoramentos/`
-  - lista e cria registros de monitoramento vinculados a um risco.
+  - lista e cria registros de monitoramento.
 
 - `GET|PATCH|DELETE /api/riscos/monitoramentos/{id}/`
-  - detalha, atualiza ou remove um monitoramento especifico.
+  - detalha, atualiza ou desativa (soft delete) um monitoramento.
 
 ---
 
 ## Observacoes importantes
 
 - a listagem de unidades (`/api/usuarios/setores/`) e publica e nao exige autenticacao;
-- a listagem administrativa de unidades exige usuario com `is_superuser = true`;
-- as rotas de perfil, planos, dashboard, mapa e exportacoes exigem token valido;
-- a edicao de riscos respeita o vinculo do usuario com a unidade correspondente (permissao `PertenceAoSetorDoRisco`);
-- os campos `nivel_risco` e `nivel_residual` sao calculados automaticamente pelo backend no `save()` do model.
+- o cadastro de novos usuarios (`/api/usuarios/registro/`) exige superusuario — nao ha auto-cadastro publico;
+- adicionar e remover membros de equipe exige `cargo = gestor_adm` ou superusuario;
+- operacoes `DELETE` nos recursos de riscos sao **soft delete**: os dados permanecem no banco marcados como `ativo=False`;
+- campos `nivel_risco` e `nivel_residual` sao calculados automaticamente pelo backend no `save()` do model;
+- a edicao de riscos respeita o vinculo do usuario com a unidade correspondente (permissao `PertenceAoSetorDoRisco`).

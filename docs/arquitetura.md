@@ -117,15 +117,17 @@ Os arquivos `models.py` definem as entidades do sistema e as relações com o ba
 No app `usuarios`, os principais models são:
 
 - `Setor`: representa uma unidade administrativa.
-- `Usuario`: usuário customizado autenticado por SIAPE e vinculado a múltiplos setores.
+- `Usuario`: usuário customizado autenticado por SIAPE e vinculado a múltiplos setores. Possui campo `cargo` (`gestor` ou `gestor_adm`) e suporta soft delete via campo `ativo`.
 - `CodigoRecuperacao`: código temporário usado no fluxo de recuperação de senha.
 
 No app `riscos`, os principais models são:
 
 - `DesafioPDI`, `ObjetivoPDI` e `Macroprocesso`: estrutura estratégica usada para classificar riscos.
-- `Risco`: registro principal do plano de risco.
-- `PlanoAcao`: tratamento do risco, seguindo a lógica de ação/resposta.
-- `Monitoramento`: acompanhamento contínuo de um risco.
+- `Risco`: registro principal do plano de risco. Suporta soft delete; ao ser desativado, propaga a desativação em cascata para `PlanoAcao` e `Monitoramento`.
+- `PlanoAcao`: tratamento do risco, seguindo a lógica de ação/resposta. Suporta soft delete.
+- `Monitoramento`: acompanhamento contínuo de um risco. Suporta soft delete.
+
+Todos os models de riscos e `Usuario` implementam `SoftDeleteModel` (abstrato): registros nunca são removidos fisicamente — apenas marcados como `ativo=False`. O manager padrão (`objects`) filtra apenas registros ativos; `all_objects` acessa inclusive os desativados.
 
 ### Serializers
 
@@ -145,11 +147,12 @@ Os `views.py` recebem requisições HTTP e aplicam as regras da API.
 No app `usuarios`, existem endpoints para:
 
 - login;
-- registro;
+- registro de gestores (restrito a superusuário);
+- gestão administrativa de usuários: listagem, soft delete e reativação;
 - perfil autenticado;
 - recuperação de senha;
 - membros de setor;
-- adicionar ou remover membros da equipe.
+- adicionar ou remover membros da equipe (restrito a `gestor_adm` ou superusuário).
 
 No app `riscos`, existem endpoints para:
 
@@ -273,6 +276,14 @@ Essa configuração está em:
 
 ```text
 src/frontend/vite.config.js
+```
+
+## Arquivos estáticos em produção
+
+O projeto usa **WhiteNoise** para servir arquivos estáticos diretamente pelo Django em produção, sem necessidade de Nginx dedicado. O middleware está configurado logo após `SecurityMiddleware` em `settings.py`, e `STATIC_ROOT` aponta para `staticfiles/` na raiz do projeto. Antes de publicar, execute:
+
+```bash
+python manage.py collectstatic
 ```
 
 ## Dados iniciais e comandos de apoio

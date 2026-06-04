@@ -4,15 +4,20 @@ Esta página descreve os principais fluxos funcionais do sistema, do ponto de vi
 
 ---
 
-## 1. Cadastro de usuário
+## 1. Cadastro de gestor (realizado pelo administrador)
+
+O auto-cadastro público foi removido. Apenas o administrador do sistema pode criar novos gestores.
 
 Fluxo esperado:
 
-1. acessar a tela de cadastro;
-2. informar nome completo, e-mail, SIAPE e senha;
-3. selecionar um ou mais setores/unidades;
-4. concluir o cadastro;
-5. ser redirecionado para o login.
+1. administrador acessa a página **Gestão de Usuários** (`/usuarios`);
+2. clica em **Novo Usuário**;
+3. preenche SIAPE, nome completo, e-mail, senha inicial e seleciona o cargo:
+   - **Gestor**: acessa o sistema e gerencia riscos, mas não pode adicionar ou remover membros de equipe;
+   - **Gestor Administrador**: mesmos acessos do Gestor, mais a capacidade de gerenciar membros da equipe em sua unidade;
+4. seleciona um ou mais setores/unidades;
+5. conclui o cadastro;
+6. o gestor recebe a senha inicial e pode alterá-la em **Editar Perfil**.
 
 ---
 
@@ -85,12 +90,18 @@ Fluxo esperado:
 
 ## 7. Dashboard gerencial
 
-Fluxo esperado:
+**Para gestores comuns:**
 
 1. acessar o dashboard;
 2. visualizar os cards de resumo: total de planos, riscos críticos, tratamentos ativos;
 3. aplicar filtros por setor/unidade, período ou busca textual;
 4. analisar a lista consolidada de planos com datas e status de tratamento.
+
+**Para administradores (superusuário):**
+
+1. acessar o dashboard — o sistema exibe o **Painel Administrativo** automaticamente;
+2. visualizar estatísticas globais: gestores cadastrados, total de planos, riscos críticos;
+3. usar os atalhos para navegar rapidamente às áreas de gestão: usuários, unidades, planos e mapa de riscos.
 
 ---
 

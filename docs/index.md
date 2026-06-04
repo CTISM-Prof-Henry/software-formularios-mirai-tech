@@ -36,4 +36,5 @@ As páginas do MkDocs foram organizadas para facilitar a navegação entre área
 - **Banco de dados**: PostgreSQL 16;
 - **Infraestrutura local**: Docker e Docker Compose;
 - **Sistemas suportados para execução local**: Windows 11 e Ubuntu/Linux;
-- **Testes**: Pytest, Pytest-Django e Pytest-Cov.
+- **Testes**: Pytest, Pytest-Django e Pytest-Cov;
+- **Qualidade de código**: Ruff (formatação e lint) e Pylint (análise estática).

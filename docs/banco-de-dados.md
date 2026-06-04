@@ -26,12 +26,14 @@ classDiagram
         -nome: String
         -email: String
         -senha: String
+        -cargo: String
         -ativo: Boolean
         -equipe: Boolean
         -lastLogin: DateTime
         -isSuperuser: Boolean
         +isStaff(): Boolean
         +isActive(): Boolean
+        +delete(): void
     }
 
     class UsuarioSetor {
@@ -51,17 +53,23 @@ classDiagram
         -id: Integer
         -numero: Integer
         -descricao: String
+        -ativo: Boolean
+        +delete(): void
     }
 
     class ObjetivoPDI {
         -id: Integer
         -codigo: String
         -descricao: String
+        -ativo: Boolean
+        +delete(): void
     }
 
     class Macroprocesso {
         -id: Integer
         -nome: String
+        -ativo: Boolean
+        +delete(): void
     }
 
     class Risco {
@@ -78,8 +86,10 @@ classDiagram
         -probResidual: Integer
         -impResidual: Integer
         -nivelResidual: Integer
+        -ativo: Boolean
         +calcularNivelRisco(): Integer
         +calcularNivelResidual(): Integer
+        +delete(): void
     }
 
     class PlanoAcao {
@@ -92,7 +102,9 @@ classDiagram
         -dataFim: Date
         -status: StatusPlanoAcao
         -observacoes: String
+        -ativo: Boolean
         +atualizarStatus(): void
+        +delete(): void
     }
 
     class Monitoramento {
@@ -101,7 +113,9 @@ classDiagram
         -resultados: String
         -acoesFuturas: String
         -analiseCritica: String
+        -ativo: Boolean
         +registrarAnalise(): void
+        +delete(): void
     }
 
     class CategoriaRisco {
@@ -153,12 +167,12 @@ classDiagram
     PlanoAcao --> StatusPlanoAcao : status
 
     note for GerenciadorUsuario "Serviço de suporte à criação de usuários no Django."
-    note for Usuario "Modelo conceitual de usuário baseado em SIAPE; no Django os campos são acessados pelo ORM, mas no UML aparecem encapsulados."
+    note for Usuario "cargo: gestor (padrão) ou gestor_adm. Apenas gestor_adm pode gerenciar membros de equipe. delete() faz soft delete (ativo=False)."
     note for UsuarioSetor "Representa a associação muitos-para-muitos entre usuário e setor."
     note for CodigoRecuperacao "Usado no fluxo de envio, validação e redefinição de senha; o e-mail é mantido como dado operacional."
-    note for Risco "A classe concentra as regras de cálculo do nível de risco e do nível residual."
-    note for PlanoAcao "Representa o tratamento do risco em formato 5W2H."
-    note for Monitoramento "Mantém o histórico de acompanhamento e análise do risco."
+    note for Risco "delete() desativa o risco e propaga soft delete para PlanoAcao e Monitoramento vinculados."
+    note for PlanoAcao "Representa o tratamento do risco em formato 5W2H. delete() faz soft delete."
+    note for Monitoramento "Mantém o histórico de acompanhamento e análise do risco. delete() faz soft delete."
 ```
 
 ## Diagrama de casos de uso - Mermaid 
@@ -168,11 +182,12 @@ Utilizando a ferramenta Mermaid para representar os principais casos de uso rela
 ```mermaid
 flowchart LR
     gestor[Gestor]
+    gestorAdm[Gestor Administrador]
     admin[Administrador]
 
     uc1((Autenticar no sistema))
     uc2((Cadastrar gestor))
-    uc3((Vincular gestor a setor))
+    uc3((Gerenciar membros de equipe))
     uc4((Recuperar senha))
     uc5((Gerenciar perfil))
     uc6((Consultar setores))
@@ -182,6 +197,7 @@ flowchart LR
     uc10((Cadastrar plano de ação))
     uc11((Registrar monitoramento))
     uc12((Manter estrutura PDI))
+    uc13((Desativar/Reativar gestor))
 
     gestor --> uc1
     gestor --> uc4
@@ -193,11 +209,23 @@ flowchart LR
     gestor --> uc10
     gestor --> uc11
 
+    gestorAdm --> uc1
+    gestorAdm --> uc4
+    gestorAdm --> uc5
+    gestorAdm --> uc6
+    gestorAdm --> uc7
+    gestorAdm --> uc8
+    gestorAdm --> uc9
+    gestorAdm --> uc10
+    gestorAdm --> uc11
+    gestorAdm --> uc3
+
     admin --> uc2
     admin --> uc3
     admin --> uc12
     admin --> uc6
     admin --> uc9
+    admin --> uc13
 
     uc1 --> db1[(USUARIOS)]
     uc2 --> db1
@@ -221,6 +249,7 @@ flowchart LR
     uc12 --> db10[(DESAFIOS_PDI)]
     uc12 --> db6
     uc12 --> db7
+    uc13 --> db1
 ```
 
 ## Diagrama entidade relacionamento (ER) (Padrão ISO/Min-max) - Dbdiagram.io
@@ -263,15 +292,21 @@ As entidades mais relevantes do sistema incluem:
   - armazena as unidades administrativas vinculadas a usuários e riscos;
 - `usuarios`
   - representa os gestores autenticados no sistema;
+  - campo `cargo`: `gestor` (padrão) ou `gestor_adm` (pode gerenciar membros de equipe);
+  - campo `ativo`: soft delete — usuário desativado não consegue autenticar;
 - `usuario_setores`
   - tabela intermediária para o relacionamento muitos-para-muitos entre gestores e setores;
 - `codigos_recuperacao`
   - registra códigos temporários usados no fluxo de recuperação de senha;
 - `desafios_pdi`, `objetivos_pdi` e `macroprocessos`
   - representam a estrutura estratégica utilizada como referência para os riscos;
+  - possuem campo `ativo` para soft delete;
 - `riscos`
   - armazena os registros centrais do sistema e os níveis calculados;
+  - campo `ativo`: soft delete — ao desativar um risco, planos de ação e monitoramentos vinculados também são desativados em cascata;
 - `planos_acao`
   - guarda as ações de tratamento associadas a cada risco;
+  - campo `ativo`: soft delete;
 - `monitoramentos`
-  - mantém o histórico de acompanhamento dos riscos.
+  - mantém o histórico de acompanhamento dos riscos;
+  - campo `ativo`: soft delete.

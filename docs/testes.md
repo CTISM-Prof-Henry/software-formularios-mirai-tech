@@ -126,6 +126,9 @@ Os testes unitarios validam comportamentos isolados de classes, metodos e regras
 - criacao de `PlanoAcao`
 - criacao de `Monitoramento`
 - representacoes textuais basicas dos modelos relacionados
+- soft delete: risco permanece no banco com ativo=False apos delete()
+- soft delete: risco some do queryset padrao apos delete()
+- soft delete em cascata: PlanoAcao e Monitoramento desativados junto com o Risco
 
 #### `tests/unit/riscos/test_seed_data.py`
 
@@ -140,6 +143,7 @@ Os testes unitarios validam comportamentos isolados de classes, metodos e regras
 - criacao de risco com payload valido
 - rejeicao de categoria invalida
 - rejeicao de campo obrigatorio ausente
+- rejeicao de probabilidade ou impacto fora do intervalo 1-5
 
 #### `tests/unit/riscos/test_exporters.py`
 
@@ -195,14 +199,18 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 #### `tests/component/usuarios/test_views.py`
 
 - login
-- registro de novo usuario
+- registro de novo usuario (restrito a superusuario)
 - leitura de perfil autenticado
 - atualizacao de perfil
 - envio, validacao e redefinicao de senha
 - listagem publica de setores
 - listagem administrativa de unidades da UFSM exclusiva para superusuario
 - listagem de membros por setor
-- adicao e remocao de membros da equipe
+- adicao e remocao de membros da equipe (restrito a gestor_adm)
+- bloqueio de registro para nao autenticado e gestor comum
+- listagem administrativa de usuarios (superusuario)
+- soft delete e reativacao de usuario pelo admin
+- bloqueio de desativacao de superusuario
 
 #### `tests/component/riscos/test_views.py`
 
@@ -218,6 +226,9 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 - exportacao para PDF
 - dados consolidados da dashboard com filtros por setor e periodo
 - dados analiticos da dashboard e do mapa de riscos
+- soft delete: DELETE retorna 204 e mantém registro com ativo=False
+- soft delete: risco desativado retorna 404 para gestores
+- superusuario ve riscos desativados com `?incluir_inativos=true`
 
 ## Testes de integracao
 
