@@ -119,8 +119,24 @@
   gap: 18px;
 }
 
+.modal-setor-busca {
+  width: 100%;
+  border: 1px solid #d9e2ec;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  outline: none;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.modal-setor-busca:focus {
+  border-color: #003470;
+  box-shadow: 0 0 0 3px rgba(0, 52, 112, 0.08);
+}
+
 .modal-setores-lista {
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
   border: 1px solid #d9e2ec;
   border-radius: 14px;
@@ -128,6 +144,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.modal-setores-vazio {
+  font-size: 0.85rem;
+  color: #62748a;
+  text-align: center;
+  padding: 8px 0;
 }
 
 .modal-setor-item {
@@ -153,25 +176,6 @@
   padding-top: 8px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .modal-card {
-    background: #1a2840;
-  }
-
-  .modal-header h2 {
-    color: #e8edf3;
-  }
-
-  .modal-setor-item {
-    color: #c8d6e6;
-  }
-
-  .modal-setores-lista {
-    border-color: #2d4060;
-    background: #162035;
-  }
-}
-
 [data-theme="dark"] .modal-card {
   background: #1a2840;
 }
@@ -192,4 +196,10 @@
 [data-theme="dark"] .modal-close:hover {
   background: #243b53;
   color: #e8edf3;
+}
+
+[data-theme="dark"] .modal-setor-busca {
+  background: var(--surface-input, #1e3050);
+  border-color: #2d4060;
+  color: #c8d6e6;
 }

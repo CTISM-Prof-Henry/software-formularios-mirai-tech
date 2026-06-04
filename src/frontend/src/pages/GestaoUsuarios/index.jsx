@@ -35,6 +35,7 @@ const GestaoUsuarios = () => {
   const [modalAberto, setModalAberto] = useState(false);
   const [form, setForm] = useState(FORM_VAZIO);
   const [setoresDisponiveis, setSetoresDisponiveis] = useState([]);
+  const [buscaSetor, setBuscaSetor] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState('');
 
@@ -69,7 +70,7 @@ const GestaoUsuarios = () => {
 
   useEffect(() => { setPaginaAtual(1); }, [busca]);
 
-  const abrirModal = () => { setForm(FORM_VAZIO); setErroForm(''); setModalAberto(true); };
+  const abrirModal = () => { setForm(FORM_VAZIO); setErroForm(''); setBuscaSetor(''); setModalAberto(true); };
   const fecharModal = () => setModalAberto(false);
 
   const handleFormChange = (e) => {
@@ -272,17 +273,37 @@ const GestaoUsuarios = () => {
 
               <div className="form-group">
                 <label>Setores / Unidades</label>
+                <input
+                  type="text"
+                  className="modal-setor-busca"
+                  placeholder="Buscar por sigla, nome ou centro..."
+                  value={buscaSetor}
+                  onChange={(e) => setBuscaSetor(e.target.value)}
+                />
                 <div className="modal-setores-lista">
-                  {setoresDisponiveis.map((s) => (
-                    <label key={s.id} className="modal-setor-item">
-                      <input
-                        type="checkbox"
-                        checked={form.id_setores.includes(s.id)}
-                        onChange={() => toggleSetor(s.id)}
-                      />
-                      <span>{s.label_curto || s.nome}</span>
-                    </label>
-                  ))}
+                  {(() => {
+                    const termo = buscaSetor.trim().toLowerCase();
+                    const filtrados = termo
+                      ? setoresDisponiveis.filter((s) =>
+                          (s.label_curto || s.nome || '').toLowerCase().includes(termo) ||
+                          (s.sigla_centro || '').toLowerCase().includes(termo) ||
+                          (s.nome_centro || '').toLowerCase().includes(termo),
+                        )
+                      : setoresDisponiveis;
+                    if (filtrados.length === 0) {
+                      return <span className="modal-setores-vazio">Nenhuma unidade encontrada.</span>;
+                    }
+                    return filtrados.map((s) => (
+                      <label key={s.id} className="modal-setor-item">
+                        <input
+                          type="checkbox"
+                          checked={form.id_setores.includes(s.id)}
+                          onChange={() => toggleSetor(s.id)}
+                        />
+                        <span>{s.label_curto || s.nome}</span>
+                      </label>
+                    ));
+                  })()}
                 </div>
               </div>
 
