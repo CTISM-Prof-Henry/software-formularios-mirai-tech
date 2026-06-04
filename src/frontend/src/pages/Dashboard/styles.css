@@ -449,3 +449,100 @@
     align-self: flex-end;
   }
 }
+
+/* ── Admin Dashboard ─────────────────────────────────────── */
+
+.admin-boas-vindas {
+  background: linear-gradient(135deg, #003470 0%, #00509e 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  color: #fff;
+}
+
+.admin-boas-vindas h2 {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.admin-boas-vindas p {
+  margin: 0;
+  opacity: 0.82;
+  font-size: 0.95rem;
+}
+
+.admin-atalhos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.admin-atalho-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #fff;
+  border: 1px solid rgba(0, 52, 112, 0.08);
+  border-radius: 20px;
+  padding: 22px 24px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(15, 33, 63, 0.06);
+  transition: box-shadow 0.18s, transform 0.15s;
+}
+
+.admin-atalho-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 52, 112, 0.14);
+  transform: translateY(-2px);
+}
+
+.admin-atalho-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-icon-blue  { background: #e8f0fc; color: #003470; }
+.admin-icon-green { background: #e6f4ea; color: #1e6b2e; }
+.admin-icon-yellow{ background: #fff8e6; color: #8a5e00; }
+.admin-icon-red   { background: #fce8e8; color: #b91c1c; }
+
+.admin-atalho-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-atalho-texto strong {
+  font-size: 1rem;
+  color: #102a43;
+}
+
+.admin-atalho-texto span {
+  font-size: 0.85rem;
+  color: #62748a;
+  line-height: 1.4;
+}
+
+.admin-atalho-seta {
+  color: #b0bec5;
+  flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+  .admin-atalhos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-boas-vindas {
+    padding: 20px;
+    border-radius: 16px;
+  }
+}

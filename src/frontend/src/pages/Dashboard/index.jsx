@@ -9,10 +9,197 @@ import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const safeUser = user || {};
+  const [stats, setStats] = useState({ total_planos: 0, riscos_altos: 0, total_usuarios: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function carregarStats() {
+      try {
+        const [estatisticasRes, gestoresRes] = await Promise.all([
+          api.get('/riscos/planos/estatisticas/'),
+          api.get('/usuarios/gestores/', { params: { page_size: 1 } }),
+        ]);
+        setStats({
+          total_planos: estatisticasRes.data.total_planos || 0,
+          riscos_altos: estatisticasRes.data.riscos_altos || 0,
+          total_usuarios: gestoresRes.data.count || 0,
+        });
+      } catch {
+        // stats ficam zerados em caso de erro
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarStats();
+  }, []);
+
+  const atalhos = [
+    {
+      label: 'Gestão de Usuários',
+      descricao: 'Cadastre gestores e gerencie o acesso ao sistema.',
+      path: '/usuarios',
+      cor: 'blue',
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          <line x1="19" y1="8" x2="23" y2="8"></line>
+          <line x1="21" y1="6" x2="21" y2="10"></line>
+        </svg>
+      ),
+    },
+    {
+      label: 'Unidades UFSM',
+      descricao: 'Consulte a estrutura organizacional completa da UFSM.',
+      path: '/unidades',
+      cor: 'green',
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21h18"></path>
+          <path d="M5 21V7l8-4v18"></path>
+          <path d="M19 21V11l-6-4"></path>
+          <path d="M9 9v.01"></path>
+          <path d="M9 13v.01"></path>
+          <path d="M9 17v.01"></path>
+        </svg>
+      ),
+    },
+    {
+      label: 'Planos de Risco',
+      descricao: 'Visualize todos os planos de risco cadastrados no sistema.',
+      path: '/planos',
+      cor: 'yellow',
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      ),
+    },
+    {
+      label: 'Mapa de Riscos',
+      descricao: 'Analise a distribuição e prioridade dos riscos institucionais.',
+      path: '/mapa',
+      cor: 'red',
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+          <path d="M7 10v4M17 10v4M10 7h4M10 17h4"></path>
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <div className="dashboard-container">
+      <Sidebar />
+
+      <main className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="header-title">
+            <div className="title-line"></div>
+            <h1>Painel Administrativo</h1>
+          </div>
+          <div className="header-actions">
+            <ThemeToggle compact />
+          </div>
+        </header>
+
+        <div className="admin-boas-vindas">
+          <div className="admin-boas-vindas-texto">
+            <h2>Bem-vindo, {safeUser.nome?.split(' ')[0] || 'Administrador'}</h2>
+            <p>Você está logado como administrador do sistema. Use os atalhos abaixo para gerenciar o SIGR.</p>
+          </div>
+        </div>
+
+        <section className="stats-grid dashboard-stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon-wrapper blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+              </svg>
+              <span className="stat-badge positive">TOTAL</span>
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{loading ? '—' : String(stats.total_usuarios).padStart(2, '0')}</span>
+              <span className="stat-label">GESTORES CADASTRADOS</span>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper yellow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span className="stat-badge queue">TOTAL</span>
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{loading ? '—' : String(stats.total_planos).padStart(2, '0')}</span>
+              <span className="stat-label">PLANOS DE RISCO</span>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper red">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span className="stat-badge critical">CRÍTICO</span>
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{loading ? '—' : String(stats.riscos_altos).padStart(2, '0')}</span>
+              <span className="stat-label">RISCOS CRÍTICOS</span>
+            </div>
+          </div>
+        </section>
+
+        <h2 className="content-title">Atalhos administrativos</h2>
+
+        <section className="admin-atalhos-grid">
+          {atalhos.map((atalho) => (
+            <button
+              key={atalho.path}
+              type="button"
+              className={`admin-atalho-card admin-atalho-${atalho.cor}`}
+              onClick={() => navigate(atalho.path)}
+            >
+              <div className={`admin-atalho-icon admin-icon-${atalho.cor}`}>{atalho.icon}</div>
+              <div className="admin-atalho-texto">
+                <strong>{atalho.label}</strong>
+                <span>{atalho.descricao}</span>
+              </div>
+              <svg className="admin-atalho-seta" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          ))}
+        </section>
+      </main>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const safeUser = user || {};
+
+  if (safeUser.is_superuser) return <AdminDashboard />;
 
   const [planos, setPlanos] = useState([]);
   const [stats, setStats] = useState({
