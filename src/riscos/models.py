@@ -5,7 +5,32 @@ from django.db import models
 from src.usuarios.models import Setor
 
 
-class DesafioPDI(models.Model):
+class SoftDeleteManager(models.Manager):
+    """Retorna apenas registros ativos (ativo=True) por padrão."""
+    def get_queryset(self):
+        return super().get_queryset().filter(ativo=True)
+
+
+class SoftDeleteModel(models.Model):
+    """
+    Mixin abstrato de soft delete.
+    Registros nunca são removidos fisicamente — apenas marcados como ativo=False.
+    Use `Model.all_objects` para acessar inclusive os desativados.
+    """
+    ativo = models.BooleanField(default=True, db_column="ativo")
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    def delete(self, *args, **kwargs):
+        self.ativo = False
+        self.save(update_fields=['ativo'])
+
+    class Meta:
+        abstract = True
+
+
+class DesafioPDI(SoftDeleteModel):
     numero = models.IntegerField(unique=True, verbose_name="Número do Desafio", db_column="numero")
     descricao = models.CharField(max_length=255, verbose_name="Descrição", db_column="descricao")
 
@@ -19,7 +44,7 @@ class DesafioPDI(models.Model):
         return f"{self.numero} - {self.descricao}"
 
 
-class Macroprocesso(models.Model):
+class Macroprocesso(SoftDeleteModel):
     nome = models.CharField(max_length=255, unique=True, verbose_name="Nome do Processo", db_column="nome")
 
     class Meta:
@@ -32,7 +57,7 @@ class Macroprocesso(models.Model):
         return self.nome
 
 
-class ObjetivoPDI(models.Model):
+class ObjetivoPDI(SoftDeleteModel):
     codigo = models.CharField(max_length=20, unique=True, verbose_name="Código", db_column="codigo")
     descricao = models.TextField(verbose_name="Descrição", db_column="descricao")
     desafio = models.ForeignKey(DesafioPDI, on_delete=models.CASCADE, related_name="objetivos", db_column="id_desafio")
@@ -47,7 +72,7 @@ class ObjetivoPDI(models.Model):
         return f"{self.codigo} - {self.descricao[:50]}"
 
 
-class Risco(models.Model):
+class Risco(SoftDeleteModel):
     CATEGORIAS_CHOICES = [
         ('Operacional', 'Operacional'),
         ('Estratégico', 'Estratégico'),
@@ -93,11 +118,18 @@ class Risco(models.Model):
         self.nivel_residual = self.prob_residual * self.imp_residual
         super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        # Cascata: desativa planos de ação e monitoramentos vinculados
+        PlanoAcao.all_objects.filter(risco=self).update(ativo=False)
+        Monitoramento.all_objects.filter(risco=self).update(ativo=False)
+        self.ativo = False
+        self.save(update_fields=['ativo'])
+
     def __str__(self):
         return f"Risco {self.id} - {self.setor.label_curto}"
 
 
-class PlanoAcao(models.Model):
+class PlanoAcao(SoftDeleteModel):
     RESPOSTA_CHOICES = [
         ('Mitigar', 'Mitigar'),
         ('Evitar', 'Evitar'),
@@ -128,7 +160,7 @@ class PlanoAcao(models.Model):
         verbose_name_plural = "Planos de Ação"
 
 
-class Monitoramento(models.Model):
+class Monitoramento(SoftDeleteModel):
     risco = models.ForeignKey(Risco, on_delete=models.CASCADE, related_name="monitoramentos", db_column="id_risco")
     data_verificacao = models.DateField(auto_now_add=True, db_column="data_verificacao")
     resultados = models.TextField(db_column="resultados")

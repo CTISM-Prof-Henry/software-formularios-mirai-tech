@@ -261,24 +261,25 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
 
 class RegistroUsuarioView(generics.CreateAPIView):
     """
-    Endpoint para cadastrar novos usuários (Gestores).
+    Cria um novo usuário gestor. Restrito a superusuários.
     """
     queryset = Usuario.objects.all()
     serializer_class = RegistroUsuarioSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem criar novos usuários.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializador = self.get_serializer(data=request.data)
         serializador.is_valid(raise_exception=True)
         usuario = serializador.save()
-        
-        # Criamos o token automaticamente ao registrar
-        token, _ = Token.objects.get_or_create(user=usuario)
-        
-        return Response({
-            "usuario": UsuarioSerializer(usuario).data,
-            "token": token.key
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {'usuario': UsuarioSerializer(usuario).data},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
@@ -336,3 +337,83 @@ class UsuarioLogadoView(APIView):
 
 
 SetorViewSet = UnidadeOrganizacionalViewSet
+
+
+class UsuarioViewSet(viewsets.GenericViewSet):
+    """
+    Gestão administrativa de usuários (superusuário only).
+    GET  /api/usuarios/gestores/           — lista todos os usuários
+    DELETE /api/usuarios/gestores/<id>/    — desativa (soft delete)
+    POST /api/usuarios/gestores/<id>/reativar/ — reativa
+    """
+    serializer_class = UsuarioSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Usuario.objects.all().prefetch_related('setores').order_by('nome')
+        search = self.request.query_params.get('search', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(siape__icontains=search)
+                | Q(nome__icontains=search)
+                | Q(email__icontains=search)
+            )
+        return qs
+
+    def list(self, request):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem acessar esta listagem.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        page_size = max(_query_int(request, 'page_size', 20), 1)
+        paginador = PageNumberPagination()
+        paginador.page_size = page_size
+        pagina = paginador.paginate_queryset(self.get_queryset(), request)
+        serializador = self.get_serializer(pagina, many=True)
+        return Response({
+            'count': paginador.page.paginator.count,
+            'page': paginador.page.number,
+            'total_pages': paginador.page.paginator.num_pages,
+            'results': serializador.data,
+        })
+
+    def destroy(self, request, pk=None):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem desativar usuários.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            usuario = Usuario.objects.get(pk=pk)
+        except Usuario.DoesNotExist:
+            return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if usuario.is_superuser:
+            return Response(
+                {'erro': 'Não é possível desativar um superusuário.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if usuario.pk == request.user.pk:
+            return Response(
+                {'erro': 'Você não pode desativar sua própria conta.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        usuario.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def reativar(self, request, pk=None):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem reativar usuários.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            usuario = Usuario.objects.get(pk=pk)
+        except Usuario.DoesNotExist:
+            return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        usuario.ativo = True
+        usuario.save(update_fields=['ativo'])
+        return Response({'usuario': UsuarioSerializer(usuario).data})

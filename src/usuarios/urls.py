@@ -8,11 +8,13 @@ from .views import (
     RegistroUsuarioView,
     SetorViewSet,
     UsuarioLogadoView,
+    UsuarioViewSet,
     ValidarCodigoRecuperacaoView,
 )
 
 router = DefaultRouter()
 router.register(r'setores', SetorViewSet)
+router.register(r'gestores', UsuarioViewSet, basename='gestores')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -49,8 +49,17 @@ class RiscoViewSet(viewsets.ModelViewSet):
     # Mantenha os dois sincronizados ao alterar categorias.
     CATEGORY_ORDER = ["Operacional", "Estratégico", "Integridade", "Imagem", "Financeiro"]
 
+    def _base_manager(self):
+        """Retorna all_objects para superusuários com ?incluir_inativos=true."""
+        if (
+            self.request.user.is_superuser
+            and self.request.query_params.get('incluir_inativos') == 'true'
+        ):
+            return Risco.all_objects
+        return Risco.objects
+
     def get_queryset(self):
-        queryset = Risco.objects.select_related(
+        queryset = self._base_manager().select_related(
             "setor",
             "objetivo__desafio",
             "macroprocesso",
@@ -351,7 +360,13 @@ class PlanoAcaoViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
 
     def get_queryset(self):
-        queryset = PlanoAcao.objects.select_related("risco", "risco__setor").all()
+        manager = (
+            PlanoAcao.all_objects
+            if self.request.user.is_superuser
+            and self.request.query_params.get('incluir_inativos') == 'true'
+            else PlanoAcao.objects
+        )
+        queryset = manager.select_related("risco", "risco__setor").all()
         risco_id = self.request.query_params.get("risco")
         if risco_id:
             queryset = queryset.filter(risco_id=risco_id)

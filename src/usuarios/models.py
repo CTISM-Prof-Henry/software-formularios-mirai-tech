@@ -132,6 +132,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
 
+    def delete(self, *args, **kwargs):
+        self.ativo = False
+        self.save(update_fields=['ativo'])
+
     def __str__(self):
         return f"{self.siape} - {self.nome}"
 
