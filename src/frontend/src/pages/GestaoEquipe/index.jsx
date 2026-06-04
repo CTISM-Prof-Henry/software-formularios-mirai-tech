@@ -20,6 +20,7 @@ const GestaoEquipe = () => {
 
   const { user } = useAuth();
   const safeUser = user || {};
+  const podeGerenciar = safeUser.is_superuser || safeUser.cargo === 'gestor_adm';
 
   useEffect(() => {
     // Carrega os setores do usuário logado
@@ -160,25 +161,27 @@ const GestaoEquipe = () => {
             </div>
           </div>
 
-          <div className="equipe-actions">
-            <form className="add-membro-form" onSubmit={handleAdicionarMembro}>
-              <div className="input-group">
-                <input 
-                  type="text" 
-                  placeholder="SIAPE do novo membro..." 
-                  value={siapeNovoMembro}
-                  onChange={(e) => setSiapeNovoMembro(e.target.value)}
-                />
-                <button type="submit" className="add-button">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  Adicionar Membro
-                </button>
-              </div>
-            </form>
-          </div>
+          {podeGerenciar && (
+            <div className="equipe-actions">
+              <form className="add-membro-form" onSubmit={handleAdicionarMembro}>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="SIAPE do novo membro..."
+                    value={siapeNovoMembro}
+                    onChange={(e) => setSiapeNovoMembro(e.target.value)}
+                  />
+                  <button type="submit" className="add-button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Adicionar Membro
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           <div className="membros-list-container">
             <div className="list-header-row">
@@ -227,8 +230,10 @@ const GestaoEquipe = () => {
                       <p className="membro-email">{membro.email}</p>
                     </div>
                     <div className="membro-acoes-cell">
-                      {membro.id !== user.id ? (
-                        <button 
+                      {membro.id === user.id ? (
+                        <span className="current-user-tag">Você</span>
+                      ) : podeGerenciar ? (
+                        <button
                           className="remove-membro-button"
                           onClick={() => handleRemoverMembro(membro.id)}
                           title="Remover membro"
@@ -238,9 +243,7 @@ const GestaoEquipe = () => {
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                           </svg>
                         </button>
-                      ) : (
-                        <span className="current-user-tag">Você</span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 ))

@@ -15,6 +15,7 @@ const FORM_VAZIO = {
   nome: '',
   email: '',
   senha: SENHA_PLACEHOLDER,
+  cargo: 'gestor',
   id_setores: [],
 };
 
@@ -191,7 +192,7 @@ const GestaoUsuarios = () => {
                       <th>Nome</th>
                       <th>SIAPE</th>
                       <th>E-mail</th>
-                      <th>Setores</th>
+                      <th>Cargo</th>
                       <th>Status</th>
                       <th>Ações</th>
                     </tr>
@@ -202,7 +203,11 @@ const GestaoUsuarios = () => {
                         <td>{u.nome}</td>
                         <td>{u.siape}</td>
                         <td>{u.email || '—'}</td>
-                        <td>{u.setores?.map((s) => s.sigla_centro || s.sigla).join(', ') || '—'}</td>
+                        <td>
+                          <span className={`badge-cargo ${u.cargo === 'gestor_adm' ? 'adm' : 'padrao'}`}>
+                            {u.cargo === 'gestor_adm' ? 'Gestor Adm.' : 'Gestor'}
+                          </span>
+                        </td>
                         <td>
                           <span className={`badge-status ${u.ativo ? 'ativo' : 'inativo'}`}>
                             {u.ativo ? 'Ativo' : 'Inativo'}
@@ -269,6 +274,15 @@ const GestaoUsuarios = () => {
                 <label htmlFor="senha">Senha Inicial</label>
                 <input id="senha" type="text" value={form.senha} onChange={handleFormChange} required minLength={8} />
                 <span className="input-caption">O gestor deve alterar a senha no primeiro acesso.</span>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="cargo">Cargo</label>
+                <select id="cargo" value={form.cargo} onChange={handleFormChange}>
+                  <option value="gestor">Gestor</option>
+                  <option value="gestor_adm">Gestor Administrador</option>
+                </select>
+                <span className="input-caption">Gestor Administrador pode adicionar e remover membros da equipe.</span>
               </div>
 
               <div className="form-group">
