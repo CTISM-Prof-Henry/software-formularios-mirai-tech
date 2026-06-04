@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -11,6 +12,7 @@ const Login = () => {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
   const { showFeedback } = useFeedback();
 
   const handleLogin = async (event) => {
@@ -22,7 +24,7 @@ const Login = () => {
       const { token, usuario } = response.data;
 
       localStorage.setItem('@SIGR:token', token);
-      localStorage.setItem('@SIGR:user', JSON.stringify(usuario));
+      updateUser(usuario);
 
       showFeedback({
         type: 'success',
