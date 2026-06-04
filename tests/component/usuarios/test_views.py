@@ -30,6 +30,18 @@ def admin_usuario(db, setor):
     u.setores.add(setor)
     return u
 
+@pytest.fixture
+def gestor_adm(db, setor):
+    u = Usuario.objects.create_user(
+        siape="5555555",
+        password="senha_gestadm",
+        nome="Gestor Administrador",
+        email="gestadm@ufsm.br",
+        cargo="gestor_adm",
+    )
+    u.setores.add(setor)
+    return u
+
 @pytest.mark.django_db
 class TestUsuarioViews:
     def test_listar_setores_publico(self, api_client, setor):
@@ -39,7 +51,8 @@ class TestUsuarioViews:
         assert isinstance(response.data, list)
         assert len(response.data) >= 1
 
-    def test_registro_usuario(self, api_client, setor):
+    def test_registro_usuario(self, api_client, setor, admin_usuario):
+        api_client.force_authenticate(user=admin_usuario)
         url = "/api/usuarios/registro/"
         payload = {
             "siape": "2222222",
@@ -50,7 +63,6 @@ class TestUsuarioViews:
         }
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_201_CREATED
-        assert "token" in response.data
         assert response.data["usuario"]["nome"] == "Novo Gestor"
 
     def test_login_usuario(self, api_client, usuario):
@@ -228,44 +240,38 @@ class TestUsuarioViews:
         assert response.data["total_pages"] == 1
         assert response.data["results"][0]["id"] == unidade_ct.id
 
-    def test_remover_membro_setor_sucesso(self, api_client, usuario, setor):
-        api_client.force_authenticate(user=usuario)
+    def test_remover_membro_setor_sucesso(self, api_client, gestor_adm, setor):
+        api_client.force_authenticate(user=gestor_adm)
         url = f"/api/usuarios/setores/{setor.id}/remover_membro/"
-        payload = {"usuario_id": usuario.id}
+        payload = {"usuario_id": gestor_adm.id}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data["mensagem"] == "Membro removido da equipe com sucesso."
-        
-        # Valida se o vínculo sumiu
-        assert setor not in usuario.setores.all()
+        assert setor not in gestor_adm.setores.all()
 
-    def test_remover_membro_nao_pertencente(self, api_client, usuario):
-        # Novo setor que o usuário não pertence
+    def test_remover_membro_nao_pertencente(self, api_client, gestor_adm):
         setor_vazio = Setor.objects.create(nome="Vazio", sigla="VV")
-        api_client.force_authenticate(user=usuario)
+        api_client.force_authenticate(user=gestor_adm)
         url = f"/api/usuarios/setores/{setor_vazio.id}/remover_membro/"
-        payload = {"usuario_id": usuario.id}
+        payload = {"usuario_id": gestor_adm.id}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["erro"] == "Usuário não pertence a esta unidade."
 
-    def test_adicionar_membro_setor_sucesso(self, api_client, usuario, setor):
-        # Novo usuário que não pertence ao setor
+    def test_adicionar_membro_setor_sucesso(self, api_client, gestor_adm, setor):
         novo_usuario = Usuario.objects.create_user(siape="999", password="p", nome="Novo", email="n@u.com")
-        api_client.force_authenticate(user=usuario)
+        api_client.force_authenticate(user=gestor_adm)
         url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
         payload = {"siape": "999"}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data["mensagem"] == "Membro adicionado com sucesso!"
-        
-        # Valida se o vínculo foi criado
         assert setor in novo_usuario.setores.all()
 
-    def test_adicionar_membro_ja_existente(self, api_client, usuario, setor):
-        api_client.force_authenticate(user=usuario)
+    def test_adicionar_membro_ja_existente(self, api_client, gestor_adm, setor):
+        api_client.force_authenticate(user=gestor_adm)
         url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
-        payload = {"siape": usuario.siape}
+        payload = {"siape": gestor_adm.siape}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["erro"] == "Este usuário já faz parte desta unidade."
@@ -334,10 +340,10 @@ class TestGestaoUsuariosAdmin:
         response = api_client.delete(f"/api/usuarios/gestores/{usuario_superuser.id}/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_adicionar_membro_nao_encontrado(self, api_client, usuario, setor):
-        api_client.force_authenticate(user=usuario)
+    def test_adicionar_membro_nao_encontrado(self, api_client, gestor_adm, setor):
+        api_client.force_authenticate(user=gestor_adm)
         url = f"/api/usuarios/setores/{setor.id}/adicionar_membro/"
-        payload = {"siape": "000"} # Não existe
+        payload = {"siape": "000"}
         response = api_client.post(url, payload, format='json')
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.data["erro"] == "Usuário com este SIAPE não encontrado."
