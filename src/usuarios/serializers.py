@@ -32,15 +32,20 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
     """
     senha = serializers.CharField(write_only=True, min_length=8, source='password')
     id_setores = serializers.PrimaryKeyRelatedField(
-        queryset=UnidadeOrganizacional.objects.all(), 
-        source='setores', 
+        queryset=UnidadeOrganizacional.objects.all(),
+        source='setores',
         many=True,
-        required=False
+        required=False,
+    )
+    cargo = serializers.ChoiceField(
+        choices=[('gestor', 'Gestor'), ('gestor_adm', 'Gestor Administrador')],
+        default='gestor',
+        required=False,
     )
 
     class Meta:
         model = Usuario
-        fields = ['id', 'siape', 'senha', 'nome', 'email', 'id_setores']
+        fields = ['id', 'siape', 'senha', 'nome', 'email', 'id_setores', 'cargo']
 
     def create(self, dados_validados):
         senha = dados_validados.pop('password')
@@ -62,7 +67,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['id', 'siape', 'nome', 'email', 'setores', 'is_superuser', 'ativo']
+        fields = ['id', 'siape', 'nome', 'email', 'setores', 'is_superuser', 'ativo', 'cargo']
 
 
 class AtualizarPerfilSerializer(serializers.ModelSerializer):

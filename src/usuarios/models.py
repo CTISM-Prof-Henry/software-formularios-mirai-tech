@@ -97,12 +97,24 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     Modelo customizado de usuário para gestores da UFSM.
     Focado em SIAPE, Nome Completo, E-mail e múltiplos Setores.
     """
+    CARGO_CHOICES = [
+        ('gestor', 'Gestor'),
+        ('gestor_adm', 'Gestor Administrador'),
+    ]
+
     siape = models.CharField(
         max_length=20, unique=True, verbose_name="Matrícula SIAPE", db_column="siape"
     )
     nome = models.CharField(max_length=255, verbose_name="Nome Completo", db_column="nome")
     email = models.EmailField(
         verbose_name="E-mail", unique=True, db_column="email", null=True, blank=True
+    )
+    cargo = models.CharField(
+        max_length=20,
+        choices=CARGO_CHOICES,
+        default='gestor',
+        db_column='cargo',
+        verbose_name='Cargo',
     )
     setores = models.ManyToManyField(
         Setor,

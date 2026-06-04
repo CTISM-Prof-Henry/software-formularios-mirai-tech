@@ -223,10 +223,15 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def remover_membro(self, request, pk=None):
-        """Remove o vínculo de um gestor com esta unidade."""
+        """Remove o vínculo de um gestor com esta unidade. Requer cargo gestor_adm ou superusuário."""
+        if not (_usuario_eh_superusuario(request.user) or getattr(request.user, 'cargo', '') == 'gestor_adm'):
+            return Response(
+                {'erro': 'Apenas Gestores Administradores podem remover membros da equipe.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         setor = self.get_object()
         usuario_id = request.data.get('usuario_id')
-        
+
         try:
             usuario = Usuario.objects.get(id=usuario_id)
             if setor in usuario.setores.all():
@@ -238,10 +243,15 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def adicionar_membro(self, request, pk=None):
-        """Adiciona um usuário (existente pelo SIAPE) a esta unidade."""
+        """Adiciona um usuário (existente pelo SIAPE) a esta unidade. Requer cargo gestor_adm ou superusuário."""
+        if not (_usuario_eh_superusuario(request.user) or getattr(request.user, 'cargo', '') == 'gestor_adm'):
+            return Response(
+                {'erro': 'Apenas Gestores Administradores podem adicionar membros à equipe.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         setor = self.get_object()
         siape = request.data.get('siape')
-        
+
         if not siape:
             return Response({'erro': 'O SIAPE é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -249,7 +259,7 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
             usuario = Usuario.objects.get(siape=siape)
             if setor in usuario.setores.all():
                 return Response({'erro': 'Este usuário já faz parte desta unidade.'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             usuario.setores.add(setor)
             return Response({
                 'mensagem': 'Membro adicionado com sucesso!',
