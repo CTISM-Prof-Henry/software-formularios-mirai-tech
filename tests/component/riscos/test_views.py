@@ -254,7 +254,7 @@ class TestSoftDeleteEndpoints:
         infra_risco["risco"].delete()
 
         api_client.force_authenticate(user=usuario_superuser)
-        response = api_client.get(f"/api/riscos/planos/?incluir_inativos=true")
+        response = api_client.get("/api/riscos/planos/?incluir_inativos=true")
 
         ids = [p["id"] for p in response.data["results"]]
         assert risco_id in ids
