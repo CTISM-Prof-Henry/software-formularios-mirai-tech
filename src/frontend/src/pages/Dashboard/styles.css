@@ -546,3 +546,29 @@
     border-radius: 16px;
   }
 }
+
+[data-theme="dark"] .admin-atalho-card {
+  background: var(--surface-card);
+  border-color: var(--border-soft);
+}
+
+[data-theme="dark"] .admin-atalho-card:hover {
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .admin-atalho-texto strong {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .admin-atalho-texto span {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .admin-atalho-seta {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .admin-icon-blue  { background: rgba(0, 52, 112, 0.35); }
+[data-theme="dark"] .admin-icon-green { background: rgba(30, 107, 46, 0.3); }
+[data-theme="dark"] .admin-icon-yellow{ background: rgba(138, 94, 0, 0.3); }
+[data-theme="dark"] .admin-icon-red   { background: rgba(185, 28, 28, 0.3); }
