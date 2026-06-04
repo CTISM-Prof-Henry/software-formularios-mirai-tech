@@ -4,7 +4,6 @@ import FeedbackToast from './components/FeedbackToast'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { FeedbackProvider } from './context/FeedbackContext'
 import { ThemeProvider } from './context/ThemeContext'
-import Cadastro from './pages/Cadastro'
 import Dashboard from './pages/Dashboard'
 import EditarPlano from './pages/EditarPlano'
 import GestaoEquipe from './pages/GestaoEquipe'
@@ -14,6 +13,7 @@ import NovoPlano from './pages/NovoPlano'
 import Perfil from './pages/Perfil'
 import PlanosRisco from './pages/PlanosRisco'
 import RecuperarSenha from './pages/RecuperarSenha'
+import GestaoUsuarios from './pages/GestaoUsuarios'
 import UnidadesAdmin from './pages/UnidadesAdmin'
 import VisualizarPlano from './pages/VisualizarPlano'
 
@@ -33,7 +33,6 @@ function App() {
             <Routes>
               {/* Rotas públicas */}
               <Route path="/login" element={<Login />} />
-              <Route path="/cadastro" element={<Cadastro />} />
               <Route path="/recuperar-senha" element={<RecuperarSenha />} />
 
               {/* Rotas autenticadas */}
@@ -45,6 +44,7 @@ function App() {
               <Route path="/mapa" element={<ProtectedRoute><MapaRisco /></ProtectedRoute>} />
               <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
               <Route path="/equipe" element={<ProtectedRoute><GestaoEquipe /></ProtectedRoute>} />
+              <Route path="/usuarios" element={<ProtectedRoute><GestaoUsuarios /></ProtectedRoute>} />
               <Route path="/unidades" element={<ProtectedRoute><UnidadesAdmin /></ProtectedRoute>} />
 
               <Route path="/" element={<Navigate to="/login" replace />} />

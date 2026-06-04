@@ -85,12 +85,6 @@ const Login = () => {
         </form>
 
         <footer className="login-footer">
-          <p>
-            Ainda nao tem acesso?{' '}
-            <Link to="/cadastro" className="register-link">
-              Cadastrar Gestor
-            </Link>
-          </p>
           <Link to="/recuperar-senha" className="forgot-password">
             Esqueceu a senha?
           </Link>
