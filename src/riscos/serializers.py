@@ -71,11 +71,15 @@ class RiscoSerializer(serializers.ModelSerializer):
         return data
 
 class PlanoAcaoSerializer(serializers.ModelSerializer):
+    risco = serializers.SlugRelatedField(slug_field='uuid', queryset=Risco.objects.all())
+
     class Meta:
         model = PlanoAcao
         fields = '__all__'
 
 class MonitoramentoSerializer(serializers.ModelSerializer):
+    risco = serializers.SlugRelatedField(slug_field='uuid', queryset=Risco.objects.all())
+
     class Meta:
         model = Monitoramento
         fields = '__all__'

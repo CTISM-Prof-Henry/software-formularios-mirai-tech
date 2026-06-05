@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 
-from src.riscos.models import Macroprocesso, ObjetivoPDI, PlanoAcao, Risco
+from src.riscos.models import HistoricoPlano, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
 
 
 @pytest.fixture
@@ -316,4 +316,336 @@ class TestSoftDeleteEndpoints:
         assert response.data["total_planos"] == 0
         assert response.data["tratamentos_ativos"] == 0
         assert response.data["planos"] == []
+
+
+@pytest.mark.django_db
+class TestRiscoSerializerCamposComputados:
+    def test_serializer_retorna_periodo_acao_quando_plano_existe(self, risco_com_plano):
+        from src.riscos.serializers import RiscoSerializer
+        risco = Risco.objects.prefetch_related("planos_acao", "monitoramentos").get(pk=risco_com_plano.pk)
+        dados = RiscoSerializer(risco).data
+        assert dados["possui_plano_acao"] is True
+        assert dados["periodo_acao"]["data_inicio"] == "2026-01-10"
+        assert dados["periodo_acao"]["data_fim"] == "2026-03-10"
+
+    def test_serializer_retorna_periodo_acao_vazio_sem_plano(self, risco_basico):
+        from src.riscos.serializers import RiscoSerializer
+        risco = Risco.objects.prefetch_related("planos_acao", "monitoramentos").get(pk=risco_basico.pk)
+        dados = RiscoSerializer(risco).data
+        assert dados["possui_plano_acao"] is False
+        assert dados["periodo_acao"] == {"data_inicio": None, "data_fim": None}
+
+    def test_serializer_retorna_possui_monitoramento(self, risco_com_monitoramento):
+        from src.riscos.serializers import RiscoSerializer
+        risco = Risco.objects.prefetch_related("planos_acao", "monitoramentos").get(pk=risco_com_monitoramento.pk)
+        dados = RiscoSerializer(risco).data
+        assert dados["possui_monitoramento"] is True
+
+    def test_serializer_retorna_nao_possui_monitoramento_sem_registros(self, risco_basico):
+        from src.riscos.serializers import RiscoSerializer
+        risco = Risco.objects.prefetch_related("planos_acao", "monitoramentos").get(pk=risco_basico.pk)
+        dados = RiscoSerializer(risco).data
+        assert dados["possui_monitoramento"] is False
+
+
+@pytest.mark.django_db
+class TestPlanoAcaoAutoProgresso:
+    def test_progresso_auto_100_ao_concluir(self, api_client, infra_risco):
+        # ao marcar status como Concluída o progresso deve ser automaticamente 100
+        api_client.force_authenticate(user=infra_risco["u1"])
+        acao = PlanoAcao.objects.create(
+            risco=infra_risco["risco"],
+            tipo_resposta="Mitigar",
+            descricao_acao="Acao de teste",
+            responsavel="Responsavel",
+            data_inicio="2026-01-01",
+            data_fim="2026-06-30",
+            status="Em andamento",
+            progresso=40,
+        )
+
+        response = api_client.patch(
+            f"/api/riscos/acoes/{acao.id}/",
+            {"status": "Concluída"},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        acao.refresh_from_db()
+        assert acao.progresso == 100
+
+    def test_progresso_nao_alterado_em_outros_status(self, api_client, infra_risco):
+        # status diferente de Concluída nao deve forcar o progresso a 100
+        api_client.force_authenticate(user=infra_risco["u1"])
+        acao = PlanoAcao.objects.create(
+            risco=infra_risco["risco"],
+            tipo_resposta="Mitigar",
+            descricao_acao="Acao de teste",
+            responsavel="Responsavel",
+            data_inicio="2026-01-01",
+            data_fim="2026-06-30",
+            status="Não iniciada",
+            progresso=30,
+        )
+
+        response = api_client.patch(
+            f"/api/riscos/acoes/{acao.id}/",
+            {"status": "Em andamento", "progresso": 55},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        acao.refresh_from_db()
+        assert acao.progresso == 55
+
+
+@pytest.mark.django_db
+class TestDuplicarRisco:
+    def test_duplicar_cria_novo_risco_sem_plano_acao(self, api_client, infra_risco):
+        # a duplicacao deve criar um risco novo com os mesmos dados mas sem acao vinculada
+        risco = infra_risco["risco"]
+        PlanoAcao.objects.create(
+            risco=risco,
+            tipo_resposta="Mitigar",
+            descricao_acao="Acao original",
+            responsavel="Responsavel",
+            data_inicio="2026-01-01",
+            data_fim="2026-06-30",
+            status="Em andamento",
+        )
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.post(f"/api/riscos/planos/{risco.uuid}/duplicar/")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        novo_uuid = response.data["uuid"]
+        assert novo_uuid != str(risco.uuid)
+
+        novo = Risco.objects.get(uuid=novo_uuid)
+        assert novo.evento == risco.evento
+        assert novo.categoria == risco.categoria
+        assert novo.planos_acao.count() == 0
+
+    def test_duplicar_cria_entrada_de_historico(self, api_client, infra_risco):
+        # a duplicacao deve registrar no historico do novo risco
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+
+        response = api_client.post(f"/api/riscos/planos/{risco.uuid}/duplicar/")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        novo_uuid = response.data["uuid"]
+        novo = Risco.objects.get(uuid=novo_uuid)
+        assert HistoricoPlano.objects.filter(risco=novo).exists()
+
+    def test_outro_setor_nao_pode_duplicar(self, api_client, infra_risco):
+        # usuario de setor diferente nao tem permissao de duplicar (acao de escrita)
+        api_client.force_authenticate(user=infra_risco["u2"])
+
+        response = api_client.post(f"/api/riscos/planos/{infra_risco['risco'].uuid}/duplicar/")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+class TestHistoricoPlano:
+    def test_historico_registrado_ao_atualizar_risco(self, api_client, infra_risco):
+        # cada patch no risco deve gerar uma entrada no historico
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+
+        api_client.patch(
+            f"/api/riscos/planos/{risco.uuid}/",
+            {"evento": "Evento atualizado"},
+            format="json",
+        )
+
+        assert HistoricoPlano.objects.filter(risco=risco).count() == 1
+
+    def test_endpoint_historico_retorna_entradas(self, api_client, infra_risco):
+        # o endpoint de historico deve retornar as entradas em ordem decrescente
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+        HistoricoPlano.objects.create(risco=risco, usuario_nome="Gestor", descricao="Primeira alteracao")
+        HistoricoPlano.objects.create(risco=risco, usuario_nome="Gestor", descricao="Segunda alteracao")
+
+        response = api_client.get(f"/api/riscos/planos/{risco.uuid}/historico/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        assert response.data[0]["descricao"] == "Segunda alteracao"
+
+    def test_historico_vazio_retorna_lista_vazia(self, api_client, infra_risco):
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+
+        response = api_client.get(f"/api/riscos/planos/{risco.uuid}/historico/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []
+
+
+@pytest.mark.django_db
+class TestMonitoramentoViewSet:
+    def test_filtra_monitoramentos_por_uuid_do_risco(self, api_client, infra_risco):
+        # o endpoint de monitoramentos deve aceitar uuid do risco como filtro
+        risco = infra_risco["risco"]
+        Monitoramento.objects.create(
+            risco=risco,
+            resultados="Resultado 1",
+            acoes_futuras="Acao futura 1",
+            analise_critica="Analise 1",
+        )
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get(f"/api/riscos/monitoramentos/?risco={risco.uuid}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resultados = response.data.get("results", response.data)
+        assert len(resultados) == 1
+
+    def test_filtra_monitoramentos_retorna_vazio_para_uuid_inexistente(self, api_client, infra_risco):
+        import uuid
+        api_client.force_authenticate(user=infra_risco["u1"])
+        uuid_falso = uuid.uuid4()
+
+        response = api_client.get(f"/api/riscos/monitoramentos/?risco={uuid_falso}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resultados = response.data.get("results", response.data)
+        assert len(resultados) == 0
+
+    def test_cria_monitoramento_com_uuid_do_risco(self, api_client, infra_risco):
+        # a criacao deve aceitar uuid no campo risco em vez de pk inteiro
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+
+        response = api_client.post(
+            "/api/riscos/monitoramentos/",
+            {
+                "risco": str(risco.uuid),
+                "resultados": "Resultado novo",
+                "acoes_futuras": "Acao futura nova",
+                "analise_critica": "Analise nova",
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Monitoramento.objects.filter(risco=risco).exists()
+
+
+@pytest.mark.django_db
+class TestPlanoAcaoFiltroUUID:
+    def test_filtra_acoes_por_uuid_do_risco(self, api_client, infra_risco):
+        # o endpoint de acoes deve aceitar uuid do risco como filtro
+        risco = infra_risco["risco"]
+        PlanoAcao.objects.create(
+            risco=risco,
+            tipo_resposta="Mitigar",
+            descricao_acao="Acao filtro",
+            responsavel="Resp",
+            data_inicio="2026-01-01",
+            data_fim="2026-06-30",
+            status="Em andamento",
+        )
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get(f"/api/riscos/acoes/?risco={risco.uuid}")
+
+        assert response.status_code == status.HTTP_200_OK
+        resultados = response.data.get("results", response.data)
+        assert len(resultados) == 1
+
+    def test_cria_acao_com_uuid_do_risco(self, api_client, infra_risco):
+        # a criacao deve aceitar uuid no campo risco em vez de pk inteiro
+        api_client.force_authenticate(user=infra_risco["u1"])
+        risco = infra_risco["risco"]
+
+        response = api_client.post(
+            "/api/riscos/acoes/",
+            {
+                "risco": str(risco.uuid),
+                "tipo_resposta": "Mitigar",
+                "descricao_acao": "Descricao da acao",
+                "responsavel": "Responsavel",
+                "data_inicio": "2026-01-01",
+                "data_fim": "2026-06-30",
+                "status": "Não iniciada",
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+class TestBuscaExpandidaEOrdenacao:
+    def test_busca_por_nome_macroprocesso(self, api_client, infra_risco):
+        # a busca expandida deve localizar riscos pelo nome do macroprocesso vinculado
+        api_client.force_authenticate(user=infra_risco["u1"])
+        termo = infra_risco["risco"].macroprocesso.nome[:8]
+
+        response = api_client.get(f"/api/riscos/planos/?search={termo}")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+
+    def test_busca_por_responsavel_da_acao(self, api_client, infra_risco):
+        # a busca expandida deve localizar riscos pelo responsavel do plano de acao
+        risco = infra_risco["risco"]
+        PlanoAcao.objects.create(
+            risco=risco,
+            tipo_resposta="Mitigar",
+            descricao_acao="Acao",
+            responsavel="Responsavel Especifico",
+            data_inicio="2026-01-01",
+            data_fim="2026-06-30",
+            status="Em andamento",
+        )
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get("/api/riscos/planos/?search=Especifico")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+
+    def test_ordenacao_por_nivel_residual_descendente(self, api_client, infra_risco, objetivo_padrao, macroprocesso_padrao):
+        # o parametro nivel_desc deve ordenar do maior para o menor nivel residual
+        Risco.objects.create(
+            setor=infra_risco["s1"],
+            objetivo=objetivo_padrao,
+            macroprocesso=macroprocesso_padrao,
+            categoria="Estratégico",
+            evento="Risco alto",
+            causa="C",
+            consequencia="C",
+            controles_atuais="C",
+            eficacia_controle="Inexistente",
+            probabilidade=5,
+            impacto=5,
+            prob_residual=5,
+            imp_residual=5,
+        )
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get("/api/riscos/planos/?ordenacao=nivel_desc")
+
+        assert response.status_code == status.HTTP_200_OK
+        niveis = [r["nivel_residual"] for r in response.data["results"]]
+        assert niveis == sorted(niveis, reverse=True)
+
+
+@pytest.mark.django_db
+class TestExportarRelatorioGerencial:
+    def test_exporta_relatorio_gerencial_como_pdf(self, api_client, infra_risco):
+        # o endpoint deve gerar um pdf com resumo gerencial de todos os riscos
+        api_client.force_authenticate(user=infra_risco["u1"])
+
+        response = api_client.get("/api/riscos/planos/exportar-relatorio/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/pdf"
+        assert "relatorio-gerencial" in response["Content-Disposition"]
+        assert response.content.startswith(b"%PDF")
 

@@ -1,6 +1,6 @@
 import pytest
 
-from src.riscos.serializers import RiscoSerializer
+from src.riscos.serializers import MonitoramentoSerializer, PlanoAcaoSerializer, RiscoSerializer
 
 
 @pytest.mark.django_db
@@ -118,3 +118,55 @@ class TestRiscoSerializer:
 
         assert serializer.is_valid() is False
         assert "macroprocesso" in serializer.errors
+
+
+@pytest.mark.django_db
+class TestPlanoAcaoSerializerUUID:
+    def test_aceita_uuid_no_campo_risco(self, risco_basico):
+        # o serializer deve aceitar uuid como identificador do risco vinculado
+        serializer = PlanoAcaoSerializer(
+            data={
+                "risco": str(risco_basico.uuid),
+                "tipo_resposta": "Mitigar",
+                "descricao_acao": "Descricao",
+                "responsavel": "Responsavel",
+                "data_inicio": "2026-01-01",
+                "data_fim": "2026-06-30",
+                "status": "Não iniciada",
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+        acao = serializer.save()
+        assert acao.risco_id == risco_basico.pk
+
+    def test_rejeita_uuid_invalido(self, risco_basico):
+        serializer = PlanoAcaoSerializer(
+            data={
+                "risco": "nao-e-um-uuid",
+                "tipo_resposta": "Mitigar",
+                "descricao_acao": "Descricao",
+                "responsavel": "Responsavel",
+                "data_inicio": "2026-01-01",
+                "data_fim": "2026-06-30",
+                "status": "Não iniciada",
+            }
+        )
+        assert serializer.is_valid() is False
+        assert "risco" in serializer.errors
+
+
+@pytest.mark.django_db
+class TestMonitoramentoSerializerUUID:
+    def test_aceita_uuid_no_campo_risco(self, risco_basico):
+        # o serializer deve aceitar uuid como identificador do risco vinculado
+        serializer = MonitoramentoSerializer(
+            data={
+                "risco": str(risco_basico.uuid),
+                "resultados": "Resultado",
+                "acoes_futuras": "Acoes",
+                "analise_critica": "Analise",
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+        monitoramento = serializer.save()
+        assert monitoramento.risco_id == risco_basico.pk
