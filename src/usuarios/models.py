@@ -1,7 +1,9 @@
 import uuid as uuid_lib
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
 
 
 class Setor(models.Model):
@@ -129,6 +131,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     )
     ativo = models.BooleanField(default=True, db_column="ativo")
     equipe = models.BooleanField(default=False, db_column="equipe")
+    sem_equipe_desde = models.DateTimeField(null=True, blank=True, db_column="sem_equipe_desde")
 
     objects = GerenciadorUsuario()
 
@@ -141,7 +144,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_active(self):
-        return self.ativo
+        if not self.ativo:
+            return False
+        if not self.is_superuser and self.sem_equipe_desde is not None:
+            if timezone.now() - self.sem_equipe_desde > timedelta(days=7):
+                return False
+        return True
 
     class Meta:
         db_table = "usuarios"

@@ -175,7 +175,7 @@ class HistoricoPlano(models.Model):
         db_table = "historico_planos"
         verbose_name = "Histórico do Plano"
         verbose_name_plural = "Históricos dos Planos"
-        ordering = ["-data_hora"]
+        ordering = ["-data_hora", "-id"]
 
 
 class Monitoramento(SoftDeleteModel):

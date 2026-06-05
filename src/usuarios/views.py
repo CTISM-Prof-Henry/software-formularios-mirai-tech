@@ -271,6 +271,9 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
             usuario = Usuario.objects.get(id=usuario_id)
             if setor in usuario.setores.all():
                 usuario.setores.remove(setor)
+                if not usuario.setores.exists():
+                    usuario.sem_equipe_desde = timezone.now()
+                    usuario.save(update_fields=['sem_equipe_desde'])
                 return Response({'mensagem': 'Membro removido da equipe com sucesso.'})
             return Response({'erro': 'Usuário não pertence a esta unidade.'}, status=status.HTTP_400_BAD_REQUEST)
         except Usuario.DoesNotExist:
@@ -296,6 +299,9 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
                 return Response({'erro': 'Este usuário já faz parte desta unidade.'}, status=status.HTTP_400_BAD_REQUEST)
 
             usuario.setores.add(setor)
+            if usuario.sem_equipe_desde is not None:
+                usuario.sem_equipe_desde = None
+                usuario.save(update_fields=['sem_equipe_desde'])
             return Response({
                 'mensagem': 'Membro adicionado com sucesso!',
                 'usuario': UsuarioSerializer(usuario).data
