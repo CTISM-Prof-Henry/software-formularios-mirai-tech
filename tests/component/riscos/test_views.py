@@ -1,7 +1,14 @@
 import pytest
 from rest_framework import status
 
-from src.riscos.models import HistoricoPlano, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+from src.riscos.models import (
+    HistoricoPlano,
+    Macroprocesso,
+    Monitoramento,
+    ObjetivoPDI,
+    PlanoAcao,
+    Risco,
+)
 
 
 @pytest.fixture

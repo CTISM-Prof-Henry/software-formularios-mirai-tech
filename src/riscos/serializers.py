@@ -3,7 +3,15 @@ from rest_framework.exceptions import ValidationError
 
 from src.usuarios.serializers import UnidadeOrganizacionalSerializer
 
-from .models import DesafioPDI, HistoricoPlano, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+from .models import (
+    DesafioPDI,
+    HistoricoPlano,
+    Macroprocesso,
+    Monitoramento,
+    ObjetivoPDI,
+    PlanoAcao,
+    Risco,
+)
 
 
 class DesafioPDISerializer(serializers.ModelSerializer):
