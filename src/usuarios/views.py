@@ -162,14 +162,14 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny] # Aberto para cadastro
     pagination_class = None
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         if not _usuario_eh_superusuario(request.user):
             return Response(
                 {'erro': 'Apenas administradores podem editar unidades.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
         try:
-            unidade = UnidadeOrganizacional.objects.get(pk=pk)
+            unidade = UnidadeOrganizacional.objects.get(pk=kwargs.get('pk'))
         except UnidadeOrganizacional.DoesNotExist:
             return Response({'erro': 'Unidade não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -447,14 +447,14 @@ class UsuarioViewSet(viewsets.GenericViewSet):
         usuario.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         if not _usuario_eh_superusuario(request.user):
             return Response(
                 {'erro': 'Apenas administradores podem editar usuários.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
         try:
-            usuario = Usuario.objects.get(pk=pk)
+            usuario = Usuario.objects.get(pk=kwargs.get('pk'))
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
