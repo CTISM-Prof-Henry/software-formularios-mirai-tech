@@ -128,7 +128,7 @@ const MapaRisco = () => {
     return 'priority-baixo';
   };
 
-  const formatRiskIdentifier = (uuid) => `R-${String(uuid ?? '').slice(0, 8).toUpperCase()}`;
+  const formatRiskIdentifier = (index) => `#${index + 1}`;
 
   const getRiskLevelInfo = (score) => {
     if (score >= 20) return { label: 'RE', class: 'cell-extremo' };
@@ -393,7 +393,7 @@ const MapaRisco = () => {
 
             <div className="priority-table-body">
               {analytics.riscos_prioritarios.length > 0 ? (
-                analytics.riscos_prioritarios.map((risco) => {
+                analytics.riscos_prioritarios.map((risco, index) => {
                   const suggestedAction = risco.tipo_resposta || 'Plano de Mitigação';
                   const owner =
                     risco.responsavel ||
@@ -404,7 +404,7 @@ const MapaRisco = () => {
                   return (
                     <div key={risco.uuid} className="priority-row">
                       <div className="priority-cell priority-id">
-                        {formatRiskIdentifier(risco.uuid)}
+                        {formatRiskIdentifier(index)}
                       </div>
                       <div className="priority-cell priority-event">
                         <strong>{risco.evento}</strong>
@@ -424,7 +424,7 @@ const MapaRisco = () => {
 
                       <div className="priority-mobile-card">
                         <div className="priority-mobile-top">
-                          <span className="priority-id">{formatRiskIdentifier(risco.uuid)}</span>
+                          <span className="priority-id">{formatRiskIdentifier(index)}</span>
                           <span className={`priority-badge ${getRiskPriorityClass(Number(risco.nivel_residual))}`}>
                             {getRiskPriorityLabel(Number(risco.nivel_residual))}
                           </span>

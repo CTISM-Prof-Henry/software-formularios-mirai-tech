@@ -130,11 +130,10 @@ const Perfil = () => {
     setLoading(true);
     setError('');
 
-    // Prepara payload apenas com campos preenchidos
-    const payload = {
-      email: formData.email,
-      id_setores: formData.id_setores
-    };
+    const payload = { email: formData.email };
+    if (safeUser.is_superuser) {
+      payload.id_setores = formData.id_setores;
+    }
 
     if (formData.senha_atual) {
       payload.senha_atual = formData.senha_atual;
@@ -217,58 +216,56 @@ const Perfil = () => {
                 />
               </div>
 
-              <div className="form-group" ref={dropdownRef}>
-                <label>Departamento/Setor</label>
-                <div 
-                  className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
-                  onClick={toggleDropdown}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <span style={{ 
-                    whiteSpace: 'nowrap', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis',
-                    display: 'block',
-                    width: '100%'
-                  }}>
-                    {getSetoresSelecionadosTexto()}
+              {safeUser.is_superuser ? (
+                <div className="form-group" ref={dropdownRef}>
+                  <label>Departamento/Setor</label>
+                  <div
+                    className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
+                    onClick={toggleDropdown}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', width: '100%' }}>
+                      {getSetoresSelecionadosTexto()}
+                    </span>
+                  </div>
+                  {isDropdownOpen && (
+                    <div className="custom-select-options" style={{ borderTop: '1.5px solid #003470' }}>
+                      <div className="custom-select-search">
+                        <input
+                          type="text"
+                          value={buscaSetor}
+                          onChange={(e) => setBuscaSetor(e.target.value)}
+                          placeholder="Buscar unidade por sigla, nome ou centro"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="custom-select-list">
+                        {setoresFiltrados.map(setor => (
+                          <div
+                            key={setor.id}
+                            className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
+                            onClick={() => toggleSetor(setor.id)}
+                          >
+                            <input type="checkbox" checked={formData.id_setores.includes(setor.id)} readOnly />
+                            <span>{getSetorLabel(setor, { completo: true })}</span>
+                          </div>
+                        ))}
+                        {setoresFiltrados.length === 0 && (
+                          <div className="custom-option-loading">Nenhuma unidade encontrada.</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label>Departamento/Setor</label>
+                  <input type="text" value={getSetoresSelecionadosTexto()} disabled />
+                  <span className="input-caption input-caption-lock">
+                    Para alterar seu departamento, solicite ao administrador do sistema.
                   </span>
                 </div>
-                
-                {isDropdownOpen && (
-                  <div className="custom-select-options" style={{ borderTop: '1.5px solid #003470' }}>
-                    <div className="custom-select-search">
-                      <input
-                        type="text"
-                        value={buscaSetor}
-                        onChange={(e) => setBuscaSetor(e.target.value)}
-                        placeholder="Buscar unidade por sigla, nome ou centro"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-
-                    <div className="custom-select-list">
-                    {setoresFiltrados.map(setor => (
-                      <div 
-                        key={setor.id} 
-                        className={`custom-option ${formData.id_setores.includes(setor.id) ? 'selected' : ''}`}
-                        onClick={() => toggleSetor(setor.id)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.id_setores.includes(setor.id)}
-                          readOnly
-                        />
-                        <span>{getSetorLabel(setor, { completo: safeUser.is_superuser })}</span>
-                      </div>
-                    ))}
-                    {setoresFiltrados.length === 0 && (
-                      <div className="custom-option-loading">Nenhuma unidade encontrada.</div>
-                    )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             <div className="perfil-section-title mt">
