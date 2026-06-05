@@ -350,13 +350,19 @@ const GestaoUsuarios = () => {
                 <div className="modal-setores-lista">
                   {(() => {
                     const termo = buscaSetorEditar.trim().toLowerCase();
-                    const filtrados = termo
+                    const filtrados = (termo
                       ? setoresDisponiveis.filter((s) =>
                           (s.label_curto || s.nome || '').toLowerCase().includes(termo) ||
                           (s.sigla_centro || '').toLowerCase().includes(termo) ||
                           (s.nome_centro || '').toLowerCase().includes(termo),
                         )
-                      : setoresDisponiveis;
+                      : [...setoresDisponiveis]
+                    ).sort((a, b) => {
+                      const aChecked = formEditar.id_setores.includes(a.id);
+                      const bChecked = formEditar.id_setores.includes(b.id);
+                      if (aChecked === bChecked) return 0;
+                      return aChecked ? -1 : 1;
+                    });
                     if (filtrados.length === 0) return <span className="modal-setores-vazio">Nenhuma unidade encontrada.</span>;
                     return filtrados.map((s) => (
                       <label key={s.id} className="modal-setor-item">
