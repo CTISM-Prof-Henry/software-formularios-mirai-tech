@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 
 from .models import CodigoRecuperacao, UnidadeOrganizacional, Usuario
 from .serializers import (
+    AdminEditarUsuarioSerializer,
     AtualizarPerfilSerializer,
     RegistroUsuarioSerializer,
     UnidadeOrganizacionalSerializer,
@@ -160,6 +161,40 @@ class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
     serializer_class = UnidadeOrganizacionalSerializer
     permission_classes = [AllowAny] # Aberto para cadastro
     pagination_class = None
+
+    def partial_update(self, request, pk=None):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem editar unidades.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            unidade = UnidadeOrganizacional.objects.get(pk=pk)
+        except UnidadeOrganizacional.DoesNotExist:
+            return Response({'erro': 'Unidade não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializador = UnidadeOrganizacionalSerializer(unidade, data=request.data, partial=True)
+        serializador.is_valid(raise_exception=True)
+        serializador.save()
+        return Response(serializador.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated], url_path='desativar')
+    def desativar(self, request, pk=None):
+        """Desativa ou reativa uma unidade organizacional."""
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem desativar unidades.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            unidade = UnidadeOrganizacional.objects.get(pk=pk)
+        except UnidadeOrganizacional.DoesNotExist:
+            return Response({'erro': 'Unidade não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        unidade.ativo = not unidade.ativo
+        unidade.save(update_fields=['ativo'])
+        estado = 'reativada' if unidade.ativo else 'desativada'
+        return Response({'mensagem': f'Unidade {estado} com sucesso.', 'ativo': unidade.ativo})
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='admin')
     def listar_admin(self, request):
@@ -411,6 +446,22 @@ class UsuarioViewSet(viewsets.GenericViewSet):
             )
         usuario.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def partial_update(self, request, pk=None):
+        if not _usuario_eh_superusuario(request.user):
+            return Response(
+                {'erro': 'Apenas administradores podem editar usuários.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            usuario = Usuario.objects.get(pk=pk)
+        except Usuario.DoesNotExist:
+            return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializador = AdminEditarUsuarioSerializer(usuario, data=request.data, partial=True)
+        serializador.is_valid(raise_exception=True)
+        serializador.save()
+        return Response({'usuario': UsuarioSerializer(usuario).data})
 
     @action(detail=True, methods=['post'])
     def reativar(self, request, pk=None):

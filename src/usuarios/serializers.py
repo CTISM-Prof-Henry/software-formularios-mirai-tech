@@ -70,6 +70,33 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'siape', 'nome', 'email', 'setores', 'is_superuser', 'ativo', 'cargo']
 
 
+class AdminEditarUsuarioSerializer(serializers.ModelSerializer):
+    """Serializer para o administrador editar dados de outro usuario."""
+    id_setores = serializers.PrimaryKeyRelatedField(
+        queryset=UnidadeOrganizacional.objects.all(),
+        source='setores',
+        many=True,
+        required=False,
+    )
+    cargo = serializers.ChoiceField(
+        choices=[('gestor', 'Gestor'), ('gestor_adm', 'Gestor Administrador')],
+        required=False,
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ['nome', 'email', 'cargo', 'id_setores']
+
+    def update(self, instance, validated_data):
+        setores = validated_data.pop('setores', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if setores is not None:
+            instance.setores.set(setores)
+        instance.save()
+        return instance
+
+
 class AtualizarPerfilSerializer(serializers.ModelSerializer):
     """
     Serializer para atualização do perfil com validação de senha atual.
