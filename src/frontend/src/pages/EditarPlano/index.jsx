@@ -216,12 +216,12 @@ const EditarPlano = () => {
       if (planoAcaoData.id) {
         await api.patch(`/riscos/acoes/${planoAcaoData.id}/`, {
           ...planoAcaoData,
-          risco: id
+          risco: uuid
         });
       } else {
         await api.post('/riscos/acoes/', {
           ...planoAcaoData,
-          risco: id
+          risco: uuid
         });
       }
       showFeedback({
@@ -267,7 +267,7 @@ const EditarPlano = () => {
         <header className="dashboard-header">
           <div className="header-title">
             <div className="title-line"></div>
-            <h1>Editar Plano de Risco #{id}</h1>
+            <h1>Editar Plano de Risco</h1>
           </div>
           <div className="header-actions">
             <ThemeToggle compact />

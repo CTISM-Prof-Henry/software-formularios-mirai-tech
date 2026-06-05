@@ -10,7 +10,7 @@ class TestRiscoSerializer:
         serializer = RiscoSerializer(instance=risco_basico)
         dados = serializer.data
 
-        assert dados["id"] == risco_basico.id
+        assert dados["uuid"] == str(risco_basico.uuid)
         assert dados["nivel_risco"] == risco_basico.nivel_risco
         assert dados["nivel_residual"] == risco_basico.nivel_residual
         assert dados["setor_detalhes"]["label_curto"] == risco_basico.setor.label_curto

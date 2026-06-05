@@ -53,7 +53,7 @@ class TestExportadores:
         response = exportar_risco_excel(risco_basico)
 
         assert response.status_code == 200
-        assert f'filename="plano-risco-{risco_basico.id}.xlsx"' in response["Content-Disposition"]
+        assert f'filename="plano-risco-{risco_basico.uuid}.xlsx"' in response["Content-Disposition"]
 
         workbook = load_workbook(filename=BytesIO(response.content))
         planilha = workbook.active

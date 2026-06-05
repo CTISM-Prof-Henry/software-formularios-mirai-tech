@@ -328,12 +328,12 @@ class RiscoViewSet(viewsets.ModelViewSet):
         return exportar_riscos_excel(self.get_queryset())
 
     @action(detail=True, methods=['get'], url_path='exportar-excel')
-    def exportar_excel_individual(self, request, pk=None):
+    def exportar_excel_individual(self, request, uuid=None):
         """Exporta um plano de risco em Excel."""
         return exportar_risco_excel(self.get_object())
 
     @action(detail=True, methods=['get'], url_path='exportar-pdf')
-    def exportar_pdf(self, request, pk=None):
+    def exportar_pdf(self, request, uuid=None):
         """Exporta um plano de risco em PDF."""
         return exportar_risco_pdf(self.get_object())
 

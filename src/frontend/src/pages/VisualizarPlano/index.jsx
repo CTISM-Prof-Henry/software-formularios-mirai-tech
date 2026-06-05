@@ -81,10 +81,10 @@ const VisualizarPlano = () => {
     setExporting(tipo);
     try {
       const extension = tipo === 'pdf' ? 'pdf' : 'xlsx';
-      const response = await api.get(`/riscos/planos/${id}/exportar-${tipo}/`, {
+      const response = await api.get(`/riscos/planos/${uuid}/exportar-${tipo}/`, {
         responseType: 'blob',
       });
-      downloadBlob(response.data, `plano-risco-${id}.${extension}`);
+      downloadBlob(response.data, `plano-risco-${uuid}.${extension}`);
       showFeedback({
         type: 'success',
         title: 'Arquivo gerado',

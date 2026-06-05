@@ -80,4 +80,4 @@ class TestGerencialFluxo:
         assert mapa_response.data["resumo_niveis"]["extremo"] == 1
         assert mapa_response.data["status_tratamentos"]["em_andamento"] == 1
         assert len(mapa_response.data["matriz_residual"]) == 25
-        assert mapa_response.data["riscos_prioritarios"][0]["id"] == risco_critico.id
+        assert mapa_response.data["riscos_prioritarios"][0]["uuid"] == str(risco_critico.uuid)
