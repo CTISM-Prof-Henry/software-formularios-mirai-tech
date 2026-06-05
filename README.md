@@ -104,11 +104,8 @@ docker compose up -d
 ### 7. Aplicar migrations
 
 ```bash
-python manage.py migrate
-```
-
-```bash
 python manage.py makemigrations
+python manage.py migrate
 ```
 
 ### 8. Popular dados de apresentação (opcional)

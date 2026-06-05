@@ -142,6 +142,8 @@ Os testes unitarios validam comportamentos isolados de classes, metodos e regras
 - rejeicao de categoria invalida
 - rejeicao de campo obrigatorio ausente
 - rejeicao de probabilidade ou impacto fora do intervalo 1-5
+- `TestPlanoAcaoSerializerUUID`: criacao de PlanoAcao com UUID do risco no campo `risco`; rejeicao de UUID invalido
+- `TestMonitoramentoSerializerUUID`: criacao de Monitoramento com UUID do risco no campo `risco`; rejeicao de UUID invalido
 
 #### `tests/unit/riscos/test_exporters.py`
 
@@ -201,8 +203,9 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 - verificacao da permissao `PertenceAoSetorDoRisco`
 - paginacao da listagem de planos
 - filtros por setor
-- busca textual
+- busca textual expandida (evento, causa, consequencia, macroprocesso, objetivo, responsavel)
 - ordenacao estavel de objetivos e macroprocessos
+- ordenacao por nivel de risco e prazo
 - exportacao para Excel
 - exportacao para PDF
 - dados consolidados da dashboard com filtros por setor e periodo
@@ -210,6 +213,14 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 - soft delete: DELETE retorna 204 e mantém registro com ativo=False
 - soft delete: risco desativado retorna 404 para gestores
 - superusuario ve riscos desativados com `?incluir_inativos=true`
+- `TestRiscoSerializerCamposComputados`: campos `nivel_risco` e `nivel_residual` calculados e expostos no serializer
+- `TestPlanoAcaoAutoProgresso`: campo `progresso` atualizado automaticamente conforme o `status` da acao
+- `TestDuplicarRisco`: endpoint `POST /{uuid}/duplicar/` cria copia do risco com planos de acao; retorna UUID distinto do original
+- `TestHistoricoPlano`: endpoint `GET /{uuid}/historico/` retorna entradas em ordem decrescente; registra historico na criacao e edicao do plano
+- `TestMonitoramentoViewSet`: criacao e listagem de monitoramentos com filtro por UUID do risco; campo `risco` aceita UUID
+- `TestPlanoAcaoFiltroUUID`: filtro `?risco=<uuid>` retorna apenas acoes do risco informado; UUID invalido retorna lista vazia
+- `TestBuscaExpandidaEOrdenacao`: busca por macroprocesso, objetivo e responsavel; ordenacao por `nivel_asc`, `nivel_desc`, `prazo_asc` e `prazo_desc`
+- `TestExportarRelatorioGerencial`: endpoint `GET /exportar-relatorio/` retorna PDF com Content-Type correto
 
 ## Testes de integracao
 
@@ -227,7 +238,6 @@ Hoje a pasta de integracao ja possui arquivos reais:
 - `tests/integration/test_mapa_fluxo_risco.py`
 - `tests/integration/test_exportacoes_fluxo.py`
 - `tests/integration/test_recuperacao_senha_fluxo.py`
-- `tests/integration/test_gerencial_fluxo.py`
 
 ### O que estes testes cobrem
 
@@ -235,7 +245,6 @@ Hoje a pasta de integracao ja possui arquivos reais:
 - criacao de risco e reflexo no mapa de riscos
 - exportacao de plano individual em PDF e Excel
 - fluxo completo de recuperacao de senha
-- fluxo gerencial cruzando dashboard e mapa de riscos com filtros por setor e periodo
 
 ### Relacao com os testes de componente
 
@@ -244,8 +253,6 @@ Mesmo com a nova pasta de integracao, parte dos testes de componente ainda cobre
 - `tests/component/usuarios/test_views.py`
 - `tests/component/usuarios/test_importar_unidades_ufsm.py`
 - `tests/component/usuarios/test_normalizar_setores_legados.py`
-- `tests/component/usuarios/test_seed_base_demo.py`
-- `tests/component/usuarios/test_seed_usuarios_teste.py`
 - `tests/component/riscos/test_views.py`
 
 ## Como executar os testes

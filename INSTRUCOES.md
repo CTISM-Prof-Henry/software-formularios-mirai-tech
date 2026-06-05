@@ -65,8 +65,8 @@ docker compose up -d
 ## 5. Preparar o Django
 
 ```bash
-python manage.py migrate
 python manage.py makemigrations
+python manage.py migrate
 ```
 
 Opcionalmente, popule o sistema com dados realistas prontos para demonstração:
@@ -138,9 +138,12 @@ http://localhost:5173/
 ### Gestão de riscos
 
 - **Desafios, objetivos e macroprocessos**: `/api/riscos/desafios/`, `/api/riscos/objetivos/`, `/api/riscos/macroprocessos/`
-- **Planos de risco**: `/api/riscos/planos/`
-- **Ações de tratamento**: `/api/riscos/acoes/`
-- **Monitoramento**: `/api/riscos/monitoramentos/`
+- **Planos de risco**: `/api/riscos/planos/` — rotas de detalhe usam `{uuid}` (ex: `/api/riscos/planos/{uuid}/`)
+- **Duplicar plano**: `POST /api/riscos/planos/{uuid}/duplicar/`
+- **Histórico de alterações**: `GET /api/riscos/planos/{uuid}/historico/`
+- **Relatório gerencial**: `GET /api/riscos/planos/exportar-relatorio/`
+- **Ações de tratamento**: `/api/riscos/acoes/` — aceita filtro `?risco=<uuid>`
+- **Monitoramento**: `/api/riscos/monitoramentos/` — aceita filtro `?risco=<uuid>`
 
 ## 9. Validação
 
