@@ -49,8 +49,6 @@ Arquivos atualmente presentes:
 
 - `tests/component/usuarios/test_importar_unidades_ufsm.py`
 - `tests/component/usuarios/test_normalizar_setores_legados.py`
-- `tests/component/usuarios/test_seed_base_demo.py`
-- `tests/component/usuarios/test_seed_usuarios_teste.py`
 - `tests/component/usuarios/test_views.py`
 - `tests/component/riscos/test_views.py`
 
@@ -160,8 +158,6 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 
 - `tests/component/usuarios/test_importar_unidades_ufsm.py`
 - `tests/component/usuarios/test_normalizar_setores_legados.py`
-- `tests/component/usuarios/test_seed_base_demo.py`
-- `tests/component/usuarios/test_seed_usuarios_teste.py`
 - `tests/component/usuarios/test_views.py`
 - `tests/component/riscos/test_views.py`
 
@@ -180,21 +176,6 @@ Nesta documentacao, estamos tratando como **testes de componente** aqueles que v
 - localizacao da unidade oficial equivalente para um setor legado
 - remapeamento de vinculos antigos de usuario para unidade oficial
 - remapeamento de riscos antigos para unidades oficiais equivalentes
-
-#### `tests/component/usuarios/test_seed_base_demo.py`
-
-- execucao do comando `seed_base_demo`
-- criacao de usuarios comuns adicionais para demonstracao
-- criacao de riscos, planos de acao e monitoramentos de exemplo
-- idempotencia da base demo
-- garantia de que o seed nao cria novos superusuarios
-
-#### `tests/component/usuarios/test_seed_usuarios_teste.py`
-
-- execucao do comando `seed_usuarios_teste`
-- criacao de usuarios em multiplos setores
-- idempotencia do comando
-- atualizacao de senha com `--reset-password`
 
 #### `tests/component/usuarios/test_views.py`
 

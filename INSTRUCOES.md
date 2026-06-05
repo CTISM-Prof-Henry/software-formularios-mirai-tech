@@ -69,45 +69,26 @@ python manage.py migrate
 python manage.py makemigrations
 ```
 
-Opcionalmente, crie usuários de teste para validar a gestão de equipes:
+Opcionalmente, popule o sistema com dados realistas prontos para demonstração:
 
 ```bash
-python manage.py seed_usuarios_teste
+python manage.py seed_apresentacao
 ```
 
-Para redefinir a senha dos usuários de teste:
+Esse comando limpa o banco e cria 1 administrador, 9 gestores e 6 planos de risco cobrindo todas as categorias e níveis de risco.
 
-```bash
-python manage.py seed_usuarios_teste --reset-password
-```
-
-Senha padrão dos usuários criados:
+Acesso do administrador:
 
 ```text
-Teste@12345
+SIAPE: 202512603
+Senha: 12345678
 ```
 
-Usuários criados:
+Senha padrão dos gestores:
 
-- `2030001` - Ana Paula Multissetorial (`CT - Departamento de Computação Aplicada`, `PM - Departamento de Administração - PM`, `CTISM - Núcleo Pedagógico do CTISM`)
-- `2030002` - Bruno Gestor Centros (`CT - Departamento de Engenharia Mecânica`, `PM - Departamento de Ciências Econômicas - PM`)
-- `2030003` - Carla Gestora Pesquisa (`CT - Departamento de Eletrônica e Computação`, `PM - Departamento de Ciências da Saúde - PM`, `CT - Departamento de Engenharia Sanitária e Ambiental`)
-- `2030004` - Diego Gestor Ensino (`CT - Departamento de Engenharia de Produção e Sistemas`, `PM - Departamento de Alimentos e Nutrição - PM`)
-- `2030005` - Elisa Gestora Tecnologia (`CT - Departamento de Linguagens e Sistemas de Computação`, `CT - Departamento de Transportes`, `PM - Departamento de Zootecnia e Ciências Biológicas - PM`)
-
-Se quiser popular o sistema com uma base mais completa para demonstração, incluindo
-mais usuários comuns, planos de risco, ações de tratamento e alguns monitoramentos:
-
-```bash
-python manage.py seed_base_demo
+```text
+Sigr@2025
 ```
-
-Esse comando:
-
-- reutiliza/importa as unidades oficiais da UFSM;
-- cria apenas usuários comuns de demonstração;
-- não cria novos superusuários;
-- popula riscos e planos de ação adicionais para dashboard, mapa de riscos e exportações.
 
 Se necessário, também é possível criar um superusuário:
 

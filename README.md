@@ -111,22 +111,25 @@ python manage.py migrate
 python manage.py makemigrations
 ```
 
-### 8. Criar usuários de teste para gestão de equipes (opcional)
+### 8. Popular dados de apresentação (opcional)
 
 ```bash
-python manage.py seed_usuarios_teste
+python manage.py seed_apresentacao
 ```
 
-Para redefinir a senha padrão dos usuários de teste:
+Limpa o banco e cria 1 administrador, 9 gestores e 6 planos de risco cobrindo todas as categorias e níveis de risco.
 
-```bash
-python manage.py seed_usuarios_teste --reset-password
-```
-
-Senha padrão:
+Acesso do administrador:
 
 ```text
-Teste@12345
+SIAPE: 202512603
+Senha: 12345678
+```
+
+Senha padrão dos gestores:
+
+```text
+Sigr@2025
 ```
 
 ### 9. Instalar dependências do frontend

@@ -298,10 +298,10 @@ O projeto possui seeds por migration para dados estruturais:
 Também existe comando de apoio para ambiente local:
 
 ```bash
-python manage.py seed_usuarios_teste
+python manage.py seed_apresentacao
 ```
 
-Ele cria usuários de teste vinculados a múltiplos setores para validar a gestão de equipes.
+Limpa o banco e popula dados realistas (1 admin, 9 gestores, 6 planos de risco) prontos para demonstração.
 
 ## Testes automatizados
 

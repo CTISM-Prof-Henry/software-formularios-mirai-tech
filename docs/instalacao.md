@@ -88,24 +88,27 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-## 7. Usuários de teste opcionais
+## 7. Popular dados de apresentação (opcional)
 
-Para popular usuários vinculados a múltiplos setores:
-
-```bash
-python manage.py seed_usuarios_teste
-```
-
-Para redefinir a senha desses usuários:
+Para limpar o banco e inserir dados realistas prontos para demonstração:
 
 ```bash
-python manage.py seed_usuarios_teste --reset-password
+python manage.py seed_apresentacao
 ```
 
-Senha padrão:
+Isso cria 1 administrador, 9 gestores e 6 planos de risco cobrindo todas as categorias e níveis de risco.
+
+Acesso do administrador:
 
 ```text
-Teste@12345
+SIAPE: 202512603
+Senha: 12345678
+```
+
+Senha padrão dos gestores:
+
+```text
+Sigr@2025
 ```
 
 ## 8. Frontend
