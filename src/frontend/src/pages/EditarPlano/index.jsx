@@ -57,6 +57,7 @@ const EditarPlano = () => {
     data_inicio: new Date().toISOString().split('T')[0],
     data_fim: '',
     status: 'Não iniciada',
+    progresso: 0,
     observacoes: ''
   });
 
@@ -108,6 +109,7 @@ const EditarPlano = () => {
               data_inicio: acao.data_inicio,
               data_fim: acao.data_fim,
               status: acao.status,
+              progresso: acao.progresso ?? 0,
               observacoes: acao.observacoes || ''
             });
           }
@@ -137,7 +139,11 @@ const EditarPlano = () => {
 
   const handlePlanoAcaoChange = (e) => {
     const { name, value } = e.target;
-    setPlanoAcaoData(prev => ({ ...prev, [name]: value }));
+    setPlanoAcaoData(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'status' && value === 'Concluída') next.progresso = 100;
+      return next;
+    });
   };
 
   const getRiskColorClass = (nivel) => {
@@ -538,6 +544,31 @@ const EditarPlano = () => {
                   <div className="form-group">
                     <label>Data Fim (Previsão): <span className="required">*</span></label>
                     <input type="date" name="data_fim" value={planoAcaoData.data_fim} onChange={handlePlanoAcaoChange} />
+                  </div>
+                </div>
+
+                <div className="input-row">
+                  <div className="form-group">
+                    <label>Status: <span className="required">*</span></label>
+                    <select name="status" value={planoAcaoData.status} onChange={handlePlanoAcaoChange}>
+                      <option value="Não iniciada">Não iniciada</option>
+                      <option value="Em andamento">Em andamento</option>
+                      <option value="Concluída">Concluída</option>
+                      <option value="Atrasada">Atrasada</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Progresso: {planoAcaoData.progresso}%</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      name="progresso"
+                      value={planoAcaoData.progresso}
+                      onChange={handlePlanoAcaoChange}
+                      disabled={planoAcaoData.status === 'Concluída'}
+                    />
                   </div>
                 </div>
 
