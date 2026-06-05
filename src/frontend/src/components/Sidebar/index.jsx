@@ -52,6 +52,15 @@ const Sidebar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const semEquipe = !safeUser.is_superuser && Array.isArray(safeUser.setores) && safeUser.setores.length === 0;
+
+  const diasRestantes = () => {
+    if (!safeUser.sem_equipe_desde) return 7;
+    const desde = new Date(safeUser.sem_equipe_desde);
+    const passados = Math.floor((Date.now() - desde.getTime()) / 86400000);
+    return Math.max(0, 7 - passados);
+  };
+
   const navItems = [
     {
       label: 'Dashboard',
@@ -103,7 +112,7 @@ const Sidebar = () => {
       ),
     },
     {
-      label: 'Gestao de Equipe',
+      label: 'Minha Equipe',
       path: '/equipe',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -173,6 +182,23 @@ const Sidebar = () => {
         className={`sidebar-overlay ${isMobileMenuOpen ? 'visible' : ''}`}
         onClick={() => setIsMobileMenuOpen(false)}
       ></div>
+
+      {semEquipe && (
+        <div className="sem-equipe-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>
+            Você está sem departamento.{' '}
+            <strong>Solicite sua realocação ao administrador.</strong>{' '}
+            {diasRestantes() > 0
+              ? `Seu acesso será bloqueado em ${diasRestantes()} dia${diasRestantes() !== 1 ? 's' : ''}.`
+              : 'Seu acesso será bloqueado em breve.'}
+          </span>
+        </div>
+      )}
 
       <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">

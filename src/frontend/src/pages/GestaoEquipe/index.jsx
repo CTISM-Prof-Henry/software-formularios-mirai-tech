@@ -121,7 +121,7 @@ const GestaoEquipe = () => {
         <Sidebar />
         <main className="dashboard-main">
           <div className="feedback-panel">
-            <strong>Carregando gestao de equipe</strong>
+            <strong>Carregando minha equipe</strong>
             <span>Estamos preparando as unidades e os membros vinculados.</span>
           </div>
         </main>
@@ -137,7 +137,7 @@ const GestaoEquipe = () => {
         <header className="dashboard-header">
           <div className="header-title">
             <div className="title-line"></div>
-            <h1>Gestão de Equipe</h1>
+            <h1>Minha Equipe</h1>
           </div>
 
           <div className="header-actions">
