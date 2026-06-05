@@ -128,7 +128,7 @@ const MapaRisco = () => {
     return 'priority-baixo';
   };
 
-  const formatRiskIdentifier = (id) => `R-${String(id).padStart(4, '0')}`;
+  const formatRiskIdentifier = (uuid) => `R-${String(uuid ?? '').slice(0, 8).toUpperCase()}`;
 
   const getRiskLevelInfo = (score) => {
     if (score >= 20) return { label: 'RE', class: 'cell-extremo' };
@@ -402,9 +402,9 @@ const MapaRisco = () => {
                     'Não definido';
 
                   return (
-                    <div key={risco.id} className="priority-row">
+                    <div key={risco.uuid} className="priority-row">
                       <div className="priority-cell priority-id">
-                        {formatRiskIdentifier(risco.id)}
+                        {formatRiskIdentifier(risco.uuid)}
                       </div>
                       <div className="priority-cell priority-event">
                         <strong>{risco.evento}</strong>
@@ -424,7 +424,7 @@ const MapaRisco = () => {
 
                       <div className="priority-mobile-card">
                         <div className="priority-mobile-top">
-                          <span className="priority-id">{formatRiskIdentifier(risco.id)}</span>
+                          <span className="priority-id">{formatRiskIdentifier(risco.uuid)}</span>
                           <span className={`priority-badge ${getRiskPriorityClass(Number(risco.nivel_residual))}`}>
                             {getRiskPriorityLabel(Number(risco.nivel_residual))}
                           </span>
