@@ -296,9 +296,10 @@ const EditarPlano = () => {
 
           {etapa === 1 && (
             <div className="step-content">
+              <p className="form-legend"><span className="required">*</span> Campos obrigatórios</p>
               <div className="input-row">
                 <div className="form-group">
-                  <label>Unidade/Departamento:</label>
+                  <label>Unidade/Departamento: <span className="required">*</span></label>
                   <select name="setor" value={riscoData.setor} onChange={handleRiscoChange}>
                     {safeUser.setores?.map(s => (
                       <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
@@ -306,7 +307,7 @@ const EditarPlano = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Categoria:</label>
+                  <label>Categoria: <span className="required">*</span></label>
                   <select name="categoria" value={riscoData.categoria} onChange={handleRiscoChange}>
                     <option value="Operacional">Operacional</option>
                     <option value="Estratégico">Estratégico</option>
@@ -318,7 +319,7 @@ const EditarPlano = () => {
               </div>
 
               <div className="form-group">
-                <label>Desafio Estratégico:</label>
+                <label>Desafio Estratégico: <span className="required">*</span></label>
                 <select name="desafio" value={desafioSelecionado} onChange={handleRiscoChange}>
                   <option value="">Selecione um desafio...</option>
                   {desafios.map(desafio => (
@@ -330,7 +331,7 @@ const EditarPlano = () => {
               </div>
 
               <div className="form-group">
-                <label>Objetivo Estratégico (PDI):</label>
+                <label>Objetivo Estratégico (PDI): <span className="required">*</span></label>
                 <select
                   name="objetivo"
                   value={riscoData.objetivo}
@@ -347,7 +348,7 @@ const EditarPlano = () => {
               </div>
 
               <div className="form-group">
-                <label>Macroprocesso:</label>
+                <label>Macroprocesso: <span className="required">*</span></label>
                 <select name="macroprocesso" value={riscoData.macroprocesso} onChange={handleRiscoChange}>
                   <option value="">Selecione um processo...</option>
                   {macroprocessos.map(m => (
@@ -357,17 +358,17 @@ const EditarPlano = () => {
               </div>
 
               <div className="form-group">
-                <label>Evento de Risco (O que pode acontecer?):</label>
+                <label>Evento de Risco (O que pode acontecer?): <span className="required">*</span></label>
                 <textarea name="evento" value={riscoData.evento} onChange={handleRiscoChange} placeholder="Descreva o evento..."></textarea>
               </div>
 
               <div className="input-row">
                 <div className="form-group">
-                  <label>Causa:</label>
+                  <label>Causa: <span className="required">*</span></label>
                   <textarea name="causa" value={riscoData.causa} onChange={handleRiscoChange} placeholder="Por que pode acontecer?"></textarea>
                 </div>
                 <div className="form-group">
-                  <label>Consequência:</label>
+                  <label>Consequência: <span className="required">*</span></label>
                   <textarea name="consequencia" value={riscoData.consequencia} onChange={handleRiscoChange} placeholder="Impacto do evento..."></textarea>
                 </div>
               </div>
@@ -442,7 +443,7 @@ const EditarPlano = () => {
 
               <div className="controls-section">
                 <div className="form-group">
-                  <label>CONTROLES ATUAIS:</label>
+                  <label>CONTROLES ATUAIS: <span className="required">*</span></label>
                   <textarea 
                     name="controles_atuais" 
                     value={riscoData.controles_atuais} 
@@ -494,12 +495,13 @@ const EditarPlano = () => {
           {etapa === 3 && (
             <div className="step-content">
               <h3>Plano de Ação</h3>
+              <p className="form-legend"><span className="required">*</span> Campos obrigatórios</p>
               <p className="step-desc">Defina as ações de mitigação para o risco identificado.</p>
 
               <form onSubmit={handleSubmitFinal}>
                 <div className="input-row">
                   <div className="form-group">
-                    <label>Tipo de Resposta:</label>
+                    <label>Tipo de Resposta: <span className="required">*</span></label>
                     <select name="tipo_resposta" value={planoAcaoData.tipo_resposta} onChange={handlePlanoAcaoChange}>
                       <option value="Mitigar">Mitigar</option>
                       <option value="Evitar">Evitar</option>
@@ -508,13 +510,13 @@ const EditarPlano = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Responsável:</label>
+                    <label>Responsável: <span className="required">*</span></label>
                     <input type="text" name="responsavel" value={planoAcaoData.responsavel} onChange={handlePlanoAcaoChange} />
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Descrição da Ação:</label>
+                  <label>Descrição da Ação: <span className="required">*</span></label>
                   <textarea name="descricao_acao" value={planoAcaoData.descricao_acao} onChange={handlePlanoAcaoChange}></textarea>
                 </div>
 
@@ -530,11 +532,11 @@ const EditarPlano = () => {
 
                 <div className="input-row">
                   <div className="form-group">
-                    <label>Data Início:</label>
+                    <label>Data Início: <span className="required">*</span></label>
                     <input type="date" name="data_inicio" value={planoAcaoData.data_inicio} onChange={handlePlanoAcaoChange} />
                   </div>
                   <div className="form-group">
-                    <label>Data Fim (Previsão):</label>
+                    <label>Data Fim (Previsão): <span className="required">*</span></label>
                     <input type="date" name="data_fim" value={planoAcaoData.data_fim} onChange={handlePlanoAcaoChange} />
                   </div>
                 </div>

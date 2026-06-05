@@ -1,3 +1,15 @@
+.required {
+  color: #e53e3e;
+  margin-left: 3px;
+  font-weight: 700;
+}
+
+.form-legend {
+  font-size: 0.8rem;
+  color: #62748a;
+  margin-bottom: 16px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
