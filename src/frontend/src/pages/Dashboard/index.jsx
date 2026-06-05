@@ -214,6 +214,8 @@ const AdminDashboard = () => {
   );
 };
 
+const PAGE_SIZE = 5;
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -234,9 +236,11 @@ const Dashboard = () => {
   const [filterDataInicio, setFilterDataInicio] = useState('');
   const [filterDataFim, setFilterDataFim] = useState('');
   const [loading, setLoading] = useState(true);
+  const [paginaAtual, setPaginaAtual] = useState(1);
   const { showFeedback } = useFeedback();
 
   useEffect(() => {
+    setPaginaAtual(1);
     carregarDashboard();
   }, [buscaAplicada, filterSetor, filterDataInicio, filterDataFim]);
 
@@ -280,7 +284,11 @@ const Dashboard = () => {
     setFilterSetor('');
     setFilterDataInicio('');
     setFilterDataFim('');
+    setPaginaAtual(1);
   }
+
+  const totalPaginas = Math.max(1, Math.ceil(planos.length / PAGE_SIZE));
+  const planosPaginados = planos.slice((paginaAtual - 1) * PAGE_SIZE, paginaAtual * PAGE_SIZE);
 
   const getRiskColorClass = (nivel) => {
     if (nivel >= 20) return 'risk-extremo';
@@ -419,14 +427,19 @@ const Dashboard = () => {
           </form>
         </section>
 
-        <h2 className="content-title">Planos cadastrados</h2>
+        <div className="content-title-row">
+          <h2 className="content-title">Planos cadastrados</h2>
+          {!loading && planos.length > 0 && (
+            <span className="plans-count">{planos.length} plano{planos.length !== 1 ? 's' : ''}</span>
+          )}
+        </div>
 
         <section className="plans-container">
           <div className="plans-list">
             {loading ? (
               <div className="dashboard-empty-state">Carregando planos...</div>
             ) : planos.length > 0 ? (
-              planos.map((plano) => (
+              planosPaginados.map((plano) => (
                 <button key={plano.id} className="plan-item" onClick={() => navigate(`/planos/${plano.id}`)}>
                   <div className="plan-info">
                     <div className="plan-icon-box">
@@ -461,6 +474,30 @@ const Dashboard = () => {
               <div className="dashboard-empty-state">Nenhum plano encontrado para os filtros selecionados.</div>
             )}
           </div>
+
+          {!loading && totalPaginas > 1 && (
+            <div className="dashboard-pagination">
+              <button
+                type="button"
+                className="dash-page-btn"
+                onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+                disabled={paginaAtual === 1}
+              >
+                ← Anterior
+              </button>
+              <span className="dash-page-info">
+                Página {paginaAtual} de {totalPaginas}
+              </span>
+              <button
+                type="button"
+                className="dash-page-btn"
+                onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+                disabled={paginaAtual === totalPaginas}
+              >
+                Próxima →
+              </button>
+            </div>
+          )}
         </section>
       </main>
     </div>

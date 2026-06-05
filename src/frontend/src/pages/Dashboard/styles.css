@@ -547,6 +547,74 @@
   }
 }
 
+.content-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.plans-count {
+  font-size: 0.82rem;
+  color: #62748a;
+  font-weight: 600;
+}
+
+.dashboard-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 0 4px;
+}
+
+.dash-page-btn {
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #003470;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dash-page-btn:hover:not(:disabled) {
+  background: #eef4ff;
+  border-color: #003470;
+}
+
+.dash-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dash-page-info {
+  font-size: 0.85rem;
+  color: #52667d;
+  min-width: 110px;
+  text-align: center;
+}
+
+[data-theme="dark"] .dash-page-btn {
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .dash-page-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+[data-theme="dark"] .dash-page-info {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .plans-count {
+  color: var(--text-secondary);
+}
+
 [data-theme="dark"] .admin-atalho-card {
   background: var(--surface-card);
   border-color: var(--border-soft);
