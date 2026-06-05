@@ -38,9 +38,9 @@ function App() {
               {/* Rotas autenticadas */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/planos" element={<ProtectedRoute><PlanosRisco /></ProtectedRoute>} />
-              <Route path="/planos/:id" element={<ProtectedRoute><VisualizarPlano /></ProtectedRoute>} />
+              <Route path="/planos/:uuid" element={<ProtectedRoute><VisualizarPlano /></ProtectedRoute>} />
               <Route path="/novo-plano" element={<ProtectedRoute><NovoPlano /></ProtectedRoute>} />
-              <Route path="/editar-plano/:id" element={<ProtectedRoute><EditarPlano /></ProtectedRoute>} />
+              <Route path="/editar-plano/:uuid" element={<ProtectedRoute><EditarPlano /></ProtectedRoute>} />
               <Route path="/mapa" element={<ProtectedRoute><MapaRisco /></ProtectedRoute>} />
               <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
               <Route path="/equipe" element={<ProtectedRoute><GestaoEquipe /></ProtectedRoute>} />

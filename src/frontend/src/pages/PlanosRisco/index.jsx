@@ -345,7 +345,7 @@ const PlanosRisco = () => {
                 <tbody>
                   {planos.map((plano, index) => (
                     <tr key={plano.id}>
-                      <td>#{plano.id}</td>
+                      <td>#{(currentPage - 1) * pageSize + index + 1}</td>
                       <td className="col-evento" title={plano.evento}>{plano.evento}</td>
                       <td>{getSetorLabel(plano.setor_detalhes)}</td>
                       <td>{plano.categoria}</td>
@@ -355,7 +355,7 @@ const PlanosRisco = () => {
                         </span>
                       </td>
                       <td className="col-acoes">
-                        <button className="btn-action view" title="Visualizar" onClick={() => navigate(`/planos/${plano.id}`)}>
+                        <button className="btn-action view" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
@@ -375,9 +375,9 @@ const PlanosRisco = () => {
                             </button>
                             <div className={`edit-dropdown-content ${openDropdownId === plano.id ? 'show' : ''} ${index >= planos.length - 2 ? 'up' : ''}`}>
                               <div className="dropdown-title">Editar Seção:</div>
-                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=1`)}>1. Identificação</button>
-                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=2`)}>2. Avaliação</button>
-                              <button onClick={() => navigate(`/editar-plano/${plano.id}?step=3`)}>3. Tratamento</button>
+                              <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
+                              <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
+                              <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
                             </div>
                           </div>
                         )}
@@ -389,10 +389,10 @@ const PlanosRisco = () => {
               </div>
 
               <div className="plans-mobile-list">
-                {planos.map((plano) => (
+                {planos.map((plano, index) => (
                   <article key={`mobile-${plano.id}`} className="plan-mobile-card">
                     <div className="plan-mobile-top">
-                      <span className="plan-mobile-id">#{plano.id}</span>
+                      <span className="plan-mobile-id">#{(currentPage - 1) * pageSize + index + 1}</span>
                       <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>
                         {getRiskLabel(plano.nivel_residual)}
                       </span>
@@ -407,7 +407,7 @@ const PlanosRisco = () => {
                     </div>
 
                     <div className="plan-mobile-actions">
-                      <button className="btn-action view mobile-action-button" title="Visualizar" onClick={() => navigate(`/planos/${plano.id}`)}>
+                      <button className="btn-action view mobile-action-button" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                           <circle cx="12" cy="12" r="3"></circle>
@@ -430,9 +430,9 @@ const PlanosRisco = () => {
                           </button>
                           <div className={`edit-dropdown-content ${openDropdownId === `mobile-${plano.id}` ? 'show' : ''}`}>
                             <div className="dropdown-title">Editar Seção:</div>
-                            <button onClick={() => navigate(`/editar-plano/${plano.id}?step=1`)}>1. Identificação</button>
-                            <button onClick={() => navigate(`/editar-plano/${plano.id}?step=2`)}>2. Avaliação</button>
-                            <button onClick={() => navigate(`/editar-plano/${plano.id}?step=3`)}>3. Tratamento</button>
+                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
+                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
+                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
                           </div>
                         </div>
                       )}

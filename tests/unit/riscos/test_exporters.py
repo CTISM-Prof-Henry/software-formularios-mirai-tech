@@ -69,5 +69,5 @@ class TestExportadores:
 
         assert response.status_code == 200
         assert response["Content-Type"] == "application/pdf"
-        assert f'filename="plano-risco-{risco_com_plano.id}.pdf"' in response["Content-Disposition"]
+        assert f'filename="plano-risco-{risco_com_plano.uuid}.pdf"' in response["Content-Disposition"]
         assert response.content.startswith(b"%PDF")

@@ -440,7 +440,7 @@ const Dashboard = () => {
               <div className="dashboard-empty-state">Carregando planos...</div>
             ) : planos.length > 0 ? (
               planosPaginados.map((plano) => (
-                <button key={plano.id} className="plan-item" onClick={() => navigate(`/planos/${plano.id}`)}>
+                <button key={plano.id} className="plan-item" onClick={() => navigate(`/planos/${plano.uuid}`)}>
                   <div className="plan-info">
                     <div className="plan-icon-box">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -452,7 +452,7 @@ const Dashboard = () => {
                     <div className="plan-details">
                       <h3>{plano.evento}</h3>
                       <p className="plan-meta">
-                        Unidade: {getSetorLabel(plano.setor_detalhes) || 'Não informado'} • ID: #{plano.id}
+                        Unidade: {getSetorLabel(plano.setor_detalhes) || 'Não informado'}
                       </p>
                       <p className="plan-date">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

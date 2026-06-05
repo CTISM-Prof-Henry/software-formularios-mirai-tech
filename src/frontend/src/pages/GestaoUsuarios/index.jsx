@@ -112,8 +112,8 @@ const GestaoUsuarios = () => {
     setSalvandoEditar(true);
     setErroEditar('');
     try {
-      const res = await api.patch(`/usuarios/gestores/${usuarioEditando.id}/`, formEditar);
-      setUsuarios((prev) => prev.map((u) => (u.id === usuarioEditando.id ? res.data.usuario : u)));
+      const res = await api.patch(`/usuarios/gestores/${usuarioEditando.uuid}/`, formEditar);
+      setUsuarios((prev) => prev.map((u) => (u.uuid === usuarioEditando.uuid ? res.data.usuario : u)));
       showFeedback({ type: 'success', title: 'Usuário atualizado', message: `${formEditar.nome} foi atualizado com sucesso.` });
       setModalEditarAberto(false);
     } catch (err) {
@@ -165,14 +165,14 @@ const GestaoUsuarios = () => {
     const acao = usuario.ativo ? 'desativar' : 'reativar';
     try {
       if (usuario.ativo) {
-        await api.delete(`/usuarios/gestores/${usuario.id}/`);
+        await api.delete(`/usuarios/gestores/${usuario.uuid}/`);
         showFeedback({ type: 'success', title: 'Usuário desativado', message: `${usuario.nome} foi desativado.` });
       } else {
-        await api.post(`/usuarios/gestores/${usuario.id}/reativar/`);
+        await api.post(`/usuarios/gestores/${usuario.uuid}/reativar/`);
         showFeedback({ type: 'success', title: 'Usuário reativado', message: `${usuario.nome} foi reativado.` });
       }
       setUsuarios((prev) =>
-        prev.map((u) => (u.id === usuario.id ? { ...u, ativo: !u.ativo } : u)),
+        prev.map((u) => (u.uuid === usuario.uuid ? { ...u, ativo: !u.ativo } : u)),
       );
     } catch (err) {
       showFeedback({ type: 'error', title: `Falha ao ${acao}`, message: getApiErrorMessage(err, 'usuarios_admin') });

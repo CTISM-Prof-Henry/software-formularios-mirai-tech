@@ -1,3 +1,5 @@
+import uuid as uuid_lib
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
@@ -97,6 +99,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     Modelo customizado de usuário para gestores da UFSM.
     Focado em SIAPE, Nome Completo, E-mail e múltiplos Setores.
     """
+    uuid = models.UUIDField(default=uuid_lib.uuid4, unique=True, editable=False, db_column='uuid')
+
     CARGO_CHOICES = [
         ('gestor', 'Gestor'),
         ('gestor_adm', 'Gestor Administrador'),

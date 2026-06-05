@@ -1,3 +1,5 @@
+import uuid as uuid_lib
+
 from django.db import models
 
 # Importa pelo nome técnico "Setor" (nome da tabela DB e das migrations).
@@ -73,6 +75,8 @@ class ObjetivoPDI(SoftDeleteModel):
 
 
 class Risco(SoftDeleteModel):
+    uuid = models.UUIDField(default=uuid_lib.uuid4, unique=True, editable=False, db_column='uuid')
+
     CATEGORIAS_CHOICES = [
         ('Operacional', 'Operacional'),
         ('Estratégico', 'Estratégico'),

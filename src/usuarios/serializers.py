@@ -67,7 +67,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ['id', 'siape', 'nome', 'email', 'setores', 'is_superuser', 'ativo', 'cargo']
+        fields = ['uuid', 'id', 'siape', 'nome', 'email', 'setores', 'is_superuser', 'ativo', 'cargo']
 
 
 class AdminEditarUsuarioSerializer(serializers.ModelSerializer):

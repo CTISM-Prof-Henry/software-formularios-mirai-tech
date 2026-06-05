@@ -43,6 +43,7 @@ class RiscoViewSet(viewsets.ModelViewSet):
     queryset = Risco.objects.all()
     serializer_class = RiscoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
+    lookup_field = 'uuid'
 
     # Ordem canônica das categorias — fonte de verdade do backend.
     # O frontend espelha esta lista em src/frontend/src/utils/categorias.js.
@@ -113,9 +114,9 @@ class RiscoViewSet(viewsets.ModelViewSet):
 
     def _serialize_planos(self, planos, primeira_acao_por_risco, monitoramentos_por_risco):
         planos_data = RiscoSerializer(planos, many=True).data
-        for plano_data in planos_data:
-            acao = primeira_acao_por_risco.get(plano_data["id"])
-            monitoramento = monitoramentos_por_risco.get(plano_data["id"])
+        for plano, plano_data in zip(planos, planos_data):
+            acao = primeira_acao_por_risco.get(plano.id)
+            monitoramento = monitoramentos_por_risco.get(plano.id)
             plano_data["periodo_acao"] = {
                 "data_inicio": acao.data_inicio.isoformat() if acao else None,
                 "data_fim": acao.data_fim.isoformat() if acao else None,
@@ -367,9 +368,9 @@ class PlanoAcaoViewSet(viewsets.ModelViewSet):
             else PlanoAcao.objects
         )
         queryset = manager.select_related("risco", "risco__setor").all()
-        risco_id = self.request.query_params.get("risco")
-        if risco_id:
-            queryset = queryset.filter(risco_id=risco_id)
+        risco_uuid = self.request.query_params.get("risco")
+        if risco_uuid:
+            queryset = queryset.filter(risco__uuid=risco_uuid)
         return queryset.order_by("id")
 
 class MonitoramentoViewSet(viewsets.ModelViewSet):

@@ -8,8 +8,8 @@ class TestExportacoesFluxo:
         # este fluxo cobre autenticacao, leitura do risco e exportacoes finais
         api_client.force_authenticate(user=usuario_gestor)
 
-        excel_response = api_client.get(f"/api/riscos/planos/{risco_com_plano.id}/exportar-excel/")
-        pdf_response = api_client.get(f"/api/riscos/planos/{risco_com_plano.id}/exportar-pdf/")
+        excel_response = api_client.get(f"/api/riscos/planos/{risco_com_plano.uuid}/exportar-excel/")
+        pdf_response = api_client.get(f"/api/riscos/planos/{risco_com_plano.uuid}/exportar-pdf/")
 
         assert excel_response.status_code == status.HTTP_200_OK
         assert excel_response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

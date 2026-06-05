@@ -321,7 +321,7 @@ class TestGestaoUsuariosAdmin:
 
     def test_admin_desativa_usuario(self, api_client, usuario, usuario_superuser):
         api_client.force_authenticate(user=usuario_superuser)
-        response = api_client.delete(f"/api/usuarios/gestores/{usuario.id}/")
+        response = api_client.delete(f"/api/usuarios/gestores/{usuario.uuid}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         usuario.refresh_from_db()
         assert not usuario.ativo
@@ -330,14 +330,14 @@ class TestGestaoUsuariosAdmin:
         usuario.ativo = False
         usuario.save()
         api_client.force_authenticate(user=usuario_superuser)
-        response = api_client.post(f"/api/usuarios/gestores/{usuario.id}/reativar/")
+        response = api_client.post(f"/api/usuarios/gestores/{usuario.uuid}/reativar/")
         assert response.status_code == status.HTTP_200_OK
         usuario.refresh_from_db()
         assert usuario.ativo
 
     def test_admin_nao_pode_desativar_superusuario(self, api_client, usuario_superuser):
         api_client.force_authenticate(user=usuario_superuser)
-        response = api_client.delete(f"/api/usuarios/gestores/{usuario_superuser.id}/")
+        response = api_client.delete(f"/api/usuarios/gestores/{usuario_superuser.uuid}/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_adicionar_membro_nao_encontrado(self, api_client, gestor_adm, setor):

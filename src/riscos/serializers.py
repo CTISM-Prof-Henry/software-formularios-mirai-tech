@@ -33,7 +33,7 @@ class RiscoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risco
         fields = [
-            'id', 'setor', 'setor_detalhes', 'objetivo', 'objetivo_detalhes',
+            'uuid', 'setor', 'setor_detalhes', 'objetivo', 'objetivo_detalhes',
             'macroprocesso', 'macroprocesso_detalhes', 'categoria', 'evento',
             'causa', 'consequencia', 'controles_atuais', 'eficacia_controle',
             'probabilidade', 'impacto', 'nivel_risco', 'prob_residual',

@@ -387,12 +387,13 @@ SetorViewSet = UnidadeOrganizacionalViewSet
 class UsuarioViewSet(viewsets.GenericViewSet):
     """
     Gestão administrativa de usuários (superusuário only).
-    GET  /api/usuarios/gestores/           — lista todos os usuários
-    DELETE /api/usuarios/gestores/<id>/    — desativa (soft delete)
-    POST /api/usuarios/gestores/<id>/reativar/ — reativa
+    GET  /api/usuarios/gestores/                   — lista todos os usuários
+    DELETE /api/usuarios/gestores/<uuid>/          — desativa (soft delete)
+    POST /api/usuarios/gestores/<uuid>/reativar/   — reativa
     """
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = 'uuid'
 
     def get_queryset(self):
         qs = Usuario.objects.all().prefetch_related('setores').order_by('nome')
@@ -423,14 +424,14 @@ class UsuarioViewSet(viewsets.GenericViewSet):
             'results': serializador.data,
         })
 
-    def destroy(self, request, pk=None):
+    def destroy(self, request, *args, **kwargs):
         if not _usuario_eh_superusuario(request.user):
             return Response(
                 {'erro': 'Apenas administradores podem desativar usuários.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
         try:
-            usuario = Usuario.objects.get(pk=pk)
+            usuario = Usuario.objects.get(uuid=kwargs.get('uuid'))
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -454,7 +455,7 @@ class UsuarioViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         try:
-            usuario = Usuario.objects.get(pk=kwargs.get('pk'))
+            usuario = Usuario.objects.get(uuid=kwargs.get('uuid'))
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -464,14 +465,14 @@ class UsuarioViewSet(viewsets.GenericViewSet):
         return Response({'usuario': UsuarioSerializer(usuario).data})
 
     @action(detail=True, methods=['post'])
-    def reativar(self, request, pk=None):
+    def reativar(self, request, *args, **kwargs):
         if not _usuario_eh_superusuario(request.user):
             return Response(
                 {'erro': 'Apenas administradores podem reativar usuários.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
         try:
-            usuario = Usuario.objects.get(pk=pk)
+            usuario = Usuario.objects.get(uuid=kwargs.get('uuid'))
         except Usuario.DoesNotExist:
             return Response({'erro': 'Usuário não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 

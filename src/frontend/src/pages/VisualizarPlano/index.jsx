@@ -11,7 +11,7 @@ import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
 const VisualizarPlano = () => {
-  const { id } = useParams();
+  const { uuid } = useParams();
   const navigate = useNavigate();
   const [plano, setPlano] = useState(null);
   const [planoAcao, setPlanoAcao] = useState(null);
@@ -28,8 +28,8 @@ const VisualizarPlano = () => {
     async function loadData() {
       try {
         const [planoRes, acoesRes] = await Promise.all([
-          api.get(`/riscos/planos/${id}/`),
-          api.get(`/riscos/acoes/?risco=${id}`)
+          api.get(`/riscos/planos/${uuid}/`),
+          api.get(`/riscos/acoes/?risco=${uuid}`)
         ]);
 
         setPlano(planoRes.data);
@@ -45,7 +45,7 @@ const VisualizarPlano = () => {
       }
     }
     loadData();
-  }, [id]);
+  }, [uuid]);
 
   const canEdit = plano && userSetoresIds.includes(plano.setor);
 
@@ -163,7 +163,7 @@ const VisualizarPlano = () => {
               Voltar
             </button>
             {canEdit && (
-              <button className="btn-edit-main" onClick={() => navigate(`/editar-plano/${id}`)}>
+              <button className="btn-edit-main" onClick={() => navigate(`/editar-plano/${uuid}`)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 Editar Plano
               </button>
@@ -297,7 +297,7 @@ const VisualizarPlano = () => {
               <div className="empty-action-plan">
                 <p>Nenhum plano de ação registrado para este risco.</p>
                 {canEdit && (
-                  <button className="btn-add-action" onClick={() => navigate(`/editar-plano/${id}?step=3`)}>
+                  <button className="btn-add-action" onClick={() => navigate(`/editar-plano/${uuid}?step=3`)}>
                     Criar Plano de Ação
                   </button>
                 )}

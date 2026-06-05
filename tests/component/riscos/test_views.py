@@ -42,14 +42,14 @@ class TestRiscoViewsPermissions:
     def test_qualquer_gestor_visualiza_riscos(self, api_client, infra_risco):
         # este caso valida a leitura do plano por outro gestor autenticado
         api_client.force_authenticate(user=infra_risco['u2'])
-        url = f"/api/riscos/planos/{infra_risco['risco'].id}/"
+        url = f"/api/riscos/planos/{infra_risco['risco'].uuid}/"
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
     def test_gestor_nao_edita_risco_de_outro_setor(self, api_client, infra_risco):
         # aqui a regra esperada e o bloqueio da edicao fora do proprio setor
         api_client.force_authenticate(user=infra_risco['u2'])
-        url = f"/api/riscos/planos/{infra_risco['risco'].id}/"
+        url = f"/api/riscos/planos/{infra_risco['risco'].uuid}/"
         payload = {"evento": "Hacked"}
         response = api_client.patch(url, payload, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -57,7 +57,7 @@ class TestRiscoViewsPermissions:
     def test_gestor_edita_proprio_risco(self, api_client, infra_risco):
         # neste cenario o gestor altera um risco da propria unidade
         api_client.force_authenticate(user=infra_risco['u1'])
-        url = f"/api/riscos/planos/{infra_risco['risco'].id}/"
+        url = f"/api/riscos/planos/{infra_risco['risco'].uuid}/"
         payload = {"evento": "Atualizado"}
         response = api_client.patch(url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
@@ -199,11 +199,11 @@ class TestRiscoViewsPermissions:
         # aqui a exportacao e de um plano especifico
         api_client.force_authenticate(user=infra_risco["u1"])
 
-        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].id}/exportar-excel/")
+        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].uuid}/exportar-excel/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        assert f'filename="plano-risco-{infra_risco["risco"].id}.xlsx"' in response["Content-Disposition"]
+        assert f'filename="plano-risco-{infra_risco["risco"].uuid}.xlsx"' in response["Content-Disposition"]
         assert response.content.startswith(b"PK")
 
     def test_exporta_plano_individual_para_pdf(self, api_client, infra_risco):
@@ -220,11 +220,11 @@ class TestRiscoViewsPermissions:
         )
 
         # depois solicita a geracao do pdf do plano
-        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].id}/exportar-pdf/")
+        response = api_client.get(f"/api/riscos/planos/{infra_risco['risco'].uuid}/exportar-pdf/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response["Content-Type"] == "application/pdf"
-        assert f'filename="plano-risco-{infra_risco["risco"].id}.pdf"' in response["Content-Disposition"]
+        assert f'filename="plano-risco-{infra_risco["risco"].uuid}.pdf"' in response["Content-Disposition"]
         assert response.content.startswith(b"%PDF")
 
 
@@ -232,32 +232,32 @@ class TestRiscoViewsPermissions:
 class TestSoftDeleteEndpoints:
     def test_delete_risco_retorna_204_e_desativa(self, api_client, infra_risco):
         api_client.force_authenticate(user=infra_risco["u1"])
-        risco_id = infra_risco["risco"].id
+        risco = infra_risco["risco"]
 
-        response = api_client.delete(f"/api/riscos/planos/{risco_id}/")
+        response = api_client.delete(f"/api/riscos/planos/{risco.uuid}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not Risco.objects.filter(id=risco_id).exists()
-        assert Risco.all_objects.filter(id=risco_id, ativo=False).exists()
+        assert not Risco.objects.filter(id=risco.id).exists()
+        assert Risco.all_objects.filter(id=risco.id, ativo=False).exists()
 
     def test_risco_desativado_retorna_404_para_gestor(self, api_client, infra_risco):
-        risco_id = infra_risco["risco"].id
-        infra_risco["risco"].delete()
+        risco = infra_risco["risco"]
+        risco.delete()
 
         api_client.force_authenticate(user=infra_risco["u1"])
-        response = api_client.get(f"/api/riscos/planos/{risco_id}/")
+        response = api_client.get(f"/api/riscos/planos/{risco.uuid}/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_superuser_ve_risco_desativado_com_parametro(self, api_client, infra_risco, usuario_superuser):
-        risco_id = infra_risco["risco"].id
-        infra_risco["risco"].delete()
+        risco = infra_risco["risco"]
+        risco.delete()
 
         api_client.force_authenticate(user=usuario_superuser)
         response = api_client.get("/api/riscos/planos/?incluir_inativos=true")
 
-        ids = [p["id"] for p in response.data["results"]]
-        assert risco_id in ids
+        uuids = [str(p["uuid"]) for p in response.data["results"]]
+        assert str(risco.uuid) in uuids
 
     def test_dashboard_respeita_filtros_de_setor_e_data(self, api_client, infra_risco):
         # este cenario cria uma acao dentro do periodo filtrado

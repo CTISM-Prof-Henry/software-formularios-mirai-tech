@@ -10,7 +10,7 @@ import { getSetorLabel } from '../../utils/unidades';
 import '../NovoPlano/styles.css';
 
 const EditarPlano = () => {
-  const { id } = useParams();
+  const { uuid } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -68,7 +68,7 @@ const EditarPlano = () => {
           api.get('/riscos/desafios/'),
           api.get('/riscos/objetivos/'),
           api.get('/riscos/macroprocessos/'),
-          api.get(`/riscos/planos/${id}/`)
+          api.get(`/riscos/planos/${uuid}/`)
         ]);
 
         setDesafios(desafiosRes.data.results || desafiosRes.data);
@@ -95,7 +95,7 @@ const EditarPlano = () => {
 
         // Tenta carregar o plano de ação vinculado
         try {
-          const acoesRes = await api.get(`/riscos/acoes/?risco=${id}`);
+          const acoesRes = await api.get(`/riscos/acoes/?risco=${uuid}`);
           const acoes = acoesRes.data.results || acoesRes.data;
           if (acoes.length > 0) {
             const acao = acoes[0];
@@ -123,7 +123,7 @@ const EditarPlano = () => {
       }
     }
     loadData();
-  }, [id]);
+  }, [uuid]);
 
   const handleRiscoChange = (e) => {
     const { name, value } = e.target;
@@ -190,7 +190,7 @@ const EditarPlano = () => {
     setSaving(true);
     setError('');
     try {
-      await api.patch(`/riscos/planos/${id}/`, riscoData);
+      await api.patch(`/riscos/planos/${uuid}/`, riscoData);
       showFeedback({
         type: 'success',
         title: 'Etapa atualizada',

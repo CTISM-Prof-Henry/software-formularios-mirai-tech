@@ -172,7 +172,7 @@ def exportar_risco_excel(risco):
     return _resposta_arquivo(
         buffer.getvalue(),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        _nome_arquivo("plano-risco", "xlsx", risco.id),
+        _nome_arquivo("plano-risco", "xlsx", risco.uuid),
     )
 
 
@@ -235,5 +235,5 @@ def exportar_risco_pdf(risco):
     return _resposta_arquivo(
         buffer.getvalue(),
         "application/pdf",
-        _nome_arquivo("plano-risco", "pdf", risco.id),
+        _nome_arquivo("plano-risco", "pdf", risco.uuid),
     )
