@@ -13,20 +13,22 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const safeUser = user || {};
-  const [stats, setStats] = useState({ total_planos: 0, riscos_altos: 0, total_usuarios: 0 });
+  const [stats, setStats] = useState({ total_planos: 0, riscos_altos: 0, total_usuarios: 0, total_unidades: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function carregarStats() {
       try {
-        const [estatisticasRes, gestoresRes] = await Promise.all([
+        const [estatisticasRes, gestoresRes, unidadesRes] = await Promise.all([
           api.get('/riscos/planos/estatisticas/'),
           api.get('/usuarios/gestores/', { params: { page_size: 1 } }),
+          api.get('/usuarios/setores/admin/', { params: { page_size: 1 } }),
         ]);
         setStats({
           total_planos: estatisticasRes.data.total_planos || 0,
           riscos_altos: estatisticasRes.data.riscos_altos || 0,
           total_usuarios: gestoresRes.data.count || 0,
+          total_unidades: unidadesRes.data.count || 0,
         });
       } catch {
         // stats ficam zerados em caso de erro
@@ -164,6 +166,24 @@ const AdminDashboard = () => {
             <div className="stat-info">
               <span className="stat-value">{loading ? '—' : String(stats.riscos_altos).padStart(2, '0')}</span>
               <span className="stat-label">RISCOS CRÍTICOS</span>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18"></path>
+                <path d="M5 21V7l8-4v18"></path>
+                <path d="M19 21V11l-6-4"></path>
+                <path d="M9 9v.01"></path>
+                <path d="M9 13v.01"></path>
+                <path d="M9 17v.01"></path>
+              </svg>
+              <span className="stat-badge target">ATIVAS</span>
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{loading ? '—' : String(stats.total_unidades).padStart(2, '0')}</span>
+              <span className="stat-label">UNIDADES UFSM</span>
             </div>
           </div>
         </section>

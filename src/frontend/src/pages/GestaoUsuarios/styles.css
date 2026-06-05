@@ -59,6 +59,35 @@
   color: #c62828;
 }
 
+.acoes-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-acao-tabela {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.15s;
+}
+
+.btn-acao-tabela:hover { opacity: 0.75; }
+
+.btn-acao-tabela.editar {
+  background: #e8f0fc;
+  color: #003470;
+}
+
+[data-theme="dark"] .btn-acao-tabela.editar {
+  background: rgba(0, 52, 112, 0.35);
+  color: #7baee8;
+}
+
 .btn-toggle-usuario {
   border: none;
   border-radius: 10px;

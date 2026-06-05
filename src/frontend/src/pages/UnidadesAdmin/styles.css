@@ -253,6 +253,130 @@
   }
 }
 
+/* Ações na tabela de unidades */
+.acoes-cell-unidade {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-acao-unidade {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.15s;
+}
+
+.btn-acao-unidade:hover { opacity: 0.75; }
+
+.btn-acao-unidade.editar {
+  background: #e8f0fc;
+  color: #003470;
+}
+
+.btn-acao-unidade.desativar {
+  background: #fce8e8;
+  color: #c62828;
+}
+
+/* Modal de edição de unidade */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 47, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #102a43;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #62748a;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.modal-close:hover {
+  color: #102a43;
+  background: #f0f4f8;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-grid-modal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid-modal .form-group:first-child {
+  grid-column: 1 / -1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+[data-theme="dark"] .modal-card {
+  background: #1a2840;
+}
+
+[data-theme="dark"] .modal-header h2 {
+  color: #e8edf3;
+}
+
+[data-theme="dark"] .modal-close:hover {
+  background: #243b53;
+  color: #e8edf3;
+}
+
+[data-theme="dark"] .btn-acao-unidade.editar {
+  background: rgba(0, 52, 112, 0.35);
+  color: #7baee8;
+}
+
+[data-theme="dark"] .btn-acao-unidade.desativar {
+  background: rgba(198, 40, 40, 0.25);
+  color: #f48a8a;
+}
+
 @media (max-width: 760px) {
   .header-actions {
     width: 100%;

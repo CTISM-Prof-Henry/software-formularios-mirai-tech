@@ -40,6 +40,13 @@ const GestaoUsuarios = () => {
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState('');
 
+  const [modalEditarAberto, setModalEditarAberto] = useState(false);
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [formEditar, setFormEditar] = useState({ nome: '', email: '', cargo: 'gestor', id_setores: [] });
+  const [buscaSetorEditar, setBuscaSetorEditar] = useState('');
+  const [salvandoEditar, setSalvandoEditar] = useState(false);
+  const [erroEditar, setErroEditar] = useState('');
+
   useEffect(() => {
     if (!safeUser.is_superuser) {
       navigate('/dashboard', { replace: true });
@@ -72,6 +79,52 @@ const GestaoUsuarios = () => {
   useEffect(() => { setPaginaAtual(1); }, [busca]);
 
   const abrirModal = () => { setForm(FORM_VAZIO); setErroForm(''); setBuscaSetor(''); setModalAberto(true); };
+
+  const abrirModalEditar = (u) => {
+    setUsuarioEditando(u);
+    setFormEditar({
+      nome: u.nome || '',
+      email: u.email || '',
+      cargo: u.cargo || 'gestor',
+      id_setores: u.setores?.map((s) => s.id) || [],
+    });
+    setBuscaSetorEditar('');
+    setErroEditar('');
+    setModalEditarAberto(true);
+  };
+
+  const handleFormEditarChange = (e) => {
+    const { id, value } = e.target;
+    setFormEditar((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const toggleSetorEditar = (id) => {
+    setFormEditar((prev) => {
+      const atual = prev.id_setores.includes(id)
+        ? prev.id_setores.filter((s) => s !== id)
+        : [...prev.id_setores, id];
+      return { ...prev, id_setores: atual };
+    });
+  };
+
+  const handleSalvarEdicao = async (e) => {
+    e.preventDefault();
+    setSalvandoEditar(true);
+    setErroEditar('');
+    try {
+      const res = await api.patch(`/usuarios/gestores/${usuarioEditando.id}/`, formEditar);
+      setUsuarios((prev) => prev.map((u) => (u.id === usuarioEditando.id ? res.data.usuario : u)));
+      showFeedback({ type: 'success', title: 'Usuário atualizado', message: `${formEditar.nome} foi atualizado com sucesso.` });
+      setModalEditarAberto(false);
+    } catch (err) {
+      const msg = err.response?.data?.erro
+        || Object.values(err.response?.data || {})[0]
+        || getApiErrorMessage(err, 'usuarios_admin');
+      setErroEditar(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setSalvandoEditar(false);
+    }
+  };
   const fecharModal = () => setModalAberto(false);
 
   const handleFormChange = (e) => {
@@ -213,7 +266,18 @@ const GestaoUsuarios = () => {
                             {u.ativo ? 'Ativo' : 'Inativo'}
                           </span>
                         </td>
-                        <td>
+                        <td className="acoes-cell">
+                          <button
+                            type="button"
+                            className="btn-acao-tabela editar"
+                            onClick={() => abrirModalEditar(u)}
+                            title="Editar usuário"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                          </button>
                           {!u.is_superuser && u.id !== safeUser.id && (
                             <button
                               type="button"
@@ -241,6 +305,79 @@ const GestaoUsuarios = () => {
           </div>
         </section>
       </main>
+
+      {modalEditarAberto && usuarioEditando && (
+        <div className="modal-overlay" onClick={() => setModalEditarAberto(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Editar Gestor</h2>
+              <button type="button" className="modal-close" onClick={() => setModalEditarAberto(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <form className="modal-form" onSubmit={handleSalvarEdicao}>
+              {erroEditar && <div className="error-message-perfil">{erroEditar}</div>}
+
+              <div className="form-group">
+                <label htmlFor="nome">Nome Completo</label>
+                <input id="nome" type="text" value={formEditar.nome} onChange={handleFormEditarChange} required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">E-mail Corporativo</label>
+                <input id="email" type="email" value={formEditar.email} onChange={handleFormEditarChange} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="cargo">Cargo</label>
+                <select id="cargo" value={formEditar.cargo} onChange={handleFormEditarChange}>
+                  <option value="gestor">Gestor</option>
+                  <option value="gestor_adm">Gestor Administrador</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Setores / Unidades</label>
+                <input
+                  type="text"
+                  className="modal-setor-busca"
+                  placeholder="Buscar por sigla, nome ou centro..."
+                  value={buscaSetorEditar}
+                  onChange={(e) => setBuscaSetorEditar(e.target.value)}
+                />
+                <div className="modal-setores-lista">
+                  {(() => {
+                    const termo = buscaSetorEditar.trim().toLowerCase();
+                    const filtrados = termo
+                      ? setoresDisponiveis.filter((s) =>
+                          (s.label_curto || s.nome || '').toLowerCase().includes(termo) ||
+                          (s.sigla_centro || '').toLowerCase().includes(termo) ||
+                          (s.nome_centro || '').toLowerCase().includes(termo),
+                        )
+                      : setoresDisponiveis;
+                    if (filtrados.length === 0) return <span className="modal-setores-vazio">Nenhuma unidade encontrada.</span>;
+                    return filtrados.map((s) => (
+                      <label key={s.id} className="modal-setor-item">
+                        <input type="checkbox" checked={formEditar.id_setores.includes(s.id)} onChange={() => toggleSetorEditar(s.id)} />
+                        <span>{s.label_curto || s.nome}</span>
+                      </label>
+                    ));
+                  })()}
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancelar" onClick={() => setModalEditarAberto(false)}>Cancelar</button>
+                <button type="submit" className="btn-salvar" disabled={salvandoEditar}>
+                  {salvandoEditar ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {modalAberto && (
         <div className="modal-overlay" onClick={fecharModal}>
