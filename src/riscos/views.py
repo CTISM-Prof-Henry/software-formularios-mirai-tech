@@ -6,10 +6,11 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .exporters import exportar_risco_excel, exportar_risco_pdf, exportar_riscos_excel
-from .models import DesafioPDI, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+from .exporters import exportar_relatorio_gerencial, exportar_risco_excel, exportar_risco_pdf, exportar_riscos_excel
+from .models import DesafioPDI, HistoricoPlano, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
 from .serializers import (
     DesafioPDISerializer,
+    HistoricoPlanoSerializer,
     MacroprocessoSerializer,
     MonitoramentoSerializer,
     ObjetivoPDISerializer,
@@ -64,18 +65,14 @@ class RiscoViewSet(viewsets.ModelViewSet):
             "setor",
             "objetivo__desafio",
             "macroprocesso",
-        ).prefetch_related("planos_acao")
-        
-        # Filtros básicos
+        ).prefetch_related("planos_acao", "monitoramentos")
+
         setor_id = self.request.query_params.get('setor')
         categoria = self.request.query_params.get('categoria')
         search = self.request.query_params.get('search')
-        
-        # Filtros de Data (considerando que planos de ação tem datas, mas o risco em si usaremos ID para ordenação)
-        # Se desejar filtrar pela data de início do primeiro plano de ação vinculado:
         data_inicio = self.request.query_params.get('data_inicio')
         data_fim = self.request.query_params.get('data_fim')
-        ordenacao = self.request.query_params.get('ordenacao', 'desc') # padrão: mais recentes primeiro
+        ordenacao = self.request.query_params.get('ordenacao', 'desc')
 
         if setor_id:
             queryset = queryset.filter(setor_id=setor_id)
@@ -83,21 +80,29 @@ class RiscoViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(categoria=categoria)
         if search:
             queryset = queryset.filter(
-                Q(evento__icontains=search) | 
-                Q(causa__icontains=search) | 
-                Q(consequencia__icontains=search)
+                Q(evento__icontains=search) |
+                Q(causa__icontains=search) |
+                Q(consequencia__icontains=search) |
+                Q(macroprocesso__nome__icontains=search) |
+                Q(objetivo__descricao__icontains=search) |
+                Q(objetivo__codigo__icontains=search) |
+                Q(planos_acao__responsavel__icontains=search)
             )
         if data_inicio:
             queryset = queryset.filter(planos_acao__data_inicio__gte=data_inicio)
         if data_fim:
             queryset = queryset.filter(planos_acao__data_fim__lte=data_fim)
-        
-        # Ordenação
-        if ordenacao == 'asc':
-            queryset = queryset.order_by('id')
-        else:
-            queryset = queryset.order_by('-id')
-        
+
+        ordenacao_map = {
+            'asc': 'id',
+            'desc': '-id',
+            'nivel_desc': '-nivel_residual',
+            'nivel_asc': 'nivel_residual',
+            'prazo_asc': 'planos_acao__data_fim',
+            'prazo_desc': '-planos_acao__data_fim',
+        }
+        queryset = queryset.order_by(ordenacao_map.get(ordenacao, '-id'))
+
         return queryset.distinct()
 
     def _normalize_status(self, status_label):
@@ -313,7 +318,6 @@ class RiscoViewSet(viewsets.ModelViewSet):
         })
 
     def create(self, request, *args, **kwargs):
-        # Garante que o gestor só crie riscos para os seus próprios setores
         id_setor = request.data.get('setor')
         if not request.user.setores.filter(id=id_setor).exists():
             return Response(
@@ -322,20 +326,63 @@ class RiscoViewSet(viewsets.ModelViewSet):
             )
         return super().create(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        risco = serializer.instance
+        HistoricoPlano.objects.create(
+            risco=risco,
+            usuario_nome=self.request.user.nome,
+            descricao="Plano atualizado",
+        )
+
     @action(detail=False, methods=['get'], url_path='exportar-excel')
     def exportar_excel(self, request):
-        """Exporta a lista filtrada de planos de risco em Excel."""
         return exportar_riscos_excel(self.get_queryset())
+
+    @action(detail=False, methods=['get'], url_path='exportar-relatorio')
+    def exportar_relatorio_gerencial(self, request):
+        return exportar_relatorio_gerencial(self.get_queryset())
+
+    @action(detail=True, methods=['post'], url_path='duplicar')
+    def duplicar(self, request, uuid=None):
+        original = self.get_object()
+        novo = Risco.objects.create(
+            setor=original.setor,
+            objetivo=original.objetivo,
+            macroprocesso=original.macroprocesso,
+            categoria=original.categoria,
+            evento=original.evento,
+            causa=original.causa,
+            consequencia=original.consequencia,
+            controles_atuais=original.controles_atuais,
+            eficacia_controle=original.eficacia_controle,
+            probabilidade=original.probabilidade,
+            impacto=original.impacto,
+            prob_residual=original.prob_residual,
+            imp_residual=original.imp_residual,
+        )
+        HistoricoPlano.objects.create(
+            risco=novo,
+            usuario_nome=request.user.nome,
+            descricao=f"Plano criado como cópia de {original.uuid}",
+        )
+        serializer = self.get_serializer(novo)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['get'], url_path='exportar-excel')
     def exportar_excel_individual(self, request, uuid=None):
-        """Exporta um plano de risco em Excel."""
         return exportar_risco_excel(self.get_object())
 
     @action(detail=True, methods=['get'], url_path='exportar-pdf')
     def exportar_pdf(self, request, uuid=None):
-        """Exporta um plano de risco em PDF."""
         return exportar_risco_pdf(self.get_object())
+
+    @action(detail=True, methods=['get'], url_path='historico')
+    def historico(self, request, uuid=None):
+        risco = self.get_object()
+        entradas = risco.historico.all()
+        serializer = HistoricoPlanoSerializer(entradas, many=True)
+        return Response(serializer.data)
 
 class DesafioPDIViewSet(viewsets.ModelViewSet):
     queryset = DesafioPDI.objects.all()
@@ -373,7 +420,20 @@ class PlanoAcaoViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(risco__uuid=risco_uuid)
         return queryset.order_by("id")
 
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('status') == 'Concluída':
+            serializer.validated_data['progresso'] = 100
+        super().perform_update(serializer)
+
+
 class MonitoramentoViewSet(viewsets.ModelViewSet):
     queryset = Monitoramento.objects.all()
     serializer_class = MonitoramentoSerializer
     permission_classes = [permissions.IsAuthenticated, PertenceAoSetorDoRisco]
+
+    def get_queryset(self):
+        queryset = Monitoramento.objects.select_related("risco", "risco__setor").all()
+        risco_uuid = self.request.query_params.get("risco")
+        if risco_uuid:
+            queryset = queryset.filter(risco__uuid=risco_uuid)
+        return queryset.order_by("-data_verificacao")

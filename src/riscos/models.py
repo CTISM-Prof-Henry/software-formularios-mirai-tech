@@ -156,12 +156,26 @@ class PlanoAcao(SoftDeleteModel):
     data_inicio = models.DateField(db_column="data_inicio")
     data_fim = models.DateField(db_column="data_fim")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, db_column="status")
+    progresso = models.IntegerField(default=0, db_column="progresso")
     observacoes = models.TextField(db_column="observacoes", null=True, blank=True)
 
     class Meta:
         db_table = "planos_acao"
         verbose_name = "Plano de Ação"
         verbose_name_plural = "Planos de Ação"
+
+
+class HistoricoPlano(models.Model):
+    risco = models.ForeignKey(Risco, on_delete=models.CASCADE, related_name="historico", db_column="id_risco")
+    usuario_nome = models.CharField(max_length=255, db_column="usuario_nome")
+    data_hora = models.DateTimeField(auto_now_add=True, db_column="data_hora")
+    descricao = models.CharField(max_length=255, db_column="descricao")
+
+    class Meta:
+        db_table = "historico_planos"
+        verbose_name = "Histórico do Plano"
+        verbose_name_plural = "Históricos dos Planos"
+        ordering = ["-data_hora"]
 
 
 class Monitoramento(SoftDeleteModel):

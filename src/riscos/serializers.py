@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.usuarios.serializers import UnidadeOrganizacionalSerializer
 
-from .models import DesafioPDI, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
+from .models import DesafioPDI, HistoricoPlano, Macroprocesso, Monitoramento, ObjetivoPDI, PlanoAcao, Risco
 
 
 class DesafioPDISerializer(serializers.ModelSerializer):
@@ -29,6 +29,9 @@ class RiscoSerializer(serializers.ModelSerializer):
     setor_detalhes = UnidadeOrganizacionalSerializer(source='setor', read_only=True)
     objetivo_detalhes = ObjetivoPDISerializer(source='objetivo', read_only=True)
     macroprocesso_detalhes = MacroprocessoSerializer(source='macroprocesso', read_only=True)
+    periodo_acao = serializers.SerializerMethodField()
+    possui_plano_acao = serializers.SerializerMethodField()
+    possui_monitoramento = serializers.SerializerMethodField()
 
     class Meta:
         model = Risco
@@ -37,8 +40,24 @@ class RiscoSerializer(serializers.ModelSerializer):
             'macroprocesso', 'macroprocesso_detalhes', 'categoria', 'evento',
             'causa', 'consequencia', 'controles_atuais', 'eficacia_controle',
             'probabilidade', 'impacto', 'nivel_risco', 'prob_residual',
-            'imp_residual', 'nivel_residual'
+            'imp_residual', 'nivel_residual',
+            'periodo_acao', 'possui_plano_acao', 'possui_monitoramento',
         ]
+
+    def get_periodo_acao(self, obj):
+        acao = next(iter(obj.planos_acao.all()), None)
+        if not acao:
+            return {"data_inicio": None, "data_fim": None}
+        return {
+            "data_inicio": acao.data_inicio.isoformat(),
+            "data_fim": acao.data_fim.isoformat(),
+        }
+
+    def get_possui_plano_acao(self, obj):
+        return any(True for _ in obj.planos_acao.all())
+
+    def get_possui_monitoramento(self, obj):
+        return any(True for _ in obj.monitoramentos.all())
 
     def validate(self, data):
         campos_escala = ['probabilidade', 'impacto', 'prob_residual', 'imp_residual']
@@ -60,3 +79,9 @@ class MonitoramentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Monitoramento
         fields = '__all__'
+
+class HistoricoPlanoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistoricoPlano
+        fields = ['id', 'usuario_nome', 'data_hora', 'descricao']
+        read_only_fields = ['id', 'data_hora']
