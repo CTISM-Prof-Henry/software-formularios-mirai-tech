@@ -15,9 +15,18 @@ const VisualizarPlano = () => {
   const navigate = useNavigate();
   const [plano, setPlano] = useState(null);
   const [planoAcao, setPlanoAcao] = useState(null);
+  const [monitoramentos, setMonitoramentos] = useState([]);
+  const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState('');
+  const [showMonitoramentoForm, setShowMonitoramentoForm] = useState(false);
+  const [savingMonitoramento, setSavingMonitoramento] = useState(false);
+  const [monitoramentoForm, setMonitoramentoForm] = useState({
+    resultados: '',
+    acoes_futuras: '',
+    analise_critica: '',
+  });
   const { showFeedback } = useFeedback();
 
   const { user } = useAuth();
@@ -27,16 +36,18 @@ const VisualizarPlano = () => {
   useEffect(() => {
     async function loadData() {
       try {
-        const [planoRes, acoesRes] = await Promise.all([
+        const [planoRes, acoesRes, monitoramentosRes, historicoRes] = await Promise.all([
           api.get(`/riscos/planos/${uuid}/`),
-          api.get(`/riscos/acoes/?risco=${uuid}`)
+          api.get(`/riscos/acoes/?risco=${uuid}`),
+          api.get(`/riscos/monitoramentos/?risco=${uuid}`),
+          api.get(`/riscos/planos/${uuid}/historico/`),
         ]);
 
         setPlano(planoRes.data);
         const acoes = acoesRes.data.results || acoesRes.data;
-        if (acoes.length > 0) {
-          setPlanoAcao(acoes[0]);
-        }
+        if (acoes.length > 0) setPlanoAcao(acoes[0]);
+        setMonitoramentos(monitoramentosRes.data.results || monitoramentosRes.data);
+        setHistorico(historicoRes.data);
       } catch (err) {
         console.error('Erro ao carregar plano:', err);
         setError('Não foi possível carregar as informações do plano de risco.');
@@ -63,17 +74,12 @@ const VisualizarPlano = () => {
     return 'BAIXO';
   };
 
-  const getStatusClass = (status) => {
-    const normalizado = (status || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/\s+/g, '-');
-
-    if (normalizado === 'concluida') return 'concluida';
-    if (normalizado === 'em-andamento') return 'em-andamento';
-    if (normalizado === 'nao-iniciada') return 'nao-iniciada';
-    if (normalizado === 'atrasada') return 'atrasada';
+  const getStatusClass = (s) => {
+    const n = (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, '-');
+    if (n === 'concluida') return 'concluida';
+    if (n === 'em-andamento') return 'em-andamento';
+    if (n === 'nao-iniciada') return 'nao-iniciada';
+    if (n === 'atrasada') return 'atrasada';
     return 'status-default';
   };
 
@@ -81,24 +87,33 @@ const VisualizarPlano = () => {
     setExporting(tipo);
     try {
       const extension = tipo === 'pdf' ? 'pdf' : 'xlsx';
-      const response = await api.get(`/riscos/planos/${uuid}/exportar-${tipo}/`, {
-        responseType: 'blob',
-      });
+      const response = await api.get(`/riscos/planos/${uuid}/exportar-${tipo}/`, { responseType: 'blob' });
       downloadBlob(response.data, `plano-risco-${uuid}.${extension}`);
-      showFeedback({
-        type: 'success',
-        title: 'Arquivo gerado',
-        message: `O arquivo em ${tipo.toUpperCase()} foi preparado e o download foi iniciado.`,
-      });
+      showFeedback({ type: 'success', title: 'Arquivo gerado', message: `O arquivo em ${tipo.toUpperCase()} foi preparado.` });
     } catch (err) {
       console.error(`Erro ao exportar ${tipo}:`, err);
-      showFeedback({
-        type: 'error',
-        title: 'Download nao concluido',
-        message: getApiErrorMessage(err, 'exportacao'),
-      });
+      showFeedback({ type: 'error', title: 'Download nao concluido', message: getApiErrorMessage(err, 'exportacao') });
     } finally {
       setExporting('');
+    }
+  }
+
+  async function salvarMonitoramento(e) {
+    e.preventDefault();
+    setSavingMonitoramento(true);
+    try {
+      const res = await api.post('/riscos/monitoramentos/', {
+        ...monitoramentoForm,
+        risco: plano.uuid,
+      });
+      setMonitoramentos(prev => [res.data, ...prev]);
+      setMonitoramentoForm({ resultados: '', acoes_futuras: '', analise_critica: '' });
+      setShowMonitoramentoForm(false);
+      showFeedback({ type: 'success', title: 'Monitoramento registrado', message: 'O acompanhamento foi salvo com sucesso.' });
+    } catch (err) {
+      showFeedback({ type: 'error', title: 'Erro ao salvar', message: getApiErrorMessage(err, 'monitoramento') });
+    } finally {
+      setSavingMonitoramento(false);
     }
   }
 
@@ -131,30 +146,22 @@ const VisualizarPlano = () => {
   return (
     <div className="dashboard-container">
       <Sidebar />
-      
+
       <main className="dashboard-main">
         <header className="dashboard-header view-header">
           <div className="header-title">
             <div className="title-line"></div>
-            <h1>Plano de Risco #{plano.id}</h1>
+            <h1>Plano de Risco</h1>
             <span className="setor-tag">{getSetorLabel(plano.setor_detalhes)}</span>
           </div>
-          
+
           <div className="header-actions">
             <ThemeToggle compact />
-            <button
-              className="btn-export-file pdf"
-              onClick={() => baixarArquivo('pdf')}
-              disabled={exporting === 'pdf'}
-            >
+            <button className="btn-export-file pdf" onClick={() => baixarArquivo('pdf')} disabled={exporting === 'pdf'}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               {exporting === 'pdf' ? 'Gerando...' : 'PDF'}
             </button>
-            <button
-              className="btn-export-file excel"
-              onClick={() => baixarArquivo('excel')}
-              disabled={exporting === 'excel'}
-            >
+            <button className="btn-export-file excel" onClick={() => baixarArquivo('excel')} disabled={exporting === 'excel'}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
               {exporting === 'excel' ? 'Gerando...' : 'Excel'}
             </button>
@@ -178,7 +185,6 @@ const VisualizarPlano = () => {
               <span className="section-number">01</span>
               <h3>Identificação e Análise</h3>
             </div>
-            
             <div className="info-grid">
               <div className="info-item">
                 <label>CATEGORIA</label>
@@ -186,9 +192,7 @@ const VisualizarPlano = () => {
               </div>
               <div className="info-item full">
                 <label>DESAFIO ESTRATÉGICO</label>
-                <span>
-                  {`Desafio ${plano.objetivo_detalhes?.desafio_detalhes?.numero} - ${plano.objetivo_detalhes?.desafio_detalhes?.descricao}`}
-                </span>
+                <span>{`Desafio ${plano.objetivo_detalhes?.desafio_detalhes?.numero} - ${plano.objetivo_detalhes?.desafio_detalhes?.descricao}`}</span>
               </div>
               <div className="info-item full">
                 <label>OBJETIVO ESTRATÉGICO (PDI)</label>
@@ -219,7 +223,6 @@ const VisualizarPlano = () => {
               <span className="section-number">02</span>
               <h3>Avaliação e Controles</h3>
             </div>
-
             <div className="evaluation-summary">
               <div className="risk-score-card">
                 <div className="score-header">RISCO INERENTE</div>
@@ -227,26 +230,20 @@ const VisualizarPlano = () => {
                   <span className="score-num">{plano.nivel_risco}</span>
                   <span className="score-label">{getRiskLabel(plano.nivel_risco)}</span>
                 </div>
-                <div className="score-details">
-                  Probabilidade: {plano.probabilidade} | Impacto: {plano.impacto}
-                </div>
+                <div className="score-details">Probabilidade: {plano.probabilidade} | Impacto: {plano.impacto}</div>
               </div>
-
               <div className="eficacia-display">
                 <label>EFICÁCIA DOS CONTROLES</label>
                 <div className="eficacia-tag">{plano.eficacia_controle}</div>
                 <p className="controles-texto">{plano.controles_atuais}</p>
               </div>
-
               <div className="risk-score-card">
                 <div className="score-header">RISCO RESIDUAL</div>
                 <div className={`score-badge ${getRiskColorClass(plano.nivel_residual)}`}>
                   <span className="score-num">{plano.nivel_residual}</span>
                   <span className="score-label">{getRiskLabel(plano.nivel_residual)}</span>
                 </div>
-                <div className="score-details">
-                  Probabilidade: {plano.prob_residual} | Impacto: {plano.imp_residual}
-                </div>
+                <div className="score-details">Probabilidade: {plano.prob_residual} | Impacto: {plano.imp_residual}</div>
               </div>
             </div>
           </section>
@@ -257,7 +254,6 @@ const VisualizarPlano = () => {
               <span className="section-number">03</span>
               <h3>Plano de Ação (Tratamento)</h3>
             </div>
-
             {planoAcao ? (
               <div className="plano-acao-details">
                 <div className="info-grid">
@@ -272,6 +268,15 @@ const VisualizarPlano = () => {
                   <div className="info-item">
                     <label>RESPONSÁVEL</label>
                     <span>{planoAcao.responsavel}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>PROGRESSO</label>
+                    <div className="progresso-wrapper">
+                      <div className="progresso-bar">
+                        <div className="progresso-fill" style={{ width: `${planoAcao.progresso ?? 0}%` }} />
+                      </div>
+                      <span className="progresso-texto">{planoAcao.progresso ?? 0}%</span>
+                    </div>
                   </div>
                   <div className="info-item full">
                     <label>DESCRIÇÃO DA AÇÃO</label>
@@ -304,6 +309,111 @@ const VisualizarPlano = () => {
               </div>
             )}
           </section>
+
+          {/* Seção 4: Monitoramento */}
+          <section className="view-section">
+            <div className="section-header">
+              <span className="section-number">04</span>
+              <h3>Acompanhamento (Monitoramento)</h3>
+              {canEdit && (
+                <button
+                  className="btn-add-monitoramento"
+                  onClick={() => setShowMonitoramentoForm(v => !v)}
+                >
+                  {showMonitoramentoForm ? 'Cancelar' : '+ Registrar'}
+                </button>
+              )}
+            </div>
+
+            {showMonitoramentoForm && (
+              <form className="monitoramento-form" onSubmit={salvarMonitoramento}>
+                <div className="monitor-field">
+                  <label>Resultados observados</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={monitoramentoForm.resultados}
+                    onChange={e => setMonitoramentoForm(p => ({ ...p, resultados: e.target.value }))}
+                    placeholder="Descreva os resultados verificados até agora..."
+                  />
+                </div>
+                <div className="monitor-field">
+                  <label>Ações futuras</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={monitoramentoForm.acoes_futuras}
+                    onChange={e => setMonitoramentoForm(p => ({ ...p, acoes_futuras: e.target.value }))}
+                    placeholder="O que ainda precisa ser feito..."
+                  />
+                </div>
+                <div className="monitor-field">
+                  <label>Análise crítica</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={monitoramentoForm.analise_critica}
+                    onChange={e => setMonitoramentoForm(p => ({ ...p, analise_critica: e.target.value }))}
+                    placeholder="Avaliação do andamento do tratamento..."
+                  />
+                </div>
+                <button type="submit" className="btn-edit-main" disabled={savingMonitoramento}>
+                  {savingMonitoramento ? 'Salvando...' : 'Salvar monitoramento'}
+                </button>
+              </form>
+            )}
+
+            {monitoramentos.length === 0 && !showMonitoramentoForm ? (
+              <div className="empty-action-plan">
+                <p>Nenhum monitoramento registrado para este risco.</p>
+              </div>
+            ) : (
+              <div className="monitoramento-lista">
+                {monitoramentos.map((m) => (
+                  <div key={m.id} className="monitoramento-item">
+                    <div className="monitor-data">{new Date(m.data_verificacao).toLocaleDateString('pt-BR')}</div>
+                    <div className="monitor-campos">
+                      <div className="monitor-campo">
+                        <strong>Resultados</strong>
+                        <p>{m.resultados}</p>
+                      </div>
+                      <div className="monitor-campo">
+                        <strong>Ações futuras</strong>
+                        <p>{m.acoes_futuras}</p>
+                      </div>
+                      <div className="monitor-campo">
+                        <strong>Análise crítica</strong>
+                        <p>{m.analise_critica}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Seção 5: Histórico */}
+          {historico.length > 0 && (
+            <section className="view-section">
+              <div className="section-header">
+                <span className="section-number">05</span>
+                <h3>Histórico de Alterações</h3>
+              </div>
+              <div className="historico-lista">
+                {historico.map((h) => (
+                  <div key={h.id} className="historico-item">
+                    <div className="historico-dot" />
+                    <div className="historico-info">
+                      <span className="historico-descricao">{h.descricao}</span>
+                      <span className="historico-meta">
+                        {h.usuario_nome} · {new Date(h.data_hora).toLocaleString('pt-BR')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
     </div>

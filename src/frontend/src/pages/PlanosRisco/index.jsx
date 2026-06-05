@@ -10,39 +10,54 @@ import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
 import './styles.css';
 
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0);
+
+function getAlertaPrazo(plano) {
+  const dataFim = plano.periodo_acao?.data_fim;
+  if (!dataFim || plano.periodo_acao?.data_inicio === null) return null;
+  const fim = new Date(dataFim);
+  fim.setHours(0, 0, 0, 0);
+  const dias = Math.round((fim - hoje) / 86400000);
+  if (dias < 0) return { tipo: 'atrasada', texto: 'Atrasada' };
+  if (dias <= 7) return { tipo: 'vence-breve', texto: `Vence em ${dias}d` };
+  return null;
+}
+
 const PlanosRisco = () => {
   const navigate = useNavigate();
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingRelatorio, setExportingRelatorio] = useState(false);
+  const [duplicandoId, setDuplicandoId] = useState(null);
   const dropdownRef = useRef(null);
-  
+
   const [stats, setStats] = useState({
     total_planos: 0,
     riscos_altos: 0,
     em_revisao: 0,
     concluidos: 0
   });
-  
-  // Paginação
+
   const [count, setCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
-  // Filtros
+  const { user } = useAuth();
+  const safeUser = user || {};
+  const userSetoresIds = safeUser.setores?.map(s => s.id) || [];
+  const primeiroSetor = safeUser.setores?.[0]?.id || '';
+
   const [search, setSearch] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [filterSetor, setFilterSetor] = useState('');
+  const [filterSetor, setFilterSetor] = useState(primeiroSetor);
   const [filterCategoria, setFilterCategoria] = useState('');
   const [filterDataInicio, setFilterDataInicio] = useState('');
   const [filterDataFim, setFilterDataFim] = useState('');
   const [ordenacao, setOrdenacao] = useState('desc');
   const { showFeedback } = useFeedback();
-
-  const { user } = useAuth();
-  const safeUser = user || {};
-  const userSetoresIds = safeUser.setores?.map(s => s.id) || [];
 
   useEffect(() => {
     carregarPlanos();
@@ -81,7 +96,7 @@ const PlanosRisco = () => {
       if (filterCategoria) url += `&categoria=${filterCategoria}`;
       if (filterDataInicio) url += `&data_inicio=${filterDataInicio}`;
       if (filterDataFim) url += `&data_fim=${filterDataFim}`;
-      if (search) url += `&search=${search}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
 
       const response = await api.get(url);
       setPlanos(response.data.results);
@@ -118,28 +133,56 @@ const PlanosRisco = () => {
         responseType: 'blob',
       });
       downloadBlob(response.data, 'planos-risco.xlsx');
-      showFeedback({
-        type: 'success',
-        title: 'Excel gerado',
-        message: 'O arquivo com os planos filtrados foi preparado e o download foi iniciado.',
-      });
+      showFeedback({ type: 'success', title: 'Excel gerado', message: 'O arquivo com os planos filtrados foi preparado.' });
     } catch (err) {
-      console.error('Erro ao exportar Excel:', err);
-      showFeedback({
-        type: 'error',
-        title: 'Exportacao nao concluida',
-        message: getApiErrorMessage(err, 'exportacao'),
-      });
+      showFeedback({ type: 'error', title: 'Exportacao nao concluida', message: getApiErrorMessage(err, 'exportacao') });
     } finally {
       setExportingExcel(false);
     }
   }
 
+  async function exportarRelatorio() {
+    setExportingRelatorio(true);
+    try {
+      const params = new URLSearchParams({ ordenacao });
+      if (filterSetor) params.append('setor', filterSetor);
+      if (filterCategoria) params.append('categoria', filterCategoria);
+      if (filterDataInicio) params.append('data_inicio', filterDataInicio);
+      if (filterDataFim) params.append('data_fim', filterDataFim);
+      if (search) params.append('search', search);
+
+      const response = await api.get(`/riscos/planos/exportar-relatorio/?${params.toString()}`, {
+        responseType: 'blob',
+      });
+      downloadBlob(response.data, 'relatorio-gerencial.pdf');
+      showFeedback({ type: 'success', title: 'Relatorio gerado', message: 'O relatorio gerencial em PDF foi preparado.' });
+    } catch (err) {
+      showFeedback({ type: 'error', title: 'Relatorio nao concluido', message: getApiErrorMessage(err, 'exportacao') });
+    } finally {
+      setExportingRelatorio(false);
+    }
+  }
+
+  async function duplicarPlano(plano) {
+    setDuplicandoId(plano.uuid);
+    try {
+      const response = await api.post(`/riscos/planos/${plano.uuid}/duplicar/`);
+      showFeedback({
+        type: 'success',
+        title: 'Plano duplicado',
+        message: 'O plano foi copiado. Voce pode edita-lo agora.',
+      });
+      navigate(`/editar-plano/${response.data.uuid}?step=1`);
+    } catch (err) {
+      showFeedback({ type: 'error', title: 'Duplicacao falhou', message: getApiErrorMessage(err, 'planos_risco') });
+    } finally {
+      setDuplicandoId(null);
+    }
+  }
+
   const totalPages = Math.ceil(count / pageSize);
 
-  const canEdit = (plano) => {
-    return userSetoresIds.includes(plano.setor);
-  };
+  const canEdit = (plano) => userSetoresIds.includes(plano.setor);
 
   const getRiskColorClass = (nivel) => {
     if (nivel >= 20) return 'risk-extremo';
@@ -155,18 +198,41 @@ const PlanosRisco = () => {
     return 'Baixo';
   };
 
+  function CompletudeIndicador({ plano }) {
+    const temAcao = plano.possui_plano_acao;
+    const temMonitoramento = plano.possui_monitoramento;
+    return (
+      <span className="completude-indicator" title={`Tratamento: ${temAcao ? 'sim' : 'não'} | Monitoramento: ${temMonitoramento ? 'sim' : 'não'}`}>
+        <span className={`completude-dot ${temAcao ? 'ok' : 'vazio'}`} />
+        <span className={`completude-dot ${temMonitoramento ? 'ok' : 'vazio'}`} />
+      </span>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       <Sidebar />
-      
+
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-title">
             <div className="title-line"></div>
             <h1>Planos de Risco</h1>
           </div>
-          
+
           <div className="header-actions">
+            <button
+              className="export-button"
+              title="Relatorio gerencial em PDF"
+              onClick={exportarRelatorio}
+              disabled={exportingRelatorio}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              {exportingRelatorio ? 'Gerando...' : 'Relatório'}
+            </button>
             <button
               className="export-button excel"
               title="Exportar planos filtrados para Excel"
@@ -216,7 +282,7 @@ const PlanosRisco = () => {
 
           <div className="stat-card">
             <div className="stat-icon-wrapper yellow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
               <span className="stat-badge queue">EM FILA</span>
             </div>
             <div className="stat-info">
@@ -243,16 +309,16 @@ const PlanosRisco = () => {
               <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input 
-                type="text" 
-                placeholder="Buscar por evento, causa ou consequência..." 
+              <input
+                type="text"
+                placeholder="Buscar por evento, causa, macroprocesso, responsável..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <button type="submit" className="btn-search">Filtrar</button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={`btn-advanced ${showAdvancedFilters ? 'active' : ''}`}
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             >
@@ -291,6 +357,10 @@ const PlanosRisco = () => {
                   <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
                     <option value="desc">Mais recentes</option>
                     <option value="asc">Mais antigos</option>
+                    <option value="nivel_desc">Nível (maior primeiro)</option>
+                    <option value="nivel_asc">Nível (menor primeiro)</option>
+                    <option value="prazo_asc">Prazo (mais urgente)</option>
+                    <option value="prazo_desc">Prazo (mais distante)</option>
                   </select>
                 </div>
               </div>
@@ -298,28 +368,20 @@ const PlanosRisco = () => {
               <div className="filters-row">
                 <div className="filter-group">
                   <label>A partir de:</label>
-                  <input 
-                    type="date" 
-                    value={filterDataInicio} 
-                    onChange={(e) => setFilterDataInicio(e.target.value)} 
-                  />
+                  <input type="date" value={filterDataInicio} onChange={(e) => setFilterDataInicio(e.target.value)} />
                 </div>
                 <div className="filter-group">
                   <label>Até:</label>
-                  <input 
-                    type="date" 
-                    value={filterDataFim} 
-                    onChange={(e) => setFilterDataFim(e.target.value)} 
-                  />
+                  <input type="date" value={filterDataFim} onChange={(e) => setFilterDataFim(e.target.value)} />
                 </div>
                 <button className="btn-clear-filters" onClick={() => {
-                  setFilterSetor('');
+                  setFilterSetor(primeiroSetor);
                   setFilterCategoria('');
                   setFilterDataInicio('');
                   setFilterDataFim('');
                   setOrdenacao('desc');
                   setSearch('');
-                }}>Limpar Todos os Filtros</button>
+                }}>Limpar Filtros</button>
               </div>
             </div>
           )}
@@ -331,49 +393,143 @@ const PlanosRisco = () => {
           ) : planos.length > 0 ? (
             <>
               <div className="plans-table-wrapper">
-              <table className="plans-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>EVENTO DE RISCO</th>
-                    <th>UNIDADE</th>
-                    <th>CATEGORIA</th>
-                    <th>NÍVEL (RESIDUAL)</th>
-                    <th>AÇÕES</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {planos.map((plano, index) => (
-                    <tr key={plano.id}>
-                      <td>#{(currentPage - 1) * pageSize + index + 1}</td>
-                      <td className="col-evento" title={plano.evento}>{plano.evento}</td>
-                      <td>{getSetorLabel(plano.setor_detalhes)}</td>
-                      <td>{plano.categoria}</td>
-                      <td>
-                        <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>
-                          {plano.nivel_residual}
-                        </span>
-                      </td>
-                      <td className="col-acoes">
-                        <button className="btn-action view" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
+                <table className="plans-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>EVENTO DE RISCO</th>
+                      <th>UNIDADE</th>
+                      <th>CATEGORIA</th>
+                      <th>NÍVEL (RESIDUAL)</th>
+                      <th title="Tratamento definido | Monitoramento registrado">STATUS</th>
+                      <th>AÇÕES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {planos.map((plano, index) => {
+                      const alerta = getAlertaPrazo(plano);
+                      return (
+                        <tr key={plano.uuid}>
+                          <td>#{(currentPage - 1) * pageSize + index + 1}</td>
+                          <td className="col-evento" title={plano.evento}>
+                            {plano.evento}
+                            {alerta && (
+                              <span className={`prazo-badge ${alerta.tipo}`}>{alerta.texto}</span>
+                            )}
+                          </td>
+                          <td>{getSetorLabel(plano.setor_detalhes)}</td>
+                          <td>{plano.categoria}</td>
+                          <td>
+                            <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>
+                              {plano.nivel_residual}
+                            </span>
+                          </td>
+                          <td><CompletudeIndicador plano={plano} /></td>
+                          <td className="col-acoes">
+                            <button className="btn-action view" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                            </button>
+                            <button
+                              className="btn-action duplicate"
+                              title="Duplicar plano (copia identificação e avaliação)"
+                              onClick={() => duplicarPlano(plano)}
+                              disabled={duplicandoId === plano.uuid}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
+                            {canEdit(plano) && (
+                              <div className="edit-dropdown-container" ref={openDropdownId === plano.uuid ? dropdownRef : null}>
+                                <button
+                                  className={`btn-action edit ${openDropdownId === plano.uuid ? 'active' : ''}`}
+                                  title="Editar"
+                                  onClick={() => setOpenDropdownId(openDropdownId === plano.uuid ? null : plano.uuid)}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                  </svg>
+                                </button>
+                                <div className={`edit-dropdown-content ${openDropdownId === plano.uuid ? 'show' : ''} ${index >= planos.length - 2 ? 'up' : ''}`}>
+                                  <div className="dropdown-title">Editar Seção:</div>
+                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
+                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
+                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="plans-mobile-list">
+                {planos.map((plano, index) => {
+                  const alerta = getAlertaPrazo(plano);
+                  return (
+                    <article key={`mobile-${plano.uuid}`} className="plan-mobile-card">
+                      <div className="plan-mobile-top">
+                        <span className="plan-mobile-id">#{(currentPage - 1) * pageSize + index + 1}</span>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          {alerta && <span className={`prazo-badge ${alerta.tipo}`}>{alerta.texto}</span>}
+                          <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>
+                            {getRiskLabel(plano.nivel_residual)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <h3>{plano.evento}</h3>
+
+                      <div className="plan-mobile-meta">
+                        <span><strong>Unidade:</strong> {getSetorLabel(plano.setor_detalhes)}</span>
+                        <span><strong>Categoria:</strong> {plano.categoria}</span>
+                        <span><strong>Nivel residual:</strong> {plano.nivel_residual}</span>
+                        <span><CompletudeIndicador plano={plano} /> <em style={{ fontSize: 12, color: '#64748b' }}>tratamento · monitoramento</em></span>
+                      </div>
+
+                      <div className="plan-mobile-actions">
+                        <button className="btn-action view mobile-action-button" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                           </svg>
+                          Visualizar
                         </button>
+
+                        <button
+                          className="btn-action duplicate mobile-action-button"
+                          onClick={() => duplicarPlano(plano)}
+                          disabled={duplicandoId === plano.uuid}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
+                          Duplicar
+                        </button>
+
                         {canEdit(plano) && (
-                          <div className="edit-dropdown-container" ref={openDropdownId === plano.id ? dropdownRef : null}>
-                            <button 
-                              className={`btn-action edit ${openDropdownId === plano.id ? 'active' : ''}`} 
+                          <div className="edit-dropdown-container" ref={openDropdownId === `mobile-${plano.uuid}` ? dropdownRef : null}>
+                            <button
+                              className={`btn-action edit mobile-action-button ${openDropdownId === `mobile-${plano.uuid}` ? 'active' : ''}`}
                               title="Editar"
-                              onClick={() => setOpenDropdownId(openDropdownId === plano.id ? null : plano.id)}
+                              onClick={() => setOpenDropdownId(openDropdownId === `mobile-${plano.uuid}` ? null : `mobile-${plano.uuid}`)}
                             >
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
+                              Editar
                             </button>
-                            <div className={`edit-dropdown-content ${openDropdownId === plano.id ? 'show' : ''} ${index >= planos.length - 2 ? 'up' : ''}`}>
+                            <div className={`edit-dropdown-content ${openDropdownId === `mobile-${plano.uuid}` ? 'show' : ''}`}>
                               <div className="dropdown-title">Editar Seção:</div>
                               <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
                               <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
@@ -381,77 +537,23 @@ const PlanosRisco = () => {
                             </div>
                           </div>
                         )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-
-              <div className="plans-mobile-list">
-                {planos.map((plano, index) => (
-                  <article key={`mobile-${plano.id}`} className="plan-mobile-card">
-                    <div className="plan-mobile-top">
-                      <span className="plan-mobile-id">#{(currentPage - 1) * pageSize + index + 1}</span>
-                      <span className={`risk-badge ${getRiskColorClass(plano.nivel_residual)}`}>
-                        {getRiskLabel(plano.nivel_residual)}
-                      </span>
-                    </div>
-
-                    <h3>{plano.evento}</h3>
-
-                    <div className="plan-mobile-meta">
-                      <span><strong>Unidade:</strong> {getSetorLabel(plano.setor_detalhes)}</span>
-                      <span><strong>Categoria:</strong> {plano.categoria}</span>
-                      <span><strong>Nivel residual:</strong> {plano.nivel_residual}</span>
-                    </div>
-
-                    <div className="plan-mobile-actions">
-                      <button className="btn-action view mobile-action-button" title="Visualizar" onClick={() => navigate(`/planos/${plano.uuid}`)}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        Visualizar
-                      </button>
-
-                      {canEdit(plano) && (
-                        <div className="edit-dropdown-container" ref={openDropdownId === `mobile-${plano.id}` ? dropdownRef : null}>
-                          <button
-                            className={`btn-action edit mobile-action-button ${openDropdownId === `mobile-${plano.id}` ? 'active' : ''}`}
-                            title="Editar"
-                            onClick={() => setOpenDropdownId(openDropdownId === `mobile-${plano.id}` ? null : `mobile-${plano.id}`)}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                            Editar
-                          </button>
-                          <div className={`edit-dropdown-content ${openDropdownId === `mobile-${plano.id}` ? 'show' : ''}`}>
-                            <div className="dropdown-title">Editar Seção:</div>
-                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
-                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
-                            <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                ))}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
 
               <div className="pagination">
-                <button 
-                  disabled={currentPage === 1} 
+                <button
+                  disabled={currentPage === 1}
                   onClick={() => setCurrentPage(prev => prev - 1)}
                   className="page-btn"
                 >
                   Anterior
                 </button>
                 <span className="page-info">Página {currentPage} de {totalPages || 1}</span>
-                <button 
-                  disabled={currentPage === totalPages || totalPages === 0} 
+                <button
+                  disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   className="page-btn"
                 >

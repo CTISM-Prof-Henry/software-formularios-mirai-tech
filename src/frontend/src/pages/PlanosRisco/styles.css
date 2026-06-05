@@ -412,6 +412,60 @@
   font-weight: 500;
 }
 
+/* Badges de prazo */
+.prazo-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.prazo-badge.atrasada {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.prazo-badge.vence-breve {
+  background: #fef9c3;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* Indicador de completude */
+.completude-indicator {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.completude-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.completude-dot.ok { background: #22c55e; }
+.completude-dot.vazio { background: #d1d5db; }
+
+.btn-action.duplicate {
+  color: #6366f1;
+  border-color: #ddd;
+}
+.btn-action.duplicate:hover {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  color: #4f46e5;
+}
+.btn-action.duplicate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .loading-state, .empty-state {
   padding: 60px;
   text-align: center;
