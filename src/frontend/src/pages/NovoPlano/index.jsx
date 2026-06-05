@@ -52,7 +52,7 @@ const NovoPlano = () => {
     observacoes: ''
   });
 
-  const [riscoCriadoId, setRiscoCriadoId] = useState(null);
+  const [riscoCriadoUuid, setRiscoCriadoUuid] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -146,7 +146,7 @@ const NovoPlano = () => {
     setLoading(true);
     try {
       const response = await api.post('/riscos/planos/', riscoData);
-      setRiscoCriadoId(response.data.id);
+      setRiscoCriadoUuid(response.data.uuid);
       showFeedback({
         type: 'success',
         title: 'Analise registrada',
@@ -170,7 +170,7 @@ const NovoPlano = () => {
     try {
       await api.post('/riscos/acoes/', {
         ...planoAcaoData,
-        risco: riscoCriadoId
+        risco: riscoCriadoUuid
       });
       showFeedback({
         type: 'success',
