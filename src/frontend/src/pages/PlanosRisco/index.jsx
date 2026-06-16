@@ -8,21 +8,8 @@ import api from '../../services/api';
 import { downloadBlob } from '../../utils/downloadFile';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSetorLabel } from '../../utils/unidades';
+import { getAlertaPrazo, getRiskColorClass, getRiskLabel } from '../../utils/risco';
 import './styles.css';
-
-const hoje = new Date();
-hoje.setHours(0, 0, 0, 0);
-
-function getAlertaPrazo(plano) {
-  const dataFim = plano.periodo_acao?.data_fim;
-  if (!dataFim || plano.periodo_acao?.data_inicio === null) return null;
-  const fim = new Date(dataFim);
-  fim.setHours(0, 0, 0, 0);
-  const dias = Math.round((fim - hoje) / 86400000);
-  if (dias < 0) return { tipo: 'atrasada', texto: 'Atrasada' };
-  if (dias <= 7) return { tipo: 'vence-breve', texto: `Vence em ${dias}d` };
-  return null;
-}
 
 const PlanosRisco = () => {
   const navigate = useNavigate();
@@ -208,20 +195,6 @@ const PlanosRisco = () => {
     : 'Todos os Setores';
 
   const canEdit = (plano) => userSetoresIds.includes(plano.setor);
-
-  const getRiskColorClass = (nivel) => {
-    if (nivel >= 20) return 'risk-extremo';
-    if (nivel >= 12) return 'risk-alto';
-    if (nivel >= 4) return 'risk-moderado';
-    return 'risk-baixo';
-  };
-
-  const getRiskLabel = (nivel) => {
-    if (nivel >= 20) return 'Extremo';
-    if (nivel >= 12) return 'Alto';
-    if (nivel >= 4) return 'Moderado';
-    return 'Baixo';
-  };
 
   function CompletudeIndicador({ plano }) {
     const temAcao = plano.possui_plano_acao;
