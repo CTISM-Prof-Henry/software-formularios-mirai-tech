@@ -51,6 +51,10 @@ jobs:
         working-directory: src/frontend
         run: npm run lint
 
+      - name: Executa testes do frontend
+        working-directory: src/frontend
+        run: npm run test:run
+
       - name: Executa build do frontend
         working-directory: src/frontend
         run: npm run build
