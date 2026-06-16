@@ -479,6 +479,35 @@ a {
   color: #334155 !important;
 }
 
+:root[data-theme='dark'] .monitoramento-item,
+:root[data-theme='dark'] .monitoramento-form {
+  background: var(--surface-card-alt);
+  border-color: var(--border-soft);
+}
+
+:root[data-theme='dark'] .monitor-campo p,
+:root[data-theme='dark'] .monitor-field label,
+:root[data-theme='dark'] .historico-meta,
+:root[data-theme='dark'] .score-header {
+  color: var(--text-secondary);
+}
+
+:root[data-theme='dark'] .monitor-campo strong {
+  color: var(--text-tertiary);
+}
+
+:root[data-theme='dark'] .historico-descricao {
+  color: var(--text-primary);
+}
+
+:root[data-theme='dark'] .historico-item {
+  border-color: var(--border-soft);
+}
+
+:root[data-theme='dark'] .progresso-bar {
+  background: var(--border-strong);
+}
+
 :root[data-theme='dark'] .login-title-large,
 :root[data-theme='dark'] .cadastro-title-large,
 :root[data-theme='dark'] .recuperar-title-main,
