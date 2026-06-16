@@ -32,7 +32,11 @@ const PlanosRisco = () => {
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingRelatorio, setExportingRelatorio] = useState(false);
   const [duplicandoId, setDuplicandoId] = useState(null);
+  const [todosSetores, setTodosSetores] = useState([]);
+  const [setorDropdownOpen, setSetorDropdownOpen] = useState(false);
+  const [setorSearch, setSetorSearch] = useState('');
   const dropdownRef = useRef(null);
+  const setorDropdownRef = useRef(null);
 
   const [stats, setStats] = useState({
     total_planos: 0,
@@ -72,6 +76,20 @@ const PlanosRisco = () => {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (setorDropdownRef.current && !setorDropdownRef.current.contains(event.target)) {
+        setSetorDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    api.get('/usuarios/setores/').then(r => setTodosSetores(r.data)).catch(() => {});
   }, []);
 
   async function carregarEstatisticas() {
@@ -181,6 +199,13 @@ const PlanosRisco = () => {
   }
 
   const totalPages = Math.ceil(count / pageSize);
+
+  const setoresFiltrados = todosSetores.filter(s =>
+    getSetorLabel(s).toLowerCase().includes(setorSearch.toLowerCase())
+  );
+  const setorSelecionadoLabel = filterSetor
+    ? (getSetorLabel(todosSetores.find(s => s.id === filterSetor) || {}) || 'Unidade selecionada')
+    : 'Todos os Setores';
 
   const canEdit = (plano) => userSetoresIds.includes(plano.setor);
 
@@ -334,12 +359,57 @@ const PlanosRisco = () => {
               <div className="filters-row">
                 <div className="filter-group">
                   <label>Unidade/Departamento:</label>
-                  <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
-                    <option value="">Todos os Setores</option>
-                    {user.setores?.map(s => (
-                      <option key={s.id} value={s.id}>{getSetorLabel(s)}</option>
-                    ))}
-                  </select>
+                  <div className="setor-dropdown" ref={setorDropdownRef}>
+                    <button
+                      type="button"
+                      className={`setor-dropdown-trigger ${setorDropdownOpen ? 'open' : ''}`}
+                      onClick={() => { setSetorDropdownOpen(o => !o); setSetorSearch(''); }}
+                    >
+                      <span className="setor-dropdown-label">{setorSelecionadoLabel}</span>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points={setorDropdownOpen ? '18 15 12 9 6 15' : '6 9 12 15 18 9'}></polyline>
+                      </svg>
+                    </button>
+                    {setorDropdownOpen && (
+                      <div className="setor-dropdown-panel">
+                        <div className="setor-dropdown-search">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                          </svg>
+                          <input
+                            type="text"
+                            placeholder="Buscar unidade..."
+                            value={setorSearch}
+                            onChange={e => setSetorSearch(e.target.value)}
+                            autoFocus
+                          />
+                        </div>
+                        <div className="setor-dropdown-list">
+                          <button
+                            type="button"
+                            className={`setor-option ${!filterSetor ? 'selected' : ''}`}
+                            onClick={() => { setFilterSetor(''); setSetorDropdownOpen(false); setCurrentPage(1); }}
+                          >
+                            Todos os Setores
+                          </button>
+                          {setoresFiltrados.map(s => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className={`setor-option ${filterSetor === s.id ? 'selected' : ''}`}
+                              onClick={() => { setFilterSetor(s.id); setSetorDropdownOpen(false); setCurrentPage(1); }}
+                            >
+                              {getSetorLabel(s)}
+                            </button>
+                          ))}
+                          {setoresFiltrados.length === 0 && (
+                            <div className="setor-option-empty">Nenhuma unidade encontrada</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="filter-group">
                   <label>Categoria:</label>
