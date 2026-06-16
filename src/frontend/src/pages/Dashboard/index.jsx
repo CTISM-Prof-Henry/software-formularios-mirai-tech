@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -237,7 +237,27 @@ const Dashboard = () => {
   const [filterDataFim, setFilterDataFim] = useState('');
   const [loading, setLoading] = useState(true);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [todosSetores, setTodosSetores] = useState([]);
+  const [setorDropdownOpen, setSetorDropdownOpen] = useState(false);
+  const [setorSearch, setSetorSearch] = useState('');
+  const setorDropdownRef = useRef(null);
   const { showFeedback } = useFeedback();
+
+  useEffect(() => {
+    api.get('/usuarios/setores/').then((r) => setTodosSetores(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!setorDropdownOpen) return;
+    function handleClickOutside(e) {
+      if (setorDropdownRef.current && !setorDropdownRef.current.contains(e.target)) {
+        setSetorDropdownOpen(false);
+        setSetorSearch('');
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [setorDropdownOpen]);
 
   useEffect(() => {
     setPaginaAtual(1);
@@ -285,6 +305,8 @@ const Dashboard = () => {
     setFilterDataInicio('');
     setFilterDataFim('');
     setPaginaAtual(1);
+    setSetorDropdownOpen(false);
+    setSetorSearch('');
   }
 
   const totalPaginas = Math.max(1, Math.ceil(planos.length / PAGE_SIZE));
@@ -319,6 +341,13 @@ const Dashboard = () => {
   };
 
   const setoresResumo = filterSetor ? stats.setores_filtrados : (safeUser.setores?.length || 0);
+
+  const setoresFiltradosDropdown = todosSetores.filter((s) =>
+    getSetorLabel(s).toLowerCase().includes(setorSearch.toLowerCase())
+  );
+  const setorSelecionadoLabel = filterSetor
+    ? (getSetorLabel(todosSetores.find((s) => s.id === filterSetor) || {}) || 'Unidade selecionada')
+    : 'Todas as Unidades';
 
   return (
     <div className="dashboard-container">
@@ -404,12 +433,52 @@ const Dashboard = () => {
 
             <div className="dashboard-filter-group">
               <label>Unidade/Departamento</label>
-              <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
-                <option value="">Todos</option>
-                {safeUser.setores?.map((setor) => (
-                  <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
-                ))}
-              </select>
+              <div className="dash-setor-dropdown" ref={setorDropdownRef}>
+                <button
+                  type="button"
+                  className={`dash-setor-trigger${setorDropdownOpen ? ' open' : ''}`}
+                  onClick={() => { setSetorDropdownOpen((o) => !o); setSetorSearch(''); }}
+                >
+                  <span className="dash-setor-label" title={setorSelecionadoLabel}>
+                    {setorSelecionadoLabel}
+                  </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                {setorDropdownOpen && (
+                  <div className="dash-setor-panel">
+                    <input
+                      className="dash-setor-search"
+                      type="text"
+                      placeholder="Buscar unidade..."
+                      value={setorSearch}
+                      onChange={(e) => setSetorSearch(e.target.value)}
+                      autoFocus
+                    />
+                    <ul className="dash-setor-list">
+                      <li
+                        className={`dash-setor-option${filterSetor === '' ? ' selected' : ''}`}
+                        onClick={() => { setFilterSetor(''); setSetorDropdownOpen(false); setSetorSearch(''); }}
+                      >
+                        Todas as Unidades
+                      </li>
+                      {setoresFiltradosDropdown.map((s) => (
+                        <li
+                          key={s.id}
+                          className={`dash-setor-option${filterSetor === s.id ? ' selected' : ''}`}
+                          onClick={() => { setFilterSetor(s.id); setSetorDropdownOpen(false); setSetorSearch(''); }}
+                        >
+                          {getSetorLabel(s)}
+                        </li>
+                      ))}
+                      {setoresFiltradosDropdown.length === 0 && (
+                        <li className="dash-setor-option-empty">Nenhuma unidade encontrada</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="dashboard-filter-group date">
