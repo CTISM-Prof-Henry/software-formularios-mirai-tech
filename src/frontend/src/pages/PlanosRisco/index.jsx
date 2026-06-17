@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -16,7 +17,7 @@ const PlanosRisco = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [dropdownUp, setDropdownUp] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState(null);
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingRelatorio, setExportingRelatorio] = useState(false);
   const [duplicandoId, setDuplicandoId] = useState(null);
@@ -60,6 +61,7 @@ const PlanosRisco = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpenDropdownId(null);
+        setDropdownPos(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -488,16 +490,21 @@ const PlanosRisco = () => {
                               </svg>
                             </button>
                             {canEdit(plano) && (
-                              <div className="edit-dropdown-container" ref={openDropdownId === plano.uuid ? dropdownRef : null}>
+                              <div className="edit-dropdown-container">
                                 <button
                                   className={`btn-action edit ${openDropdownId === plano.uuid ? 'active' : ''}`}
                                   title="Editar"
                                   onClick={(e) => {
                                     if (openDropdownId === plano.uuid) {
                                       setOpenDropdownId(null);
+                                      setDropdownPos(null);
                                     } else {
                                       const rect = e.currentTarget.getBoundingClientRect();
-                                      setDropdownUp(rect.bottom + 160 > window.innerHeight);
+                                      const fitsBelow = rect.bottom + 145 < window.innerHeight;
+                                      setDropdownPos({
+                                        top: fitsBelow ? rect.bottom + 4 : rect.top - 145,
+                                        right: window.innerWidth - rect.right,
+                                      });
                                       setOpenDropdownId(plano.uuid);
                                     }
                                   }}
@@ -507,12 +514,19 @@ const PlanosRisco = () => {
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                   </svg>
                                 </button>
-                                <div className={`edit-dropdown-content ${openDropdownId === plano.uuid ? 'show' : ''} ${openDropdownId === plano.uuid && dropdownUp ? 'up' : ''}`}>
-                                  <div className="dropdown-title">Editar Seção:</div>
-                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
-                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
-                                  <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
-                                </div>
+                                {openDropdownId === plano.uuid && dropdownPos && createPortal(
+                                  <div
+                                    ref={dropdownRef}
+                                    className="edit-dropdown-portal"
+                                    style={{ top: dropdownPos.top, right: dropdownPos.right }}
+                                  >
+                                    <div className="dropdown-title">Editar Seção:</div>
+                                    <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
+                                    <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
+                                    <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=3`)}>3. Tratamento</button>
+                                  </div>,
+                                  document.body
+                                )}
                               </div>
                             )}
                           </td>

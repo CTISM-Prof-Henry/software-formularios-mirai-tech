@@ -330,7 +330,7 @@ a {
 :root[data-theme='dark'] .btn-advanced,
 :root[data-theme='dark'] .page-btn,
 :root[data-theme='dark'] .btn-action,
-:root[data-theme='dark'] .edit-dropdown-content {
+:root[data-theme='dark'] .edit-dropdown-portal {
   background: var(--surface-card);
   border-color: var(--border-strong);
   color: var(--text-primary);
