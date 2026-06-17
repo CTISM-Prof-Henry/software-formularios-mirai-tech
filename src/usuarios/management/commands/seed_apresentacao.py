@@ -3,7 +3,7 @@ Seed de apresentação do SIGR-UFSM.
 
 Limpa usuários e planos existentes e recria dados realistas para demonstração:
 - 1 administrador (conta do apresentador), vinculado ao CT/DCTA
-- 9 gestores (mix de gestor e gestor_adm, setores variados)
+- 18 gestores — cada equipe tem pelo menos 1 gestor_adm e 1 gestor
 - 9 planos de risco — um por setor de cada gestor cadastrado
 - Senha padrão para todos: 12345678
 """
@@ -28,6 +28,7 @@ ADMIN = {
 }
 
 GESTORES = [
+    # ── CCR ──────────────────────────────────────────────────────────────────
     {
         "siape": "1847293",
         "nome": "Maria Cláudia Fonseca",
@@ -36,11 +37,34 @@ GESTORES = [
         "setores": [("CCR", "Centro de Ciências Rurais")],
     },
     {
+        "siape": "1023847",
+        "nome": "Luiz Fernando Becker",
+        "email": "luiz.becker@ufsm.br",
+        "cargo": "gestor",
+        "setores": [("CCR", "Centro de Ciências Rurais")],
+    },
+    # ── CT / DCTA ─────────────────────────────────────────────────────────────
+    {
         "siape": "2356184",
         "nome": "João Paulo Silveira",
         "email": "joao.silveira@ufsm.br",
         "cargo": "gestor_adm",
         "setores": [("CT", "Departamento de Computação Aplicada")],
+    },
+    {
+        "siape": "2094815",
+        "nome": "Patrícia Moraes Lima",
+        "email": "patricia.lima@ufsm.br",
+        "cargo": "gestor",
+        "setores": [("CT", "Departamento de Computação Aplicada")],
+    },
+    # ── CCNE ─────────────────────────────────────────────────────────────────
+    {
+        "siape": "3741826",
+        "nome": "Roberto César Almeida",
+        "email": "roberto.almeida@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("CCNE", "Centro de Ciências Naturais e Exatas")],
     },
     {
         "siape": "3074512",
@@ -49,12 +73,28 @@ GESTORES = [
         "cargo": "gestor",
         "setores": [("CCNE", "Centro de Ciências Naturais e Exatas")],
     },
+    # ── CCSH ─────────────────────────────────────────────────────────────────
+    {
+        "siape": "4852037",
+        "nome": "Sandra Vieira Duarte",
+        "email": "sandra.duarte@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("CCSH", "Centro de Ciências Sociais e Humanas")],
+    },
     {
         "siape": "4198627",
         "nome": "Carlos Eduardo Nunes",
         "email": "carlos.nunes@ufsm.br",
         "cargo": "gestor",
         "setores": [("CCSH", "Centro de Ciências Sociais e Humanas")],
+    },
+    # ── CE ───────────────────────────────────────────────────────────────────
+    {
+        "siape": "5914038",
+        "nome": "Paulo Henrique Mota",
+        "email": "paulo.mota@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("CE", "Centro de Educação")],
     },
     {
         "siape": "5263049",
@@ -63,23 +103,43 @@ GESTORES = [
         "cargo": "gestor",
         "setores": [("CE", "Centro de Educação")],
     },
+    # ── CT / EPS ─────────────────────────────────────────────────────────────
+    {
+        "siape": "6047192",
+        "nome": "Camila Ramos Ferreira",
+        "email": "camila.ferreira@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("CT", "Departamento de Engenharia de Produção e Sistemas")],
+    },
     {
         "siape": "6381720",
         "nome": "Rafael Andrade Souza",
         "email": "rafael.souza@ufsm.br",
         "cargo": "gestor",
-        "setores": [
-            ("CT", "Departamento de Engenharia de Produção e Sistemas"),
-        ],
+        "setores": [("CT", "Departamento de Engenharia de Produção e Sistemas")],
+    },
+    # ── PM ───────────────────────────────────────────────────────────────────
+    {
+        "siape": "7183064",
+        "nome": "Diego Oliveira Teixeira",
+        "email": "diego.teixeira@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("PM", "Campus da Universidade Federal de Santa Maria em Palmeira das Missões")],
     },
     {
         "siape": "7492053",
         "nome": "Juliana Pereira Martins",
         "email": "juliana.martins@ufsm.br",
         "cargo": "gestor",
-        "setores": [
-            ("PM", "Campus da Universidade Federal de Santa Maria em Palmeira das Missões"),
-        ],
+        "setores": [("PM", "Campus da Universidade Federal de Santa Maria em Palmeira das Missões")],
+    },
+    # ── POLI ─────────────────────────────────────────────────────────────────
+    {
+        "siape": "8062947",
+        "nome": "Renata Gomes Pinheiro",
+        "email": "renata.pinheiro@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("POLI", "Colégio Politécnico")],
     },
     {
         "siape": "8517364",
@@ -87,6 +147,14 @@ GESTORES = [
         "email": "marcelo.alves@ufsm.br",
         "cargo": "gestor",
         "setores": [("POLI", "Colégio Politécnico")],
+    },
+    # ── CAL ──────────────────────────────────────────────────────────────────
+    {
+        "siape": "9305821",
+        "nome": "Leonardo Castro Freitas",
+        "email": "leonardo.freitas@ufsm.br",
+        "cargo": "gestor_adm",
+        "setores": [("CAL", "Centro de Artes e Letras")],
     },
     {
         "siape": "9630481",
