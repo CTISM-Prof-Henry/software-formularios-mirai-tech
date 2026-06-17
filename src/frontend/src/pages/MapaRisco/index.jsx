@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import ThemeToggle from '../../components/ThemeToggle';
-import { useAuth } from '../../context/AuthContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import api from '../../services/api';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -41,10 +40,27 @@ const MapaRisco = () => {
   });
   const [filterSetor, setFilterSetor] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
+  const [todosSetores, setTodosSetores] = useState([]);
+  const [setorDropdownOpen, setSetorDropdownOpen] = useState(false);
+  const [setorSearch, setSetorSearch] = useState('');
+  const setorDropdownRef = useRef(null);
   const { showFeedback } = useFeedback();
 
-  const { user } = useAuth();
-  const safeUser = user || {};
+  useEffect(() => {
+    api.get('/usuarios/setores/').then((r) => setTodosSetores(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!setorDropdownOpen) return;
+    function handleClickOutside(e) {
+      if (setorDropdownRef.current && !setorDropdownRef.current.contains(e.target)) {
+        setSetorDropdownOpen(false);
+        setSetorSearch('');
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [setorDropdownOpen]);
 
   useEffect(() => {
     carregarAnalytics();
@@ -130,6 +146,13 @@ const MapaRisco = () => {
 
   const formatRiskIdentifier = (index) => `#${index + 1}`;
 
+  const setoresFiltradosDropdown = todosSetores.filter((s) =>
+    getSetorLabel(s).toLowerCase().includes(setorSearch.toLowerCase())
+  );
+  const setorSelecionadoLabel = filterSetor
+    ? (getSetorLabel(todosSetores.find((s) => s.id === filterSetor) || {}) || 'Unidade selecionada')
+    : 'Todas as Unidades';
+
   const getRiskLevelInfo = (score) => {
     if (score >= 20) return { label: 'RE', class: 'cell-extremo' };
     if (score >= 12) return { label: 'RA', class: 'cell-alto' };
@@ -177,12 +200,52 @@ const MapaRisco = () => {
               <div className="filters-row">
                 <div className="filter-group">
                   <label>Unidade/Departamento:</label>
-                  <select value={filterSetor} onChange={(e) => setFilterSetor(e.target.value)}>
-                    <option value="">Todas as Unidades</option>
-                    {safeUser.setores?.map((setor) => (
-                      <option key={setor.id} value={setor.id}>{getSetorLabel(setor)}</option>
-                    ))}
-                  </select>
+                  <div className="mapa-setor-dropdown" ref={setorDropdownRef}>
+                    <button
+                      type="button"
+                      className={`mapa-setor-trigger${setorDropdownOpen ? ' open' : ''}`}
+                      onClick={() => { setSetorDropdownOpen((o) => !o); setSetorSearch(''); }}
+                    >
+                      <span className="mapa-setor-label" title={setorSelecionadoLabel}>
+                        {setorSelecionadoLabel}
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                    {setorDropdownOpen && (
+                      <div className="mapa-setor-panel">
+                        <input
+                          className="mapa-setor-search"
+                          type="text"
+                          placeholder="Buscar unidade..."
+                          value={setorSearch}
+                          onChange={(e) => setSetorSearch(e.target.value)}
+                          autoFocus
+                        />
+                        <ul className="mapa-setor-list">
+                          <li
+                            className={`mapa-setor-option${filterSetor === '' ? ' selected' : ''}`}
+                            onClick={() => { setFilterSetor(''); setSetorDropdownOpen(false); setSetorSearch(''); }}
+                          >
+                            Todas as Unidades
+                          </li>
+                          {setoresFiltradosDropdown.map((s) => (
+                            <li
+                              key={s.id}
+                              className={`mapa-setor-option${filterSetor === s.id ? ' selected' : ''}`}
+                              onClick={() => { setFilterSetor(s.id); setSetorDropdownOpen(false); setSetorSearch(''); }}
+                            >
+                              {getSetorLabel(s)}
+                            </li>
+                          ))}
+                          {setoresFiltradosDropdown.length === 0 && (
+                            <li className="mapa-setor-option-empty">Nenhuma unidade encontrada</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="filter-group">
                   <label>Categoria:</label>
