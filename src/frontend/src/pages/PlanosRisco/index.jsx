@@ -16,6 +16,7 @@ const PlanosRisco = () => {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdownUp, setDropdownUp] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingRelatorio, setExportingRelatorio] = useState(false);
   const [duplicandoId, setDuplicandoId] = useState(null);
@@ -491,14 +492,22 @@ const PlanosRisco = () => {
                                 <button
                                   className={`btn-action edit ${openDropdownId === plano.uuid ? 'active' : ''}`}
                                   title="Editar"
-                                  onClick={() => setOpenDropdownId(openDropdownId === plano.uuid ? null : plano.uuid)}
+                                  onClick={(e) => {
+                                    if (openDropdownId === plano.uuid) {
+                                      setOpenDropdownId(null);
+                                    } else {
+                                      const rect = e.currentTarget.getBoundingClientRect();
+                                      setDropdownUp(rect.bottom + 160 > window.innerHeight);
+                                      setOpenDropdownId(plano.uuid);
+                                    }
+                                  }}
                                 >
                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                   </svg>
                                 </button>
-                                <div className={`edit-dropdown-content ${openDropdownId === plano.uuid ? 'show' : ''} ${index >= planos.length - 2 ? 'up' : ''}`}>
+                                <div className={`edit-dropdown-content ${openDropdownId === plano.uuid ? 'show' : ''} ${openDropdownId === plano.uuid && dropdownUp ? 'up' : ''}`}>
                                   <div className="dropdown-title">Editar Seção:</div>
                                   <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=1`)}>1. Identificação</button>
                                   <button onClick={() => navigate(`/editar-plano/${plano.uuid}?step=2`)}>2. Avaliação</button>
