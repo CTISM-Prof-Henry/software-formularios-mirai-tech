@@ -437,6 +437,21 @@ class PlanoAcaoViewSet(viewsets.ModelViewSet):
         if serializer.validated_data.get('status') == 'Concluída':
             serializer.validated_data['progresso'] = 100
         super().perform_update(serializer)
+        plano = serializer.instance
+        HistoricoPlano.objects.create(
+            risco=plano.risco,
+            usuario_nome=self.request.user.nome,
+            descricao="Plano de ação atualizado",
+        )
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        plano = serializer.instance
+        HistoricoPlano.objects.create(
+            risco=plano.risco,
+            usuario_nome=self.request.user.nome,
+            descricao="Plano de ação cadastrado",
+        )
 
 
 class MonitoramentoViewSet(viewsets.ModelViewSet):
@@ -450,3 +465,12 @@ class MonitoramentoViewSet(viewsets.ModelViewSet):
         if risco_uuid:
             queryset = queryset.filter(risco__uuid=risco_uuid)
         return queryset.order_by("-data_verificacao")
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        monitoramento = serializer.instance
+        HistoricoPlano.objects.create(
+            risco=monitoramento.risco,
+            usuario_nome=self.request.user.nome,
+            descricao="Monitoramento registrado",
+        )
